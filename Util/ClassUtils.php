@@ -19,8 +19,8 @@ use Doctrine\Common\Util\ClassUtils as DoctrineClassUtils;
  *
  * @see DoctrineClassUtils
  *
- * @author Benjamin Eberlei <kontakt@beberlei.de>
  * @author Johannes Schmitt <schmittjoh@gmail.com>
+ * @author Iltar van der Berg <kjarli@gmail.com>
  */
 final class ClassUtils
 {
