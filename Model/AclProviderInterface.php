@@ -53,4 +53,11 @@ interface AclProviderInterface
      * @throws AclNotFoundException when we cannot find an ACL for all identities
      */
     public function findAcls(array $oids, array $sids = array());
+
+    /**
+     * AclProvider for better performance can save some information in memory.
+     * You can ask provider to free this memory if you perform many calls
+     * @return void
+     */
+    public function releaseMemory();
 }

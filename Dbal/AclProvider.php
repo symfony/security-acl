@@ -75,6 +75,15 @@ class AclProvider implements AclProviderInterface
     /**
      * {@inheritdoc}
      */
+    public function releaseMemory()
+    {
+        $this->loadedAces = array();
+        $this->loadedAcls = array();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function findChildren(ObjectIdentityInterface $parentOid, $directChildrenOnly = false)
     {
         $sql = $this->getFindChildrenSql($parentOid, $directChildrenOnly);

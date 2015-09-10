@@ -49,6 +49,15 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
     /**
      * {@inheritdoc}
      */
+    public function releaseMemory()
+    {
+        parent::releaseMemory();
+        $this->propertyChanges = new \SplObjectStorage();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function createAcl(ObjectIdentityInterface $oid)
     {
         if (false !== $this->retrieveObjectIdentityPrimaryKey($oid)) {
