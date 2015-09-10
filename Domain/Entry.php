@@ -22,7 +22,6 @@ use Symfony\Component\Security\Acl\Model\SecurityIdentityInterface;
  */
 class Entry implements AuditableEntryInterface
 {
-    private $acl;
     private $mask;
     private $id;
     private $securityIdentity;
@@ -35,7 +34,6 @@ class Entry implements AuditableEntryInterface
      * Constructor.
      *
      * @param int                       $id
-     * @param AclInterface              $acl
      * @param SecurityIdentityInterface $sid
      * @param string                    $strategy
      * @param int                       $mask
@@ -43,24 +41,15 @@ class Entry implements AuditableEntryInterface
      * @param bool                      $auditFailure
      * @param bool                      $auditSuccess
      */
-    public function __construct($id, AclInterface $acl, SecurityIdentityInterface $sid, $strategy, $mask, $granting, $auditFailure, $auditSuccess)
+    public function __construct($id, SecurityIdentityInterface $sid, $strategy, $mask, $granting, $auditFailure, $auditSuccess)
     {
         $this->id = $id;
-        $this->acl = $acl;
         $this->securityIdentity = $sid;
         $this->strategy = $strategy;
         $this->mask = $mask;
         $this->granting = $granting;
         $this->auditFailure = $auditFailure;
         $this->auditSuccess = $auditSuccess;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getAcl()
-    {
-        return $this->acl;
     }
 
     /**

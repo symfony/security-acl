@@ -13,6 +13,7 @@ namespace Symfony\Component\Security\Acl\Dbal;
 
 use Doctrine\Common\PropertyChangedListener;
 use Doctrine\DBAL\Connection;
+use Symfony\Component\Security\Acl\Domain\AclEntry;
 use Symfony\Component\Security\Acl\Domain\RoleSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Acl\Exception\AclAlreadyExistsException;
@@ -170,13 +171,13 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
             throw new \InvalidArgumentException('$sender must be an instance of MutableAclInterface, or EntryInterface.');
         }
 
-        if ($sender instanceof EntryInterface) {
-            if (null === $sender->getId()) {
+        if ($sender instanceof AclEntry) {
+            if (null === $sender->getEntry()->getId()) {
                 return;
             }
 
-            $ace = $sender;
-            $sender = $ace->getAcl();
+            $ace = $sender->getEntry();
+            $sender = $sender->getAcl();
         } else {
             $ace = null;
         }

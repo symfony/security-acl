@@ -22,13 +22,6 @@ namespace Symfony\Component\Security\Acl\Model;
 interface EntryInterface extends \Serializable
 {
     /**
-     * The ACL this ACE is associated with.
-     *
-     * @return AclInterface
-     */
-    public function getAcl();
-
-    /**
      * The primary key of this ACE.
      *
      * @return int
