@@ -16,7 +16,6 @@ use Symfony\Component\Security\Acl\Domain\PermissionGrantingStrategy;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Acl\Dbal\Schema;
 use Doctrine\DBAL\DriverManager;
-use Symfony\Component\Security\Acl\Exception\AclNotFoundException;
 
 class AclProviderTest extends \PHPUnit_Framework_TestCase
 {

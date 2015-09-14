@@ -31,11 +31,17 @@ class AclEntry implements AclEntryInterface
         $this->entry = $entry;
     }
 
+    /**
+     * @return AclInterface
+     */
     public function getAcl()
     {
         return $this->acl;
     }
 
+    /**
+     * @return EntryInterface
+     */
     public function getEntry()
     {
         return $this->entry;

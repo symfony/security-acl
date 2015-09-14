@@ -1,23 +1,12 @@
-Security Component - ACL (Access Control List)
-==============================================
+UPGRADE FROM 2.x to 3.0
+=======================
 
-Security provides an infrastructure for sophisticated authorization systems,
-which makes it possible to easily separate the actual authorization logic from
-so called user providers that hold the users credentials. It is inspired by
-the Java Spring framework.
+### Entry, FieldEntry and EntryInterface
 
-Resources
----------
+ * The `acl` constructor argument and related getter getAcl() has been removed due to problems with release memory (https://github.com/symfony/symfony/issues/2376).
+   Classes that before work with Entry objects and call Entry::getAcl now must:
+        a) expect instance of AclEntryInterface and call AclEntry::getAcl and AclEntry::getEntry.
+        or b) additionally to EntryInterface $entry argument require AclInterface $acl argument
 
-Documentation:
-
-https://symfony.com/doc/3.0/book/security.html
-
-Tests
------
-
-You can run the unit tests with the following command:
-
-    $ cd path/to/Symfony/Component/Security/Acl/
-    $ composer.phar install --dev
-    $ phpunit
+### MutableAclProvider
+ * propertyChanged method now expect as $sender argument instance of MutableAclInterface or AclEntryInterface (was MutableAclInterface or EntryInterface)
