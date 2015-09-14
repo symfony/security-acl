@@ -29,7 +29,6 @@ class FieldEntryTest extends \PHPUnit_Framework_TestCase
         $serialized = serialize($ace);
         $uAce = unserialize($serialized);
 
-        $this->assertNull($uAce->getAcl());
         $this->assertInstanceOf('Symfony\Component\Security\Acl\Model\SecurityIdentityInterface', $uAce->getSecurityIdentity());
         $this->assertEquals($ace->getId(), $uAce->getId());
         $this->assertEquals($ace->getField(), $uAce->getField());
@@ -40,18 +39,14 @@ class FieldEntryTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($ace->isAuditFailure(), $uAce->isAuditFailure());
     }
 
-    protected function getAce($acl = null, $sid = null)
+    protected function getAce($sid = null)
     {
-        if (null === $acl) {
-            $acl = $this->getAcl();
-        }
         if (null === $sid) {
             $sid = $this->getSid();
         }
 
         return new FieldEntry(
             123,
-            $acl,
             'foo',
             $sid,
             'foostrat',
@@ -60,11 +55,6 @@ class FieldEntryTest extends \PHPUnit_Framework_TestCase
             false,
             true
         );
-    }
-
-    protected function getAcl()
-    {
-        return $this->getMock('Symfony\Component\Security\Acl\Model\AclInterface');
     }
 
     protected function getSid()

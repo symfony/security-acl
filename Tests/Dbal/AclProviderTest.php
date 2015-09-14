@@ -139,6 +139,45 @@ class AclProviderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('SomeClass', $sid->getClass());
     }
 
+    public function testReleaseMemory()
+    {
+        $oidCount = 300;
+
+        for($i = 6; $i < $oidCount; $i++) {
+            $this->insertOidStmt->execute(
+                array($i, 3, (string)$i, 2, 1)
+            );
+
+            $this->insertOidAncestorStmt->execute(array($i, 2));
+            $this->insertOidAncestorStmt->execute(array($i, 1));
+            $this->insertOidAncestorStmt->execute(array($i, $i));
+        }
+
+        $provider = $this->getProvider();
+
+        $provider->findAcl(new ObjectIdentity('6', 'foo'));
+
+        $provider->releaseMemory();
+        gc_collect_cycles();
+
+        $memoryBase = memory_get_usage();
+        $oids = array();
+
+        for($i = 6; $i < $oidCount; $i++) {
+            $oids[] = new ObjectIdentity((string)$i, 'foo');
+        }
+
+        $provider->findAcls($oids);
+
+        $this->assertGreaterThan(100000, memory_get_usage() - $memoryBase);
+
+        unset($oids);
+        $provider->releaseMemory();
+        gc_collect_cycles();
+
+        $this->assertLessThan(1000, memory_get_usage() - $memoryBase);
+    }
+
     protected function setUp()
     {
         if (!class_exists('PDO') || !in_array('sqlite', \PDO::getAvailableDrivers())) {

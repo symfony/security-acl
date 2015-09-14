@@ -18,8 +18,8 @@ use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Acl\Exception\AclAlreadyExistsException;
 use Symfony\Component\Security\Acl\Exception\ConcurrentModificationException;
 use Symfony\Component\Security\Acl\Model\AclCacheInterface;
+use Symfony\Component\Security\Acl\Model\AclEntryInterface;
 use Symfony\Component\Security\Acl\Model\AclInterface;
-use Symfony\Component\Security\Acl\Model\EntryInterface;
 use Symfony\Component\Security\Acl\Model\MutableAclInterface;
 use Symfony\Component\Security\Acl\Model\MutableAclProviderInterface;
 use Symfony\Component\Security\Acl\Model\ObjectIdentityInterface;
@@ -42,6 +42,15 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
     {
         parent::__construct($connection, $permissionGrantingStrategy, $options, $cache);
 
+        $this->propertyChanges = new \SplObjectStorage();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function releaseMemory()
+    {
+        parent::releaseMemory();
         $this->propertyChanges = new \SplObjectStorage();
     }
 
@@ -166,17 +175,17 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
      */
     public function propertyChanged($sender, $propertyName, $oldValue, $newValue)
     {
-        if (!$sender instanceof MutableAclInterface && !$sender instanceof EntryInterface) {
-            throw new \InvalidArgumentException('$sender must be an instance of MutableAclInterface, or EntryInterface.');
+        if (!$sender instanceof MutableAclInterface && !$sender instanceof AclEntryInterface) {
+            throw new \InvalidArgumentException('$sender must be an instance of MutableAclInterface, or AclEntryInterface.');
         }
 
-        if ($sender instanceof EntryInterface) {
-            if (null === $sender->getId()) {
+        if ($sender instanceof AclEntryInterface) {
+            if (null === $sender->getEntry()->getId()) {
                 return;
             }
 
-            $ace = $sender;
-            $sender = $ace->getAcl();
+            $ace = $sender->getEntry();
+            $sender = $sender->getAcl();
         } else {
             $ace = null;
         }
@@ -291,18 +300,18 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
 
             // check properties for deleted, and created ACEs, and perform creations
             if (isset($propertyChanges['classAces'])) {
-                $this->updateNewAceProperty('classAces', $propertyChanges['classAces']);
+                $this->updateNewAceProperty('classAces', $propertyChanges['classAces'], $acl);
                 $sharedPropertyChanges['classAces'] = $propertyChanges['classAces'];
             }
             if (isset($propertyChanges['classFieldAces'])) {
-                $this->updateNewFieldAceProperty('classFieldAces', $propertyChanges['classFieldAces']);
+                $this->updateNewFieldAceProperty('classFieldAces', $propertyChanges['classFieldAces'], $acl);
                 $sharedPropertyChanges['classFieldAces'] = $propertyChanges['classFieldAces'];
             }
             if (isset($propertyChanges['objectAces'])) {
-                $this->updateNewAceProperty('objectAces', $propertyChanges['objectAces']);
+                $this->updateNewAceProperty('objectAces', $propertyChanges['objectAces'], $acl);
             }
             if (isset($propertyChanges['objectFieldAces'])) {
-                $this->updateNewFieldAceProperty('objectFieldAces', $propertyChanges['objectFieldAces']);
+                $this->updateNewFieldAceProperty('objectFieldAces', $propertyChanges['objectFieldAces'], $acl);
             }
 
             // if there have been changes to shared properties, we need to synchronize other
@@ -829,7 +838,7 @@ QUERY;
      *
      * @param AclInterface $acl
      */
-    private function regenerateAncestorRelations(AclInterface $acl)
+    private function regenerateAncestorRelations(MutableAclInterface $acl)
     {
         $pk = $acl->getId();
         $this->connection->executeQuery($this->getDeleteObjectIdentityRelationsSql($pk));
@@ -849,7 +858,7 @@ QUERY;
      * @param string $name
      * @param array  $changes
      */
-    private function updateNewFieldAceProperty($name, array $changes)
+    private function updateNewFieldAceProperty($name, array $changes, MutableAclInterface $acl)
     {
         $sids = new \SplObjectStorage();
         $classIds = new \SplObjectStorage();
@@ -864,14 +873,14 @@ QUERY;
                         $sid = $this->createOrRetrieveSecurityIdentityId($ace->getSecurityIdentity());
                     }
 
-                    $oid = $ace->getAcl()->getObjectIdentity();
+                    $oid = $acl->getObjectIdentity();
                     if ($classIds->contains($oid)) {
                         $classId = $classIds->offsetGet($oid);
                     } else {
                         $classId = $this->createOrRetrieveClassId($oid->getType());
                     }
 
-                    $objectIdentityId = $name === 'classFieldAces' ? null : $ace->getAcl()->getId();
+                    $objectIdentityId = $name === 'classFieldAces' ? null : $acl->getId();
 
                     $this->connection->executeQuery($this->getInsertAccessControlEntrySql($classId, $objectIdentityId, $field, $i, $sid, $ace->getStrategy(), $ace->getMask(), $ace->isGranting(), $ace->isAuditSuccess(), $ace->isAuditFailure()));
                     $aceId = $this->connection->executeQuery($this->getSelectAccessControlEntryIdSql($classId, $objectIdentityId, $field, $i))->fetchColumn();
@@ -922,7 +931,7 @@ QUERY;
      * @param string $name
      * @param array  $changes
      */
-    private function updateNewAceProperty($name, array $changes)
+    private function updateNewAceProperty($name, array $changes, MutableAclInterface $acl)
     {
         list($old, $new) = $changes;
 
@@ -938,14 +947,14 @@ QUERY;
                     $sid = $this->createOrRetrieveSecurityIdentityId($ace->getSecurityIdentity());
                 }
 
-                $oid = $ace->getAcl()->getObjectIdentity();
+                $oid = $acl->getObjectIdentity();
                 if ($classIds->contains($oid)) {
                     $classId = $classIds->offsetGet($oid);
                 } else {
                     $classId = $this->createOrRetrieveClassId($oid->getType());
                 }
 
-                $objectIdentityId = $name === 'classAces' ? null : $ace->getAcl()->getId();
+                $objectIdentityId = $name === 'classAces' ? null : $acl->getId();
 
                 $this->connection->executeQuery($this->getInsertAccessControlEntrySql($classId, $objectIdentityId, null, $i, $sid, $ace->getStrategy(), $ace->getMask(), $ace->isGranting(), $ace->isAuditSuccess(), $ace->isAuditFailure()));
                 $aceId = $this->connection->executeQuery($this->getSelectAccessControlEntryIdSql($classId, $objectIdentityId, null, $i))->fetchColumn();

@@ -17,10 +17,9 @@ class EntryTest extends \PHPUnit_Framework_TestCase
 {
     public function testConstructor()
     {
-        $ace = $this->getAce($acl = $this->getAcl(), $sid = $this->getSid());
+        $ace = $this->getAce($sid = $this->getSid());
 
         $this->assertEquals(123, $ace->getId());
-        $this->assertSame($acl, $ace->getAcl());
         $this->assertSame($sid, $ace->getSecurityIdentity());
         $this->assertEquals('foostrat', $ace->getStrategy());
         $this->assertEquals(123456, $ace->getMask());
@@ -76,7 +75,6 @@ class EntryTest extends \PHPUnit_Framework_TestCase
         $serialized = serialize($ace);
         $uAce = unserialize($serialized);
 
-        $this->assertNull($uAce->getAcl());
         $this->assertInstanceOf('Symfony\Component\Security\Acl\Model\SecurityIdentityInterface', $uAce->getSecurityIdentity());
         $this->assertEquals($ace->getId(), $uAce->getId());
         $this->assertEquals($ace->getMask(), $uAce->getMask());
@@ -86,18 +84,14 @@ class EntryTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($ace->isAuditFailure(), $uAce->isAuditFailure());
     }
 
-    protected function getAce($acl = null, $sid = null)
+    protected function getAce($sid = null)
     {
-        if (null === $acl) {
-            $acl = $this->getAcl();
-        }
         if (null === $sid) {
             $sid = $this->getSid();
         }
 
         return new Entry(
             123,
-            $acl,
             $sid,
             'foostrat',
             123456,
@@ -105,11 +99,6 @@ class EntryTest extends \PHPUnit_Framework_TestCase
             false,
             true
         );
-    }
-
-    protected function getAcl()
-    {
-        return $this->getMock('Symfony\Component\Security\Acl\Model\AclInterface');
     }
 
     protected function getSid()

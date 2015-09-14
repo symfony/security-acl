@@ -16,6 +16,7 @@ use Symfony\Component\Security\Acl\Domain\RoleSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\PermissionGrantingStrategy;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Acl\Domain\Acl;
+use Symfony\Component\Security\Acl\Permission\MaskBuilder;
 
 class AclTest extends \PHPUnit_Framework_TestCase
 {
@@ -476,6 +477,22 @@ class AclTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($ace->isAuditFailure());
     }
 
+    public function testMemoryLeak()
+    {
+        $memoryBase = null;
+
+        for ($i = 0; $i <= 1000; $i++) {
+            $acl = new Acl($i, new ObjectIdentity($i, 1), new PermissionGrantingStrategy(), array(), 1);
+            $acl->insertObjectAce(new RoleSecurityIdentity("ROLE_ADMIN"), MaskBuilder::MASK_VIEW);
+
+            if (null === $memoryBase) {
+                $memoryBase = memory_get_usage();
+            }
+        }
+
+        $this->assertLessThan(500, memory_get_usage() - $memoryBase);
+    }
+
     public function getUpdateFieldAuditingTests()
     {
         return array(
@@ -491,7 +508,7 @@ class AclTest extends \PHPUnit_Framework_TestCase
         $listener = $this->getMock('Doctrine\Common\PropertyChangedListener');
         foreach ($expectedChanges as $index => $property) {
             if (in_array($property, $aceProperties)) {
-                $class = 'Symfony\Component\Security\Acl\Domain\Entry';
+                $class = 'Symfony\Component\Security\Acl\Domain\AclEntry';
             } else {
                 $class = 'Symfony\Component\Security\Acl\Domain\Acl';
             }

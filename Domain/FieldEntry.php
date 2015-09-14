@@ -28,7 +28,6 @@ class FieldEntry extends Entry implements FieldEntryInterface
      * Constructor.
      *
      * @param int                       $id
-     * @param AclInterface              $acl
      * @param string                    $field
      * @param SecurityIdentityInterface $sid
      * @param string                    $strategy
@@ -37,9 +36,9 @@ class FieldEntry extends Entry implements FieldEntryInterface
      * @param bool                      $auditFailure
      * @param bool                      $auditSuccess
      */
-    public function __construct($id, AclInterface $acl, $field, SecurityIdentityInterface $sid, $strategy, $mask, $granting, $auditFailure, $auditSuccess)
+    public function __construct($id, $field, SecurityIdentityInterface $sid, $strategy, $mask, $granting, $auditFailure, $auditSuccess)
     {
-        parent::__construct($id, $acl, $sid, $strategy, $mask, $granting, $auditFailure, $auditSuccess);
+        parent::__construct($id, $sid, $strategy, $mask, $granting, $auditFailure, $auditSuccess);
 
         $this->field = $field;
     }

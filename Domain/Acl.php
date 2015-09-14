@@ -485,7 +485,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
             }
         }
 
-        $aces[$index] = new Entry(null, $this, $sid, $strategy, $mask, $granting, false, false);
+        $aces[$index] = new Entry(null, $sid, $strategy, $mask, $granting, false, false);
         $this->onPropertyChanged($property, $oldValue, $this->$property);
     }
 
@@ -543,7 +543,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
             }
         }
 
-        $aces[$field][$index] = new FieldEntry(null, $this, $field, $sid, $strategy, $mask, $granting, false, false);
+        $aces[$field][$index] = new FieldEntry(null, $field, $sid, $strategy, $mask, $granting, false, false);
         $this->onPropertyChanged($property, $oldValue, $this->$property);
     }
 
@@ -620,7 +620,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
             throw new \InvalidArgumentException('$field cannot be empty.');
         }
 
-        $aces = &$this->$property;
+        $aces = $this->$property;
         if (!isset($aces[$field][$index])) {
             throw new \OutOfBoundsException(sprintf('The index "%d" does not exist.', $index));
         }
@@ -661,7 +661,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     private function onEntryPropertyChanged(EntryInterface $entry, $name, $oldValue, $newValue)
     {
         foreach ($this->listeners as $listener) {
-            $listener->propertyChanged($entry, $name, $oldValue, $newValue);
+            $listener->propertyChanged(new AclEntry($this, $entry), $name, $oldValue, $newValue);
         }
     }
 }
