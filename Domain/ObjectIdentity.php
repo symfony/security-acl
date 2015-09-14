@@ -11,7 +11,7 @@
 
 namespace Symfony\Component\Security\Acl\Domain;
 
-use Symfony\Component\Security\Core\Util\ClassUtils;
+use Doctrine\Common\Util\ClassUtils;
 use Symfony\Component\Security\Acl\Exception\InvalidDomainObjectException;
 use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
 use Symfony\Component\Security\Acl\Model\ObjectIdentityInterface;

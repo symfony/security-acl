@@ -624,9 +624,9 @@ QUERY;
                     }
 
                     if (null === $fieldName) {
-                        $loadedAces[$aceId] = new Entry((int) $aceId, $acl, $sids[$key], $grantingStrategy, (int) $mask, !!$granting, !!$auditFailure, !!$auditSuccess);
+                        $loadedAces[$aceId] = new Entry((int) $aceId, $sids[$key], $grantingStrategy, (int) $mask, !!$granting, !!$auditFailure, !!$auditSuccess);
                     } else {
-                        $loadedAces[$aceId] = new FieldEntry((int) $aceId, $acl, $fieldName, $sids[$key], $grantingStrategy, (int) $mask, !!$granting, !!$auditFailure, !!$auditSuccess);
+                        $loadedAces[$aceId] = new FieldEntry((int) $aceId, $fieldName, $sids[$key], $grantingStrategy, (int) $mask, !!$granting, !!$auditFailure, !!$auditSuccess);
                     }
                 }
                 $ace = $loadedAces[$aceId];

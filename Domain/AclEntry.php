@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\Security\Acl\Domain;
 
+use Symfony\Component\Security\Acl\Model\AclEntryInterface;
 use Symfony\Component\Security\Acl\Model\AclInterface;
 use Symfony\Component\Security\Acl\Model\EntryInterface;
 
@@ -19,7 +20,7 @@ use Symfony\Component\Security\Acl\Model\EntryInterface;
  *
  * @author Evgeniy Sokolov <ewgraf@gmail.com>
  */
-class AclEntry
+class AclEntry implements AclEntryInterface
 {
     private $acl;
     private $entry;

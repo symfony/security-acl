@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\Security\Acl\Tests\Dbal;
 
+use Symfony\Component\Security\Acl\Domain\AclEntry;
 use Symfony\Component\Security\Acl\Domain\RoleSecurityIdentity;
 use Symfony\Component\Security\Acl\Model\FieldEntryInterface;
 use Symfony\Component\Security\Acl\Model\AuditableEntryInterface;
@@ -40,7 +41,6 @@ class MutableAclProviderTest extends \PHPUnit_Framework_TestCase
         }
 
         self::assertTrue($a->getSecurityIdentity()->equals($b->getSecurityIdentity()));
-        self::assertSame($a->getAcl()->getId(), $b->getAcl()->getId());
 
         if ($a instanceof AuditableEntryInterface) {
             self::assertSame($a->isAuditSuccess(), $b->isAuditSuccess());
@@ -196,11 +196,11 @@ class MutableAclProviderTest extends \PHPUnit_Framework_TestCase
     {
         $provider = $this->getProvider();
         $acl = $provider->createAcl(new ObjectIdentity(1, 'Foo'));
-        $ace = new Entry(1, $acl, new UserSecurityIdentity('foo', 'FooClass'), 'all', 1, true, true, true);
-        $ace2 = new Entry(2, $acl, new UserSecurityIdentity('foo', 'FooClass'), 'all', 1, true, true, true);
+        $ace = new Entry(1, new UserSecurityIdentity('foo', 'FooClass'), 'all', 1, true, true, true);
+        $ace2 = new Entry(2, new UserSecurityIdentity('foo', 'FooClass'), 'all', 1, true, true, true);
         $propertyChanges = $this->getField($provider, 'propertyChanges');
 
-        $provider->propertyChanged($ace, 'mask', 1, 3);
+        $provider->propertyChanged(new AclEntry($acl, $ace), 'mask', 1, 3);
         $changes = $propertyChanges->offsetGet($acl);
         $this->assertTrue(isset($changes['aces']));
         $this->assertInstanceOf('\SplObjectStorage', $changes['aces']);
@@ -210,7 +210,7 @@ class MutableAclProviderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(1, $aceChanges['mask'][0]);
         $this->assertEquals(3, $aceChanges['mask'][1]);
 
-        $provider->propertyChanged($ace, 'strategy', 'all', 'any');
+        $provider->propertyChanged(new AclEntry($acl, $ace), 'strategy', 'all', 'any');
         $changes = $propertyChanges->offsetGet($acl);
         $this->assertTrue(isset($changes['aces']));
         $this->assertInstanceOf('\SplObjectStorage', $changes['aces']);
@@ -221,23 +221,46 @@ class MutableAclProviderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('all', $aceChanges['strategy'][0]);
         $this->assertEquals('any', $aceChanges['strategy'][1]);
 
-        $provider->propertyChanged($ace, 'mask', 3, 1);
+        $provider->propertyChanged(new AclEntry($acl, $ace), 'mask', 3, 1);
         $changes = $propertyChanges->offsetGet($acl);
         $aceChanges = $changes['aces']->offsetGet($ace);
         $this->assertFalse(isset($aceChanges['mask']));
         $this->assertTrue(isset($aceChanges['strategy']));
 
-        $provider->propertyChanged($ace2, 'mask', 1, 3);
-        $provider->propertyChanged($ace, 'strategy', 'any', 'all');
+        $provider->propertyChanged(new AclEntry($acl, $ace2), 'mask', 1, 3);
+        $provider->propertyChanged(new AclEntry($acl, $ace), 'strategy', 'any', 'all');
         $changes = $propertyChanges->offsetGet($acl);
         $this->assertTrue(isset($changes['aces']));
         $this->assertFalse($changes['aces']->contains($ace));
         $this->assertTrue($changes['aces']->contains($ace2));
 
-        $provider->propertyChanged($ace2, 'mask', 3, 4);
-        $provider->propertyChanged($ace2, 'mask', 4, 1);
+        $provider->propertyChanged(new AclEntry($acl, $ace2), 'mask', 3, 4);
+        $provider->propertyChanged(new AclEntry($acl, $ace2), 'mask', 4, 1);
         $changes = $propertyChanges->offsetGet($acl);
         $this->assertFalse(isset($changes['aces']));
+    }
+
+    public function testReleaseMemory()
+    {
+        $provider = $this->getProvider();
+
+        $provider->createAcl(new ObjectIdentity(0, 'Foo0'));
+
+        $provider->releaseMemory();
+        gc_collect_cycles();
+
+        $memoryBase = memory_get_usage();
+
+        for ($i = 1; $i < 200; $i++) {
+            $provider->createAcl(new ObjectIdentity($i, 'Foo' . $i));
+        }
+
+        $this->assertGreaterThan(100000, memory_get_usage() - $memoryBase);
+
+        $provider->releaseMemory();
+        gc_collect_cycles();
+
+        $this->assertLessThan(500, memory_get_usage() - $memoryBase);
     }
 
     /**
