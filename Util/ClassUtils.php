@@ -25,6 +25,20 @@ use Doctrine\Common\Util\ClassUtils as DoctrineClassUtils;
 final class ClassUtils
 {
     /**
+     * Marker for Proxy class names.
+     *
+     * @var string
+     */
+    const MARKER = '__CG__';
+
+    /**
+     * Length of the proxy marker.
+     *
+     * @var int
+     */
+    const MARKER_LENGTH = 6;
+
+    /**
      * This class should not be instantiated.
      */
     private function __construct()
@@ -44,8 +58,10 @@ final class ClassUtils
 
         if (class_exists('Doctrine\Common\Util\ClassUtils')) {
             return DoctrineClassUtils::getRealClass($class);
+        } else if (false === $pos = strrpos($class, '\\'.self::MARKER.'\\')) {
+            return $class;
         }
 
-        return $class;
+        return substr($class, $pos + self::MARKER_LENGTH + 2);
     }
 }
