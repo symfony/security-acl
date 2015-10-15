@@ -47,8 +47,20 @@ class FieldEntryTest extends \PHPUnit_Framework_TestCase
         $aceFirst = $this->getAce(null, $sid);
         $aceSecond = $this->getAce(null, $sid);
 
-        $serializedFirst = serialize(array($aceFirst, $aceSecond));
-        list($uAceFirst, $uAceSecond) = unserialize($serializedFirst);
+        // as used in DoctrineAclCache::putInCache (line 142)
+        $serialized = serialize(
+            array( // Acl:serialize (line 260)
+                [  // classFieldAces
+                    'fieldOne' => [$aceFirst], 
+                    'fieldTwo' => [$aceSecond],
+                ]
+            )
+        );
+
+        $unserialized = unserialize($serialized);
+        $uAceFirst  = $unserialized[0]['fieldOne'][0];
+        $uAceSecond = $unserialized[0]['fieldTwo'][0];
+
 
         $this->assertNull($uAceFirst->getAcl());
         $this->assertInstanceOf('Symfony\Component\Security\Acl\Model\SecurityIdentityInterface', $uAceFirst->getSecurityIdentity());
@@ -61,7 +73,10 @@ class FieldEntryTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($aceFirst->isAuditFailure(), $uAceFirst->isAuditFailure());
 
         $this->assertNull($uAceSecond->getAcl());
+
+        // Bug: this will fail, securityIdentity is FieldEntry
         $this->assertInstanceOf('Symfony\Component\Security\Acl\Model\SecurityIdentityInterface', $uAceSecond->getSecurityIdentity());
+        
         $this->assertEquals($aceSecond->getId(), $uAceSecond->getId());
         $this->assertEquals($aceSecond->getField(), $uAceSecond->getField());
         $this->assertEquals($aceSecond->getMask(), $uAceSecond->getMask());
