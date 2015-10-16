@@ -40,6 +40,9 @@ class FieldEntryTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($ace->isAuditFailure(), $uAce->isAuditFailure());
     }
 
+    /**
+     * Test that two FieldEntry objects correctly serialized and unserialized
+     */
     public function testSerializeUnserializeMoreAceWithSameSecurityIdentity()
     {
         $sid = $this->getSid();
@@ -61,29 +64,14 @@ class FieldEntryTest extends \PHPUnit_Framework_TestCase
         $uAceFirst  = $unserialized[0]['fieldOne'][0];
         $uAceSecond = $unserialized[0]['fieldTwo'][0];
 
-
-        $this->assertNull($uAceFirst->getAcl());
-        $this->assertInstanceOf('Symfony\Component\Security\Acl\Model\SecurityIdentityInterface', $uAceFirst->getSecurityIdentity());
-        $this->assertEquals($aceFirst->getId(), $uAceFirst->getId());
-        $this->assertEquals($aceFirst->getField(), $uAceFirst->getField());
-        $this->assertEquals($aceFirst->getMask(), $uAceFirst->getMask());
-        $this->assertEquals($aceFirst->getStrategy(), $uAceFirst->getStrategy());
-        $this->assertEquals($aceFirst->isGranting(), $uAceFirst->isGranting());
-        $this->assertEquals($aceFirst->isAuditSuccess(), $uAceFirst->isAuditSuccess());
-        $this->assertEquals($aceFirst->isAuditFailure(), $uAceFirst->isAuditFailure());
-
-        $this->assertNull($uAceSecond->getAcl());
-
-        // Bug: this will fail, securityIdentity is FieldEntry
-        $this->assertInstanceOf('Symfony\Component\Security\Acl\Model\SecurityIdentityInterface', $uAceSecond->getSecurityIdentity());
-        
-        $this->assertEquals($aceSecond->getId(), $uAceSecond->getId());
-        $this->assertEquals($aceSecond->getField(), $uAceSecond->getField());
-        $this->assertEquals($aceSecond->getMask(), $uAceSecond->getMask());
-        $this->assertEquals($aceSecond->getStrategy(), $uAceSecond->getStrategy());
-        $this->assertEquals($aceSecond->isGranting(), $uAceSecond->isGranting());
-        $this->assertEquals($aceSecond->isAuditSuccess(), $uAceSecond->isAuditSuccess());
-        $this->assertEquals($aceSecond->isAuditFailure(), $uAceSecond->isAuditFailure());
+        $this->assertInstanceOf(
+            'Symfony\Component\Security\Acl\Model\SecurityIdentityInterface',
+            $uAceFirst->getSecurityIdentity()
+        );
+        $this->assertInstanceOf(
+            'Symfony\Component\Security\Acl\Model\SecurityIdentityInterface',
+            $uAceSecond->getSecurityIdentity()
+        );
     }
 
     protected function getAce($acl = null, $sid = null)
