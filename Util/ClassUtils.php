@@ -57,9 +57,10 @@ final class ClassUtils
         $class = is_object($object) ? get_class($object) : $object;
 
         if (class_exists('Doctrine\Common\Util\ClassUtils')) {
-            $class = DoctrineClassUtils::getRealClass($class);
+            return DoctrineClassUtils::getRealClass($class);
         }
 
+        // fallback in case doctrine common  is not installed
         if (false === $pos = strrpos($class, '\\'.self::MARKER.'\\')) {
             return $class;
         }
