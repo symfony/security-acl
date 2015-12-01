@@ -22,6 +22,28 @@ class FieldEntryTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('foo', $ace->getField());
     }
 
+    public function testSerializeUnserializeMoreAceWithSameSecurityIdentity()
+    {
+        $sid = $this->getSid();
+
+        $aceFirst = $this->getAce(null, $sid);
+        $aceSecond = $this->getAce(null, $sid);
+
+        // as used in DoctrineAclCache::putInCache (line 142)
+        $serialized = serialize(array($aceFirst, $aceSecond));
+        $unserialized = unserialize($serialized);
+        $uAceFirst  = $unserialized[0];
+        $uAceSecond = $unserialized[1];
+        $this->assertInstanceOf(
+            'Symfony\Component\Security\Acl\Model\SecurityIdentityInterface',
+            $uAceFirst->getSecurityIdentity()
+        );
+        $this->assertInstanceOf(
+            'Symfony\Component\Security\Acl\Model\SecurityIdentityInterface',
+            $uAceSecond->getSecurityIdentity()
+        );
+    }
+
     public function testSerializeUnserialize()
     {
         $ace = $this->getAce();
