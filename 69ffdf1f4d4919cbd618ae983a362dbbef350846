@@ -1,0 +1,131 @@
+---------------------------------------------------------------------------
+
+by Tobion at 2015-08-27T10:50:12Z
+
+:+1:
+
+---------------------------------------------------------------------------
+
+by stof at 2015-08-27T12:57:50Z
+
+@fabpot given this repo is not a read-only subtree anymore, the core team should probably be added as collaborators on the repo
+
+---------------------------------------------------------------------------
+
+by fabpot at 2015-08-31T12:44:08Z
+
+@stof I've added deciders and mergers on this repo.
+
+---------------------------------------------------------------------------
+
+by iltar at 2015-09-21T06:31:22Z
+
+@stof can you check if this is more like what you had in mind? I have actually not let it return if the doctrine variant exists, this way both will still be executed.
+
+I saw your PR a second too late @ewgRa :(
+
+---------------------------------------------------------------------------
+
+by ewgRa at 2015-10-22T18:20:04Z
+
+One month has passed
+
+ping @stof
+
+---------------------------------------------------------------------------
+
+by Tobion at 2015-11-24T22:40:42Z
+
+@symfony/mergers we need to merge this before symfony release. As the deprecation has been merged, we need this to actually provide the alternative. @stof are you ok with this version now?
+
+---------------------------------------------------------------------------
+
+by fabpot at 2015-11-25T04:17:29Z
+
+:+1:
+
+---------------------------------------------------------------------------
+
+by stof at 2015-11-25T09:16:45Z
+
+Executing both is a bad idea, as it would be the same than executing the Doctrine logic twice, which might have unexpected effect
+
+---------------------------------------------------------------------------
+
+by Tobion at 2015-11-29T18:20:03Z
+
+@stof could you provide a solution as you see fit? I don't see the problem.
+
+---------------------------------------------------------------------------
+
+by peterrehm at 2015-11-30T18:46:46Z
+
+As 2.8.0 is tagged this should be resolved and tagged to avoid deprecation messages e.g. using ObjectIdentity
+
+---------------------------------------------------------------------------
+
+by stof at 2015-11-30T18:48:13Z
+
+@Tobion going back the way it was before: using Doctrine Common when available, and the duplicated implementation only as fallback when it is not, or using the duplicated implementation all the time. The issue is using both at the same time.
+
+---------------------------------------------------------------------------
+
+by peterrehm at 2015-11-30T18:54:10Z
+
+@stof So only a return is missing there: https://github.com/symfony/security-acl/pull/3/files#diff-f95db4a0923d2b083e7c0d2d111c722eR60 ?
+
+---------------------------------------------------------------------------
+
+by peterrehm at 2015-12-01T13:37:39Z
+
+@iltar Have you had a chance to look at the comment? If I see it correctly, we are talking just about the missing return statement.
+
+---------------------------------------------------------------------------
+
+by iltar at 2015-12-01T13:43:16Z
+
+@peterrehm Yes I have taken a look but I kind of lost track of what it's supposed to do as the PR is rather old.
+
+---------------------------------------------------------------------------
+
+by peterrehm at 2015-12-01T13:46:35Z
+
+If I understood @stof's comment correctly it is all about this here:
+
+https://github.com/symfony/security-acl/pull/3/files#diff-f95db4a0923d2b083e7c0d2d111c722eR60
+
+Without a return statement first the Doctrine logic is executed, then the custom logic which can create problems. If you add a return statement to the highlighted line the Doctrine logic is executed if the corresponding class exists otherwise the custom logic.
+
+Do you want to dig into that again to make the release possible or shall I help you out?
+
+---------------------------------------------------------------------------
+
+by ewgRa at 2015-12-01T13:47:38Z
+
+Maybe good idea to show it as test case.
+
+---------------------------------------------------------------------------
+
+by iltar at 2015-12-01T13:52:22Z
+
+@peterrehm @ewgRa feel free to provide a PR to my repository and I will merge it into the branch for this PR
+
+---------------------------------------------------------------------------
+
+by peterrehm at 2015-12-01T14:01:23Z
+
+@iltar Done. https://github.com/iltar/security-acl/pull/3 @stof Is this as you wanted it to be?
+
+---------------------------------------------------------------------------
+
+by XWB at 2015-12-02T14:29:59Z
+
+Any progress on this? I'm getting deprecation notices in my projects:
+
+> The Symfony\Component\Security\Core\Util\ClassUtils class is deprecated since version 2.8, to be removed in 3.0. Use Symfony\Component\Security\Acl\Util\ClassUtils instead.
+
+---------------------------------------------------------------------------
+
+by stof at 2015-12-02T14:48:25Z
+
+:+1:
