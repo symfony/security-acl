@@ -1,25 +1,40 @@
-language: php
-
 sudo: false
 
-cache:
-  directories:
-    - "$HOME/.composer/cache"
+language: php
 
-env:
-  - COMPOSER_FLAGS="--prefer-stable"
+cache:
+    directories:
+        - $HOME/.composer/cache/files
+
+php:
+  - 5.3
+  - 5.4
+  - 5.5
+  - 7.0
+  - hhvm
 
 matrix:
+  fast_finish: true
   include:
     - php: 5.3
-      env: COMPOSER_FLAGS="--prefer-lowest"
-    - php: 5.4
-    - php: 5.5
+      env: COMPOSER_FLAGS="--prefer-lowest" SYMFONY_DEPRECATIONS_HELPER=weak
+    # Test against Symfony LTS versions
     - php: 5.6
-    - php: hhvm
-    - php: 7.0
-      env: COMPOSER_FLAGS="" SYMFONY_VERSION="3.0.*"
+      env: SYMFONY_VERSION="2.8.*"
+    - php: 5.6
+      env: SYMFONY_VERSION="2.8.*" DEPENDENCIES=dev
+    # Test against dev versions
+    - php: 5.6
+      env: DEPENDENCIES=dev
+  allow_failures:
+    - env: DEPENDENCIES=dev
 
-before_install: if [[ "$SYMFONY_VERSION" != "" ]]; then composer require --no-update symfony/symfony:${SYMFONY_VERSION}; fi
+before_install:
+    - composer self-update
+    - if [ "$DEPENDENCIES" = "dev" ]; then perl -pi -e 's/^}$/,"minimum-stability":"dev"}/' composer.json; fi;
+    - if [ "$SYMFONY_VERSION" != "" ]; then composer require --dev --no-update symfony/symfony:"$SYMFONY_VERSION"; fi
 
-install: composer update $COMPOSER_FLAGS
+install:
+    - composer update $COMPOSER_FLAGS
+
+script: phpunit -v --coverage-text
