@@ -22,6 +22,21 @@ class FieldEntryTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('foo', $ace->getField());
     }
 
+    public function testSerializeUnserializeSameSecurityIdentity()
+    {
+        $sid = $this->getSid();
+
+        $aceFirst = $this->getAce(null, $sid);
+        $aceSecond = $this->getAce(null, $sid);
+
+        /** @var FieldEntry $uAceFirst */
+        /** @var FieldEntry $uAceSecond */
+        list($uAceFirst, $uAceSecond) = unserialize(serialize(array($aceFirst, $aceSecond)));
+
+        $this->assertInstanceOf('Symfony\Component\Security\Acl\Model\SecurityIdentityInterface', $uAceFirst->getSecurityIdentity());
+        $this->assertSame($uAceFirst->getSecurityIdentity(), $uAceSecond->getSecurityIdentity());
+    }
+
     public function testSerializeUnserialize()
     {
         $ace = $this->getAce();
