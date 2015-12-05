@@ -54,7 +54,6 @@ class FieldEntry extends Entry implements FieldEntryInterface
 
     /**
      * {@inheritdoc}
-     *
      */
     public function unserialize($serialized)
     {
