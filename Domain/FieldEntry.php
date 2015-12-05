@@ -54,6 +54,23 @@ class FieldEntry extends Entry implements FieldEntryInterface
 
     /**
      * {@inheritdoc}
+     *
+     */
+    public function unserialize($serialized)
+    {
+        # Legacy support
+        $unserialized = unserialize($serialized);
+
+        if (is_string($unserialized[1])) {
+            $unserialized[1] = unserialize($unserialized[1]);
+            $this->setSerializeData($unserialized);
+        }
+
+        $this->setSerializeData($unserialized);
+    }
+
+    /**
+     * {@inheritdoc}
      */
     protected function getSerializeData()
     {
