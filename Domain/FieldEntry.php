@@ -52,11 +52,17 @@ class FieldEntry extends Entry implements FieldEntryInterface
         return $this->field;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function getSerializeData()
     {
         return array($this->field, parent::getSerializeData());
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function setSerializeData(array $array)
     {
         $this->field = $array[0];

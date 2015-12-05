@@ -191,6 +191,10 @@ class Entry implements AuditableEntryInterface
         $this->setSerializeData(unserialize($serialized));
     }
 
+    /**
+     * Get data for serialize
+     * @return array
+     */
     protected function getSerializeData()
     {
         return array(
@@ -204,6 +208,10 @@ class Entry implements AuditableEntryInterface
         );
     }
 
+    /**
+     * Set unserialized data
+     * @param array $array Array of serialized data
+     */
     protected function setSerializeData(array $array)
     {
         list($this->mask,
