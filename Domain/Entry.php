@@ -178,15 +178,7 @@ class Entry implements AuditableEntryInterface
      */
     public function serialize()
     {
-        return serialize(array(
-            $this->mask,
-            $this->id,
-            $this->securityIdentity,
-            $this->strategy,
-            $this->auditFailure,
-            $this->auditSuccess,
-            $this->granting,
-        ));
+        return serialize($this->getSerializeData());
     }
 
     /**
@@ -196,13 +188,39 @@ class Entry implements AuditableEntryInterface
      */
     public function unserialize($serialized)
     {
+        $this->setSerializeData(unserialize($serialized));
+    }
+
+    /**
+     * Get data for serialize
+     * @return array
+     */
+    protected function getSerializeData()
+    {
+        return array(
+            $this->mask,
+            $this->id,
+            $this->securityIdentity,
+            $this->strategy,
+            $this->auditFailure,
+            $this->auditSuccess,
+            $this->granting
+        );
+    }
+
+    /**
+     * Set unserialized data
+     * @param array $array Array of serialized data
+     */
+    protected function setSerializeData(array $array)
+    {
         list($this->mask,
-             $this->id,
-             $this->securityIdentity,
-             $this->strategy,
-             $this->auditFailure,
-             $this->auditSuccess,
-             $this->granting
-        ) = unserialize($serialized);
+            $this->id,
+            $this->securityIdentity,
+            $this->strategy,
+            $this->auditFailure,
+            $this->auditSuccess,
+            $this->granting
+        ) = $array;
     }
 }

@@ -22,6 +22,30 @@ class FieldEntryTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('foo', $ace->getField());
     }
 
+    public function testSerializeUnserializeSameSecurityIdentity()
+    {
+        $sid = $this->getSid();
+
+        $aceFirst = $this->getAce(null, $sid);
+        $aceSecond = $this->getAce(null, $sid);
+
+        /** @var FieldEntry $uAceFirst */
+        /** @var FieldEntry $uAceSecond */
+        list($uAceFirst, $uAceSecond) = unserialize(serialize(array($aceFirst, $aceSecond)));
+
+        $this->assertInstanceOf('Symfony\Component\Security\Acl\Model\SecurityIdentityInterface', $uAceFirst->getSecurityIdentity());
+        $this->assertSame($uAceFirst->getSecurityIdentity(), $uAceSecond->getSecurityIdentity());
+    }
+
+    public function testUnserializeLegacy()
+    {
+        $serialized = 'C:48:"Symfony\Component\Security\Acl\Domain\FieldEntry":300:{a:2:{i:0;s:5:"field";i:1;s:265:"a:7:{i:0;s:4:"mask";i:1;i:1;i:2;O:20:"SecurityEdentityMock":2:{s:48:" SecurityEdentityMock __phpunit_invocationMocker";N;s:46:" SecurityEdentityMock __phpunit_originalObject";N;}i:3;s:8:"strategy";i:4;s:12:"auditFailure";i:5;s:12:"auditSuccess";i:6;s:8:"granting";}";}}';
+        $ace = unserialize($serialized);
+        $this->assertNull($ace->getAcl());
+        $this->assertEquals(1, $ace->getId());
+        $this->assertEquals('field', $ace->getField());
+    }
+
     public function testSerializeUnserialize()
     {
         $ace = $this->getAce();

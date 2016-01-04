@@ -27,15 +27,15 @@ class FieldEntry extends Entry implements FieldEntryInterface
     /**
      * Constructor.
      *
-     * @param int                       $id
-     * @param AclInterface              $acl
-     * @param string                    $field
+     * @param int $id
+     * @param AclInterface $acl
+     * @param string $field
      * @param SecurityIdentityInterface $sid
-     * @param string                    $strategy
-     * @param int                       $mask
-     * @param bool                      $granting
-     * @param bool                      $auditFailure
-     * @param bool                      $auditSuccess
+     * @param string $strategy
+     * @param int $mask
+     * @param bool $granting
+     * @param bool $auditFailure
+     * @param bool $auditSuccess
      */
     public function __construct($id, AclInterface $acl, $field, SecurityIdentityInterface $sid, $strategy, $mask, $granting, $auditFailure, $auditSuccess)
     {
@@ -55,20 +55,33 @@ class FieldEntry extends Entry implements FieldEntryInterface
     /**
      * {@inheritdoc}
      */
-    public function serialize()
+    public function unserialize($serialized)
     {
-        return serialize(array(
-            $this->field,
-            parent::serialize(),
-        ));
+        # Legacy support
+        $unserialized = unserialize($serialized);
+
+        if (is_string($unserialized[1])) {
+            $unserialized[1] = unserialize($unserialized[1]);
+            $this->setSerializeData($unserialized);
+        }
+
+        $this->setSerializeData($unserialized);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function unserialize($serialized)
+    protected function getSerializeData()
     {
-        list($this->field, $parentStr) = unserialize($serialized);
-        parent::unserialize($parentStr);
+        return array($this->field, parent::getSerializeData());
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function setSerializeData(array $array)
+    {
+        $this->field = $array[0];
+        parent::setSerializeData($array[1]);
     }
 }
