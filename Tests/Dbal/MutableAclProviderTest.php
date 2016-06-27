@@ -328,6 +328,45 @@ class MutableAclProviderTest extends \PHPUnit_Framework_TestCase
             $this->assertAceEquals($ace, $reloadedAces[$index]);
         }
     }
+    
+    public function testUpdateNewAceProperty()
+    {	
+        $changes = array(array(1=>'ace1', 2=>'ace2', 5=>'ace5'), 
+			 array(8=>'ace8', 9=>'ace9', 15=>'ace15') 
+		        );
+        list($old_raw, $new_raw) = $changes;
+        $old = array_values($old_raw);
+        $new = array_values($new_raw);
+        $currentIds = array();
+
+        for ($i = 0, $c = count($new); $i < $c; ++$i) {
+            $this->assertArrayHasKey($i, $new);
+        }
+
+        for ($i = 0, $c = count($old); $i < $c; ++$i) {
+            $this->assertArrayHasKey($i, $new);
+        }
+	
+    }
+
+    public function testUpdateOldAceProperty()
+    {	
+        $changes = array(array(1=>'ace1', 2=>'ace2', 5=>'ace5'),
+			 array(8=>'ace8', 9=>'ace9', 15=>'ace15') 
+		        );
+        list($old_raw, $new_raw) = $changes;
+        $old = array_values($old_raw);
+        $new = array_values($new_raw);
+        $currentIds = array();
+
+        for ($i = 0, $c = count($new); $i < $c; ++$i) {
+            $this->assertArrayHasKey($i, $new);
+        }
+
+        for ($i = 0, $c = count($old); $i < $c; ++$i) {
+            $this->assertArrayHasKey($i, $new);
+        }	
+    }
 
     public function testUpdateAclWorksForChangingTheParentAcl()
     {
