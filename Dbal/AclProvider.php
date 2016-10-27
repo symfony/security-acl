@@ -625,15 +625,15 @@ QUERY;
                 // assign ACE to the correct property
                 if (null === $objectIdentityId) {
                     if (null === $fieldName) {
-                        $aces[$aclId][0][$aceOrder] = $ace;
+                        $aces[$aclId][0][$aceOrder][] = $ace;
                     } else {
-                        $aces[$aclId][1][$fieldName][$aceOrder] = $ace;
+                        $aces[$aclId][1][$fieldName][$aceOrder][] = $ace;
                     }
                 } else {
                     if (null === $fieldName) {
-                        $aces[$aclId][2][$aceOrder] = $ace;
+                        $aces[$aclId][2][$aceOrder][] = $ace;
                     } else {
-                        $aces[$aclId][3][$fieldName][$aceOrder] = $ace;
+                        $aces[$aclId][3][$fieldName][$aceOrder][] = $ace;
                     }
                 }
             }
@@ -646,21 +646,11 @@ QUERY;
         foreach ($aces as $aclId => $aceData) {
             $acl = $acls[$aclId];
 
-            ksort($aceData[0]);
-            $aclClassAcesProperty->setValue($acl, $aceData[0]);
+            $aclClassAcesProperty->setValue($acl, $this->orderAces($aceData[0]));
+            $aclClassFieldAcesProperty->setValue($acl, $this->orderFieldAces($aceData[1]));
 
-            foreach (array_keys($aceData[1]) as $fieldName) {
-                ksort($aceData[1][$fieldName]);
-            }
-            $aclClassFieldAcesProperty->setValue($acl, $aceData[1]);
-
-            ksort($aceData[2]);
-            $aclObjectAcesProperty->setValue($acl, $aceData[2]);
-
-            foreach (array_keys($aceData[3]) as $fieldName) {
-                ksort($aceData[3][$fieldName]);
-            }
-            $aclObjectFieldAcesProperty->setValue($acl, $aceData[3]);
+            $aclObjectAcesProperty->setValue($acl, $this->orderAces($aceData[2]));
+            $aclObjectFieldAcesProperty->setValue($acl, $this->orderFieldAces($aceData[3]));
         }
 
         // fill-in parent ACLs where this hasn't been done yet cause the parent ACL was not
@@ -691,5 +681,50 @@ QUERY;
         }
 
         return $result;
+    }
+
+    /**
+     * Order the aces.
+     *
+     * @param array $aces The aces
+     *
+     * @return array
+     */
+    private function orderAces(array $aces)
+    {
+        ksort($aces);
+        $orderedAces = array();
+
+        foreach ($aces as $items) {
+            foreach ($items as $item) {
+                $orderedAces[] = $item;
+            }
+        }
+
+        return $orderedAces;
+    }
+
+    /**
+     * Order the aces of fields.
+     *
+     * @param array $aces The aces of fields
+     *
+     * @return array
+     */
+    private function orderFieldAces(array $aces)
+    {
+        $orderedAces = array();
+
+        foreach (array_keys($aces) as $fieldName) {
+            ksort($aces[$fieldName]);
+
+            foreach ($aces[$fieldName] as $items) {
+                foreach ($items as $item) {
+                    $orderedAces[$fieldName][] = $item;
+                }
+            }
+        }
+
+        return $orderedAces;
     }
 }
