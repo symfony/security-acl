@@ -122,7 +122,7 @@ class SecurityIdentityRetrievalStrategyTest extends \PHPUnit\Framework\TestCase
 
     protected function getAccount($username, $class)
     {
-        $account = $this->getMock('Symfony\Component\Security\Core\User\UserInterface', [], [], $class);
+        $account = $this->getMockBuilder('Symfony\Component\Security\Core\User\UserInterface')->setMockClassName($class)->getMock();
         $account
             ->expects($this->any())
             ->method('getUsername')
@@ -158,7 +158,7 @@ class SecurityIdentityRetrievalStrategyTest extends \PHPUnit\Framework\TestCase
                 ->willReturn($roles);
         }
 
-        $trustResolver = $this->getMock('Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolverInterface', [], ['', '']);
+        $trustResolver = $this->getMockBuilder('Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolverInterface')->getMock();
 
         $trustResolver
             ->expects($this->at(0))
