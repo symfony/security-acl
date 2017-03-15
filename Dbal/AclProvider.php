@@ -26,6 +26,7 @@ use Symfony\Component\Security\Acl\Model\AclCacheInterface;
 use Symfony\Component\Security\Acl\Model\AclProviderInterface;
 use Symfony\Component\Security\Acl\Model\ObjectIdentityInterface;
 use Symfony\Component\Security\Acl\Model\PermissionGrantingStrategyInterface;
+use Symfony\Component\Security\Acl\Model\SecurityIdentityInterface;
 
 /**
  * An ACL provider implementation.
@@ -37,6 +38,7 @@ use Symfony\Component\Security\Acl\Model\PermissionGrantingStrategyInterface;
 class AclProvider implements AclProviderInterface
 {
     const MAX_BATCH_SIZE = 30;
+    const TOKEN_FILTER_PREFIX = 'IS_AUTHENTICATED_';
 
     /**
      * @var AclCacheInterface|null
@@ -225,13 +227,12 @@ class AclProvider implements AclProviderInterface
      * ACEs, and security identities.
      *
      * @param array $ancestorIds
+     * @param array $identityIds
      *
      * @return string
      */
-    protected function getLookupSql(array $ancestorIds)
+    protected function getLookupSql(array $ancestorIds, array $identityIds)
     {
-        // FIXME: add support for filtering by sids (right now we select all sids)
-
         $sql = <<<SELECTCLAUSE
             SELECT
                 o.id as acl_id,
@@ -264,6 +265,9 @@ class AclProvider implements AclProviderInterface
 SELECTCLAUSE;
 
         $sql .= implode(' OR o.id = ', $ancestorIds).')';
+        if (!empty($identityIds)) {
+            $sql .= ' AND (s.identifier = "' . implode('" OR s.identifier = "', $identityIds) . '")';
+        }
 
         return $sql;
     }
@@ -466,7 +470,7 @@ QUERY;
      * from the cache, and for which thus a database query is required.
      *
      * @param array $batch
-     * @param array $sids
+     * @param SecurityIdentityInterface[] $sids
      * @param array $oidLookup
      *
      * @return \SplObjectStorage mapping object identities to ACL instances
@@ -480,7 +484,7 @@ QUERY;
             throw new AclNotFoundException('There is no ACL for the given object identity.');
         }
 
-        $sql = $this->getLookupSql($ancestorIds);
+        $sql = $this->getLookupSql($ancestorIds, $this->getIdentityIds($sids));
         $stmt = $this->connection->executeQuery($sql);
 
         return $this->hydrateObjectIdentities($stmt, $oidLookup, $sids);
@@ -691,5 +695,40 @@ QUERY;
         }
 
         return $result;
+    }
+
+    /**
+     * Retrieves all the security identity ids which need to be queried from the database
+     *
+     * @param SecurityIdentityInterface[] $sids
+     *
+     * @return array
+     */
+    private function getIdentityIds(array $sids) {
+
+        $identityIds = [];
+
+        foreach ($sids as $sid) {
+            /**
+             * @var RoleSecurityIdentity $sid
+             */
+            if ($this->filterToken($sid)) {
+                $identityIds[] = $sid->getRole();
+            }
+        }
+
+        return $identityIds;
+    }
+
+    /**
+     * check if token contains a security identity id
+     *
+     * @param RoleSecurityIdentity $sid
+     *
+     * @return bool
+     */
+    private function filterToken($sid)
+    {
+        return strpos($sid->getRole(), self::TOKEN_FILTER_PREFIX) === false;
     }
 }
