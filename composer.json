@@ -1,8 +1,5 @@
 {
-    "name": "littlebird/security-acl",
-    "replace": {
-	"symfony/security-acl":"self.version"
-    },
+    "name": "symfony/security-acl",
     "type": "library",
     "description": "Symfony Security Component - ACL (Access Control List)",
     "keywords": [],
