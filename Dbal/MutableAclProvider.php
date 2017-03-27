@@ -895,8 +895,8 @@ QUERY;
     {
         $currentIds = array();
         foreach ($changes[1] as $field => $new) {
-            for ($i = 0, $c = count($new); $i < $c; ++$i) {
-                $ace = $new[$i];
+            foreach($new as $newEntry) {
+                $ace = $newEntry;
 
                 if (null !== $ace->getId()) {
                     $currentIds[$ace->getId()] = true;
@@ -905,8 +905,8 @@ QUERY;
         }
 
         foreach ($changes[0] as $old) {
-            for ($i = 0, $c = count($old); $i < $c; ++$i) {
-                $ace = $old[$i];
+            foreach($old as $oldEntry) {
+                $ace = $oldEntry;
 
                 if (!isset($currentIds[$ace->getId()])) {
                     $this->connection->executeQuery($this->getDeleteAccessControlEntrySql($ace->getId()));
