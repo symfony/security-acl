@@ -854,8 +854,8 @@ QUERY;
         $sids = new \SplObjectStorage();
         $classIds = new \SplObjectStorage();
         foreach ($changes[1] as $field => $new) {
-            for ($i = 0, $c = count($new); $i < $c; ++$i) {
-                $ace = $new[$i];
+            foreach($new as $aceOrder => $newEntry) {
+                $ace = $newEntry;
 
                 if (null === $ace->getId()) {
                     if ($sids->contains($ace->getSecurityIdentity())) {
@@ -873,8 +873,8 @@ QUERY;
 
                     $objectIdentityId = $name === 'classFieldAces' ? null : $ace->getAcl()->getId();
 
-                    $this->connection->executeQuery($this->getInsertAccessControlEntrySql($classId, $objectIdentityId, $field, $i, $sid, $ace->getStrategy(), $ace->getMask(), $ace->isGranting(), $ace->isAuditSuccess(), $ace->isAuditFailure()));
-                    $aceId = $this->connection->executeQuery($this->getSelectAccessControlEntryIdSql($classId, $objectIdentityId, $field, $i))->fetchColumn();
+                    $this->connection->executeQuery($this->getInsertAccessControlEntrySql($classId, $objectIdentityId, $field, $aceOrder, $sid, $ace->getStrategy(), $ace->getMask(), $ace->isGranting(), $ace->isAuditSuccess(), $ace->isAuditFailure()));
+                    $aceId = $this->connection->executeQuery($this->getSelectAccessControlEntryIdSql($classId, $objectIdentityId, $field, $aceOrder))->fetchColumn();
                     $this->loadedAces[$aceId] = $ace;
 
                     $aceIdProperty = new \ReflectionProperty('Symfony\Component\Security\Acl\Domain\Entry', 'id');
