@@ -28,6 +28,7 @@
     "suggest": {
         "symfony/class-loader": "For using the ACL generateSql script",
         "symfony/finder": "For using the ACL generateSql script",
+        "doctrine/common": "For using the built-in ACL implementation",
         "doctrine/dbal": "For using the built-in ACL implementation"
     },
     "autoload": {
