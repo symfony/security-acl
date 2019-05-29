@@ -35,7 +35,6 @@ class BasicPermissionMap implements PermissionMapInterface, MaskBuilderRetrieval
         $this->map = array(
             self::PERMISSION_VIEW => array(
                 MaskBuilder::MASK_VIEW,
-                MaskBuilder::MASK_EDIT,
                 MaskBuilder::MASK_OPERATOR,
                 MaskBuilder::MASK_MASTER,
                 MaskBuilder::MASK_OWNER,
