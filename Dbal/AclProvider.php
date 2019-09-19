@@ -710,8 +710,12 @@ QUERY;
      */
     private function getIdentityIds(array $sids)
     {
-        return \array_filter($sids, function ($sid) {
-            return false === \strpos($sid->getRole(), self::TOKEN_FILTER_PREFIX);
+        $filteredSids = \array_filter($sids, function ($sid) {
+                return false === \strpos($sid->getRole(), self::TOKEN_FILTER_PREFIX);
         });
+
+        return \array_map(function ($sid) {
+            return $sid->getRole();
+        }, $filteredSids);
     }
 }
