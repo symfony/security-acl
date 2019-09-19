@@ -227,12 +227,16 @@ class AclProvider implements AclProviderInterface
      * ACEs, and security identities.
      *
      * @param array $ancestorIds
-     * @param array $identityIds
      *
      * @return string
      */
-    protected function getLookupSql(array $ancestorIds, array $identityIds)
+    protected function getLookupSql(array $ancestorIds/*, array $identityIds = []*/)
     {
+        $identityIds = [];
+        if (\func_num_args() > 1) {
+            $identityIds = \func_get_arg(1);
+        }
+
         $sql = <<<SELECTCLAUSE
             SELECT
                 o.id as acl_id,
@@ -704,31 +708,10 @@ QUERY;
      *
      * @return array
      */
-    private function getIdentityIds(array $sids) {
-
-        $identityIds = [];
-
-        foreach ($sids as $sid) {
-            /**
-             * @var RoleSecurityIdentity $sid
-             */
-            if ($this->filterToken($sid)) {
-                $identityIds[] = $sid->getRole();
-            }
-        }
-
-        return $identityIds;
-    }
-
-    /**
-     * check if token contains a security identity id
-     *
-     * @param RoleSecurityIdentity $sid
-     *
-     * @return bool
-     */
-    private function filterToken($sid)
+    private function getIdentityIds(array $sids)
     {
-        return strpos($sid->getRole(), self::TOKEN_FILTER_PREFIX) === false;
+        return \array_filter($sids, function ($sid) {
+            return false === \strpos($sid->getRole(), self::TOKEN_FILTER_PREFIX);
+        });
     }
 }
