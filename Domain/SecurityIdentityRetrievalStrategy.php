@@ -15,6 +15,7 @@ use Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolverIn
 use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Acl\Model\SecurityIdentityRetrievalStrategyInterface;
+use Symfony\Component\Security\Core\Role\Role;
 use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter;
 
@@ -57,8 +58,16 @@ class SecurityIdentityRetrievalStrategy implements SecurityIdentityRetrievalStra
         }
 
         // add all reachable roles
-        foreach ($this->roleHierarchy->getReachableRoles($token->getRoles()) as $role) {
-            $sids[] = new RoleSecurityIdentity($role);
+        $roles = $this->getRoleNames($token);
+        if (method_exists($this->roleHierarchy, 'getReachableRoleNames')) {
+            foreach ($this->roleHierarchy->getReachableRoleNames($roles) as $role) {
+                $sids[] = new RoleSecurityIdentity($role);
+            }
+        } else {
+            // Symfony < 4.3 BC layer
+            foreach ($this->roleHierarchy->getReachableRoles($roles) as $role) {
+                $sids[] = new RoleSecurityIdentity($role);
+            }
         }
 
         // add built-in special roles
@@ -74,5 +83,17 @@ class SecurityIdentityRetrievalStrategy implements SecurityIdentityRetrievalStra
         }
 
         return $sids;
+    }
+
+    private function getRoleNames(TokenInterface $token): array
+    {
+        if (method_exists($token, 'getRoleNames')) {
+            return $token->getRoleNames();
+        }
+
+        // Symfony < 4.3 BC layer
+        return array_map(function (Role $role) {
+            return $role->getRole();
+        }, $token->getRoles());
     }
 }

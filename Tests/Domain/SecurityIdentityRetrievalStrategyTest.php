@@ -38,11 +38,21 @@ class SecurityIdentityRetrievalStrategyTest extends \PHPUnit_Framework_TestCase
                         ->setMockClassName($class)
                         ->getMock();
         }
-        $token
-            ->expects($this->once())
-            ->method('getRoles')
-            ->will($this->returnValue(array('foo')))
-        ;
+
+        if (method_exists($token, 'getRoleNames')) {
+            $token
+                ->expects($this->once())
+                ->method('getRoleNames')
+                ->will($this->returnValue(array('foo')))
+            ;
+        } else {
+            $token
+                ->expects($this->once())
+                ->method('getRoles')
+                ->will($this->returnValue(array('foo')))
+            ;
+        }
+
         if ('anonymous' === $authenticationStatus) {
             $token
                 ->expects($this->never())
