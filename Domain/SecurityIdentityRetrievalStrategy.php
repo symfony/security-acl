@@ -58,14 +58,13 @@ class SecurityIdentityRetrievalStrategy implements SecurityIdentityRetrievalStra
         }
 
         // add all reachable roles
-        $roles = $this->getRoleNames($token);
         if (method_exists($this->roleHierarchy, 'getReachableRoleNames')) {
-            foreach ($this->roleHierarchy->getReachableRoleNames($roles) as $role) {
+            foreach ($this->roleHierarchy->getReachableRoleNames($this->getRoleNames($token)) as $role) {
                 $sids[] = new RoleSecurityIdentity($role);
             }
         } else {
             // Symfony < 4.3 BC layer
-            foreach ($this->roleHierarchy->getReachableRoles($roles) as $role) {
+            foreach ($this->roleHierarchy->getReachableRoles($token->getRoles()) as $role) {
                 $sids[] = new RoleSecurityIdentity($role);
             }
         }
@@ -85,7 +84,7 @@ class SecurityIdentityRetrievalStrategy implements SecurityIdentityRetrievalStra
         return $sids;
     }
 
-    private function getRoleNames(TokenInterface $token): array
+    private function getRoleNames(TokenInterface $token)
     {
         if (method_exists($token, 'getRoleNames')) {
             return $token->getRoleNames();
