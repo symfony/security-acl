@@ -11,14 +11,28 @@
 
 namespace Symfony\Component\Security\Acl\Domain;
 
-use Doctrine\Common\NotifyPropertyChanged;
-use Doctrine\Common\PropertyChangedListener;
+use Doctrine\Common\NotifyPropertyChanged as LegacyNotifyPropertyChanged;
+use Doctrine\Common\PropertyChangedListener as LegacyPropertyChangedListener;
+use Doctrine\Persistence\NotifyPropertyChanged;
+use Doctrine\Persistence\PropertyChangedListener;
 use Symfony\Component\Security\Acl\Model\AclInterface;
 use Symfony\Component\Security\Acl\Model\AuditableAclInterface;
 use Symfony\Component\Security\Acl\Model\EntryInterface;
 use Symfony\Component\Security\Acl\Model\ObjectIdentityInterface;
 use Symfony\Component\Security\Acl\Model\PermissionGrantingStrategyInterface;
 use Symfony\Component\Security\Acl\Model\SecurityIdentityInterface;
+
+if (class_exists(NotifyPropertyChanged::class)) {
+    class Acl implements AuditableAclInterface, NotifyPropertyChanged
+    {
+        use AclTrait;
+    }
+} else {
+    class Acl implements AuditableAclInterface, LegacyPropertyChangedListener
+    {
+        use AclTrait;
+    }
+}
 
 /**
  * An ACL implementation.
@@ -32,8 +46,10 @@ use Symfony\Component\Security\Acl\Model\SecurityIdentityInterface;
  * internally.
  *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
+ *
+ * @internal
  */
-class Acl implements AuditableAclInterface, NotifyPropertyChanged
+trait AclTrait
 {
     private $parentAcl;
     private $permissionGrantingStrategy;
@@ -68,11 +84,13 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     /**
      * Adds a property changed listener.
      *
-     * @param PropertyChangedListener $listener
+     * @param PropertyChangedListener|LegacyPropertyChangedListener $listener
      */
-    public function addPropertyChangedListener(PropertyChangedListener $listener)
+    public function addPropertyChangedListener($listener)
     {
-        $this->listeners[] = $listener;
+        if ($listener instanceof PropertyChangedListener || $listener instanceof LegacyPropertyChangedListener) {
+            $this->listeners[] = $listener;
+        }
     }
 
     /**

@@ -11,8 +11,9 @@
 
 namespace Symfony\Component\Security\Acl\Dbal;
 
-use Doctrine\Common\PropertyChangedListener;
+use Doctrine\Common\PropertyChangedListener as LegacyPropertyChangedListener;
 use Doctrine\DBAL\Connection;
+use Doctrine\Persistence\PropertyChangedListener;
 use Symfony\Component\Security\Acl\Domain\RoleSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Acl\Exception\AclAlreadyExistsException;
@@ -26,12 +27,26 @@ use Symfony\Component\Security\Acl\Model\ObjectIdentityInterface;
 use Symfony\Component\Security\Acl\Model\PermissionGrantingStrategyInterface;
 use Symfony\Component\Security\Acl\Model\SecurityIdentityInterface;
 
+if (class_exists(PropertyChangedListener::class)) {
+    class MutableAclProvider extends AclProvider implements MutableAclProviderInterface, PropertyChangedListener
+    {
+        use MutableAclProviderTrait;
+    }
+} else {
+    class MutableAclProvider extends AclProvider implements MutableAclProviderInterface, LegacyPropertyChangedListener
+    {
+        use MutableAclProviderTrait;
+    }
+}
+
 /**
  * An implementation of the MutableAclProviderInterface using Doctrine DBAL.
  *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
+ *
+ * @internal
  */
-class MutableAclProvider extends AclProvider implements MutableAclProviderInterface, PropertyChangedListener
+trait MutableAclProviderTrait
 {
     private $propertyChanges;
 
