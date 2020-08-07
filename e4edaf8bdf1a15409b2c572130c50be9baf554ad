@@ -1,0 +1,15 @@
+---------------------------------------------------------------------------
+
+by symfony-bot[bot] at 2020-04-18T22:12:10Z
+
+Thanks for your pull request! We love contributions.
+
+However, this repository is what we call a "subtree split": a read-only copy of one directory of the main Symfony repository. It is used by Composer to allow developers to depend on specific Symfony components.
+
+If you want to contribute, you should instead open a pull request on the main repository:
+
+https://github.com/symfony/symfony
+
+Thank you for your contribution!
+
+*PS: if you haven't already, please add tests, and beware that bug fixes should be submitted on the lowest maintained branch where they apply; only features should be submitted against the master branch.*
