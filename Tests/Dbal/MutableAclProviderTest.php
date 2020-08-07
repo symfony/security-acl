@@ -508,7 +508,7 @@ class MutableAclProviderTest extends \PHPUnit\Framework\TestCase
         return $method->invokeArgs($object, $args);
     }
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->con = DriverManager::getConnection([
             'driver' => 'pdo_sqlite',
@@ -522,7 +522,7 @@ class MutableAclProviderTest extends \PHPUnit\Framework\TestCase
         }
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         $this->con = null;
     }

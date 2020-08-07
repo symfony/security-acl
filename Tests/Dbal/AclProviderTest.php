@@ -143,7 +143,7 @@ class AclProviderTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('SomeClass', $sid->getClass());
     }
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->con = DriverManager::getConnection([
             'driver' => 'pdo_sqlite',
@@ -183,7 +183,7 @@ class AclProviderTest extends \PHPUnit\Framework\TestCase
         }
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         $this->con = null;
     }

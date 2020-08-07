@@ -30,7 +30,7 @@ class AclProviderBenchmarkTest extends \PHPUnit\Framework\TestCase
     protected $insertOidStmt;
     protected $insertEntryStmt;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         try {
             $this->con = DriverManager::getConnection([
@@ -45,7 +45,7 @@ class AclProviderBenchmarkTest extends \PHPUnit\Framework\TestCase
         }
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         $this->con = null;
     }
