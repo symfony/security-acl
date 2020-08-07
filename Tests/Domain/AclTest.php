@@ -488,7 +488,7 @@ class AclTest extends \PHPUnit_Framework_TestCase
     {
         $aceProperties = array('aceOrder', 'mask', 'strategy', 'auditSuccess', 'auditFailure');
 
-        $listener = $this->getMock('Doctrine\Common\PropertyChangedListener');
+        $listener = $this->getMock('Doctrine\Persistence\PropertyChangedListener;');
         foreach ($expectedChanges as $index => $property) {
             if (in_array($property, $aceProperties)) {
                 $class = 'Symfony\Component\Security\Acl\Domain\Entry';
