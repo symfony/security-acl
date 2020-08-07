@@ -33,8 +33,6 @@ class PermissionGrantingStrategy implements PermissionGrantingStrategyInterface
 
     /**
      * Sets the audit logger.
-     *
-     * @param AuditLoggerInterface $auditLogger
      */
     public function setAuditLogger(AuditLoggerInterface $auditLogger)
     {
@@ -124,13 +122,12 @@ class PermissionGrantingStrategy implements PermissionGrantingStrategyInterface
      * permission/identity combinations are left. Finally, we will either throw
      * an NoAceFoundException, or deny access.
      *
-     * @param AclInterface                $acl
      * @param EntryInterface[]            $aces               An array of ACE to check against
      * @param array                       $masks              An array of permission masks
      * @param SecurityIdentityInterface[] $sids               An array of SecurityIdentityInterface implementations
      * @param bool                        $administrativeMode True turns off audit logging
      *
-     * @return bool true, or false; either granting, or denying access respectively.
+     * @return bool true, or false; either granting, or denying access respectively
      *
      * @throws NoAceFoundException
      */
@@ -188,8 +185,7 @@ class PermissionGrantingStrategy implements PermissionGrantingStrategyInterface
      * Strategy EQUAL:
      * The ACE will be considered applicable when the bitmasks are equal.
      *
-     * @param int            $requiredMask
-     * @param EntryInterface $ace
+     * @param int $requiredMask
      *
      * @return bool
      *

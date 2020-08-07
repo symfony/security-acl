@@ -13,7 +13,7 @@ namespace Symfony\Component\Security\Acl\Tests\Domain;
 
 use Symfony\Component\Security\Acl\Domain\ObjectIdentityRetrievalStrategy;
 
-class ObjectIdentityRetrievalStrategyTest extends \PHPUnit_Framework_TestCase
+class ObjectIdentityRetrievalStrategyTest extends \PHPUnit\Framework\TestCase
 {
     public function testGetObjectIdentityReturnsNullForInvalidDomainObject()
     {
@@ -28,7 +28,7 @@ class ObjectIdentityRetrievalStrategyTest extends \PHPUnit_Framework_TestCase
         $objectIdentity = $strategy->getObjectIdentity($domainObject);
 
         $this->assertEquals($domainObject->getId(), $objectIdentity->getIdentifier());
-        $this->assertEquals(get_class($domainObject), $objectIdentity->getType());
+        $this->assertEquals(\get_class($domainObject), $objectIdentity->getType());
     }
 }
 

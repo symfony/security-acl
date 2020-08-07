@@ -11,13 +11,13 @@
 
 namespace Symfony\Component\Security\Acl\Domain;
 
+use Symfony\Component\Security\Acl\Model\SecurityIdentityRetrievalStrategyInterface;
 use Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolverInterface;
 use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Acl\Model\SecurityIdentityRetrievalStrategyInterface;
+use Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter;
 use Symfony\Component\Security\Core\Role\Role;
 use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
-use Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter;
 
 /**
  * Strategy for retrieving security identities.
@@ -31,9 +31,6 @@ class SecurityIdentityRetrievalStrategy implements SecurityIdentityRetrievalStra
 
     /**
      * Constructor.
-     *
-     * @param RoleHierarchyInterface               $roleHierarchy
-     * @param AuthenticationTrustResolverInterface $authenticationTrustResolver
      */
     public function __construct(RoleHierarchyInterface $roleHierarchy, AuthenticationTrustResolverInterface $authenticationTrustResolver)
     {
@@ -46,7 +43,7 @@ class SecurityIdentityRetrievalStrategy implements SecurityIdentityRetrievalStra
      */
     public function getSecurityIdentities(TokenInterface $token)
     {
-        $sids = array();
+        $sids = [];
 
         // add user security identity
         if (!$token instanceof AnonymousToken) {

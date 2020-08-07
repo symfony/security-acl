@@ -11,11 +11,11 @@
 
 namespace Symfony\Component\Security\Acl\Tests\Domain;
 
+use Symfony\Component\Security\Acl\Domain\RoleSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Core\Role\Role;
-use Symfony\Component\Security\Acl\Domain\RoleSecurityIdentity;
 
-class RoleSecurityIdentityTest extends \PHPUnit_Framework_TestCase
+class RoleSecurityIdentityTest extends \PHPUnit\Framework\TestCase
 {
     public function testConstructor()
     {
@@ -45,11 +45,11 @@ class RoleSecurityIdentityTest extends \PHPUnit_Framework_TestCase
 
     public function getCompareData()
     {
-        return array(
-            array(new RoleSecurityIdentity('ROLE_FOO'), new RoleSecurityIdentity('ROLE_FOO'), true),
-            array(new RoleSecurityIdentity('ROLE_FOO'), new RoleSecurityIdentity(new Role('ROLE_FOO')), true),
-            array(new RoleSecurityIdentity('ROLE_USER'), new RoleSecurityIdentity('ROLE_FOO'), false),
-            array(new RoleSecurityIdentity('ROLE_FOO'), new UserSecurityIdentity('ROLE_FOO', 'Foo'), false),
-        );
+        return [
+            [new RoleSecurityIdentity('ROLE_FOO'), new RoleSecurityIdentity('ROLE_FOO'), true],
+            [new RoleSecurityIdentity('ROLE_FOO'), new RoleSecurityIdentity(new Role('ROLE_FOO')), true],
+            [new RoleSecurityIdentity('ROLE_USER'), new RoleSecurityIdentity('ROLE_FOO'), false],
+            [new RoleSecurityIdentity('ROLE_FOO'), new UserSecurityIdentity('ROLE_FOO', 'Foo'), false],
+        ];
     }
 }

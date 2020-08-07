@@ -14,7 +14,7 @@ namespace Symfony\Component\Security\Acl\Tests\Domain;
 use Symfony\Component\Security\Acl\Domain\RoleSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 
-class UserSecurityIdentityTest extends \PHPUnit_Framework_TestCase
+class UserSecurityIdentityTest extends \PHPUnit\Framework\TestCase
 {
     public function testConstructor()
     {
@@ -49,25 +49,25 @@ class UserSecurityIdentityTest extends \PHPUnit_Framework_TestCase
         $account
             ->expects($this->any())
             ->method('getUsername')
-            ->will($this->returnValue('foo'))
+            ->willReturn('foo')
         ;
 
-        $token = $this->getMock('Symfony\Component\Security\Core\Authentication\Token\TokenInterface');
+        $token = $this->createMock('Symfony\Component\Security\Core\Authentication\Token\TokenInterface');
         $token
             ->expects($this->any())
             ->method('getUser')
-            ->will($this->returnValue($account))
+            ->willReturn($account)
         ;
 
-        return array(
-            array(new UserSecurityIdentity('foo', 'Foo'), new UserSecurityIdentity('foo', 'Foo'), true),
-            array(new UserSecurityIdentity('foo', 'Bar'), new UserSecurityIdentity('foo', 'Foo'), false),
-            array(new UserSecurityIdentity('foo', 'Foo'), new UserSecurityIdentity('bar', 'Foo'), false),
-            array(new UserSecurityIdentity('foo', 'Foo'), UserSecurityIdentity::fromAccount($account), false),
-            array(new UserSecurityIdentity('bla', 'Foo'), new UserSecurityIdentity('blub', 'Foo'), false),
-            array(new UserSecurityIdentity('foo', 'Foo'), new RoleSecurityIdentity('foo'), false),
-            array(new UserSecurityIdentity('foo', 'Foo'), UserSecurityIdentity::fromToken($token), false),
-            array(new UserSecurityIdentity('foo', 'USI_AccountImpl'), UserSecurityIdentity::fromToken($token), true),
-        );
+        return [
+            [new UserSecurityIdentity('foo', 'Foo'), new UserSecurityIdentity('foo', 'Foo'), true],
+            [new UserSecurityIdentity('foo', 'Bar'), new UserSecurityIdentity('foo', 'Foo'), false],
+            [new UserSecurityIdentity('foo', 'Foo'), new UserSecurityIdentity('bar', 'Foo'), false],
+            [new UserSecurityIdentity('foo', 'Foo'), UserSecurityIdentity::fromAccount($account), false],
+            [new UserSecurityIdentity('bla', 'Foo'), new UserSecurityIdentity('blub', 'Foo'), false],
+            [new UserSecurityIdentity('foo', 'Foo'), new RoleSecurityIdentity('foo'), false],
+            [new UserSecurityIdentity('foo', 'Foo'), UserSecurityIdentity::fromToken($token), false],
+            [new UserSecurityIdentity('foo', 'USI_AccountImpl'), UserSecurityIdentity::fromToken($token), true],
+        ];
     }
 }

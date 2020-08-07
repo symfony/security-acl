@@ -13,7 +13,7 @@ namespace Symfony\Component\Security\Acl\Tests\Domain
 {
     use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 
-    class ObjectIdentityTest extends \PHPUnit_Framework_TestCase
+    class ObjectIdentityTest extends \PHPUnit\Framework\TestCase
     {
         public function testConstructor()
         {
@@ -34,16 +34,16 @@ namespace Symfony\Component\Security\Acl\Tests\Domain
 
         public function testFromDomainObjectPrefersInterfaceOverGetId()
         {
-            $domainObject = $this->getMock('Symfony\Component\Security\Acl\Model\DomainObjectInterface');
+            $domainObject = $this->createMock('Symfony\Component\Security\Acl\Model\DomainObjectInterface');
             $domainObject
                 ->expects($this->once())
                 ->method('getObjectIdentifier')
-                ->will($this->returnValue('getObjectIdentifier()'))
+                ->willReturn('getObjectIdentifier()')
             ;
             $domainObject
                 ->expects($this->never())
                 ->method('getId')
-                ->will($this->returnValue('getId()'))
+                ->willReturn('getId()')
             ;
 
             $id = ObjectIdentity::fromDomainObject($domainObject);
@@ -98,12 +98,12 @@ namespace Symfony\Component\Security\Acl\Tests\Domain
 
         public function getCompareData()
         {
-            return array(
-                array(new ObjectIdentity('123', 'foo'), new ObjectIdentity('123', 'foo'), true),
-                array(new ObjectIdentity('123', 'foo'), new ObjectIdentity(123, 'foo'), true),
-                array(new ObjectIdentity('1', 'foo'), new ObjectIdentity('2', 'foo'), false),
-                array(new ObjectIdentity('1', 'bla'), new ObjectIdentity('1', 'blub'), false),
-            );
+            return [
+                [new ObjectIdentity('123', 'foo'), new ObjectIdentity('123', 'foo'), true],
+                [new ObjectIdentity('123', 'foo'), new ObjectIdentity(123, 'foo'), true],
+                [new ObjectIdentity('1', 'foo'), new ObjectIdentity('2', 'foo'), false],
+                [new ObjectIdentity('1', 'bla'), new ObjectIdentity('1', 'blub'), false],
+            ];
         }
     }
 

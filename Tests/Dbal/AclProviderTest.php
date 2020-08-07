@@ -11,16 +11,16 @@
 
 namespace Symfony\Component\Security\Acl\Tests\Dbal;
 
-use Symfony\Component\Security\Acl\Dbal\AclProvider;
-use Symfony\Component\Security\Acl\Domain\PermissionGrantingStrategy;
-use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
-use Symfony\Component\Security\Acl\Dbal\Schema;
 use Doctrine\DBAL\DriverManager;
+use Symfony\Component\Security\Acl\Dbal\AclProvider;
+use Symfony\Component\Security\Acl\Dbal\Schema;
+use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
+use Symfony\Component\Security\Acl\Domain\PermissionGrantingStrategy;
 
 /**
  * @requires extension pdo_sqlite
  */
-class AclProviderTest extends \PHPUnit_Framework_TestCase
+class AclProviderTest extends \PHPUnit\Framework\TestCase
 {
     protected $con;
     protected $insertClassStmt;
@@ -30,17 +30,18 @@ class AclProviderTest extends \PHPUnit_Framework_TestCase
     protected $insertSidStmt;
 
     /**
-     * @expectedException \Symfony\Component\Security\Acl\Exception\AclNotFoundException
      * @expectedMessage There is no ACL for the given object identity.
      */
     public function testFindAclThrowsExceptionWhenNoAclExists()
     {
+        $this->expectException(\Symfony\Component\Security\Acl\Exception\AclNotFoundException::class);
+
         $this->getProvider()->findAcl(new ObjectIdentity('foo', 'foo'));
     }
 
     public function testFindAclsThrowsExceptionUnlessAnACLIsFoundForEveryOID()
     {
-        $oids = array();
+        $oids = [];
         $oids[] = new ObjectIdentity('1', 'foo');
         $oids[] = new ObjectIdentity('foo', 'foo');
 
@@ -60,7 +61,7 @@ class AclProviderTest extends \PHPUnit_Framework_TestCase
 
     public function testFindAcls()
     {
-        $oids = array();
+        $oids = [];
         $oids[] = new ObjectIdentity('1', 'foo');
         $oids[] = new ObjectIdentity('2', 'foo');
 
@@ -77,7 +78,7 @@ class AclProviderTest extends \PHPUnit_Framework_TestCase
 
     public function testFindAclsWithDifferentTypes()
     {
-        $oids = array();
+        $oids = [];
         $oids[] = new ObjectIdentity('123', 'Bundle\SomeVendor\MyBundle\Entity\SomeEntity');
         $oids[] = new ObjectIdentity('123', 'Bundle\MyBundle\Entity\AnotherEntity');
 
@@ -144,10 +145,10 @@ class AclProviderTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->con = DriverManager::getConnection(array(
+        $this->con = DriverManager::getConnection([
             'driver' => 'pdo_sqlite',
             'memory' => true,
-        ));
+        ]);
 
         // import the schema
         $schema = new Schema($options = $this->getOptions());
@@ -198,74 +199,74 @@ class AclProviderTest extends \PHPUnit_Framework_TestCase
     protected function getEntryData()
     {
         // id, cid, oid, field, order, sid, mask, granting, strategy, a success, a failure
-        return array(
-            array(1, 1, 1, null, 0, 1, 1, 1, 'all', 1, 1),
-            array(2, 1, 1, null, 1, 2, 1 << 2 | 1 << 1, 0, 'any', 0, 0),
-            array(3, 3, 4, null, 0, 1, 2, 1, 'all', 1, 1),
-            array(4, 3, 4, null, 2, 2, 1, 1, 'all', 1, 1),
-            array(5, 3, 4, null, 1, 3, 1, 1, 'all', 1, 1),
-        );
+        return [
+            [1, 1, 1, null, 0, 1, 1, 1, 'all', 1, 1],
+            [2, 1, 1, null, 1, 2, 1 << 2 | 1 << 1, 0, 'any', 0, 0],
+            [3, 3, 4, null, 0, 1, 2, 1, 'all', 1, 1],
+            [4, 3, 4, null, 2, 2, 1, 1, 'all', 1, 1],
+            [5, 3, 4, null, 1, 3, 1, 1, 'all', 1, 1],
+        ];
     }
 
     protected function getOidData()
     {
         // id, cid, oid, parent_oid, entries_inheriting
-        return array(
-            array(1, 1, '123', null, 1),
-            array(2, 2, '123', 1, 1),
-            array(3, 2, 'i:3:123', 1, 1),
-            array(4, 3, '1', 2, 1),
-            array(5, 3, '2', 2, 1),
-        );
+        return [
+            [1, 1, '123', null, 1],
+            [2, 2, '123', 1, 1],
+            [3, 2, 'i:3:123', 1, 1],
+            [4, 3, '1', 2, 1],
+            [5, 3, '2', 2, 1],
+        ];
     }
 
     protected function getOidAncestorData()
     {
-        return array(
-            array(1, 1),
-            array(2, 1),
-            array(2, 2),
-            array(3, 1),
-            array(3, 3),
-            array(4, 2),
-            array(4, 1),
-            array(4, 4),
-            array(5, 2),
-            array(5, 1),
-            array(5, 5),
-        );
+        return [
+            [1, 1],
+            [2, 1],
+            [2, 2],
+            [3, 1],
+            [3, 3],
+            [4, 2],
+            [4, 1],
+            [4, 4],
+            [5, 2],
+            [5, 1],
+            [5, 5],
+        ];
     }
 
     protected function getSidData()
     {
-        return array(
-            array(1, 'SomeClass-john.doe', 1),
-            array(2, 'MyClass-john.doe@foo.com', 1),
-            array(3, 'FooClass-123', 1),
-            array(4, 'MooClass-ROLE_USER', 1),
-            array(5, 'ROLE_USER', 0),
-            array(6, 'IS_AUTHENTICATED_FULLY', 0),
-        );
+        return [
+            [1, 'SomeClass-john.doe', 1],
+            [2, 'MyClass-john.doe@foo.com', 1],
+            [3, 'FooClass-123', 1],
+            [4, 'MooClass-ROLE_USER', 1],
+            [5, 'ROLE_USER', 0],
+            [6, 'IS_AUTHENTICATED_FULLY', 0],
+        ];
     }
 
     protected function getClassData()
     {
-        return array(
-            array(1, 'Bundle\SomeVendor\MyBundle\Entity\SomeEntity'),
-            array(2, 'Bundle\MyBundle\Entity\AnotherEntity'),
-            array(3, 'foo'),
-        );
+        return [
+            [1, 'Bundle\SomeVendor\MyBundle\Entity\SomeEntity'],
+            [2, 'Bundle\MyBundle\Entity\AnotherEntity'],
+            [3, 'foo'],
+        ];
     }
 
     protected function getOptions()
     {
-        return array(
+        return [
             'oid_table_name' => 'acl_object_identities',
             'oid_ancestors_table_name' => 'acl_object_identity_ancestors',
             'class_table_name' => 'acl_classes',
             'sid_table_name' => 'acl_security_identities',
             'entry_table_name' => 'acl_entries',
-        );
+        ];
     }
 
     protected function getStrategy()

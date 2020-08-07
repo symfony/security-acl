@@ -23,8 +23,7 @@ interface AclProviderInterface
     /**
      * Retrieves all child object identities from the database.
      *
-     * @param ObjectIdentityInterface $parentOid
-     * @param bool                    $directChildrenOnly
+     * @param bool $directChildrenOnly
      *
      * @return array returns an array of child 'ObjectIdentity's
      */
@@ -33,14 +32,13 @@ interface AclProviderInterface
     /**
      * Returns the ACL that belongs to the given object identity.
      *
-     * @param ObjectIdentityInterface     $oid
      * @param SecurityIdentityInterface[] $sids
      *
      * @return AclInterface
      *
      * @throws AclNotFoundException when there is no ACL
      */
-    public function findAcl(ObjectIdentityInterface $oid, array $sids = array());
+    public function findAcl(ObjectIdentityInterface $oid, array $sids = []);
 
     /**
      * Returns the ACLs that belong to the given object identities.
@@ -52,5 +50,5 @@ interface AclProviderInterface
      *
      * @throws AclNotFoundException when we cannot find an ACL for all identities
      */
-    public function findAcls(array $oids, array $sids = array());
+    public function findAcls(array $oids, array $sids = []);
 }

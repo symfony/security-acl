@@ -34,15 +34,13 @@ class DoctrineAclCache implements AclCacheInterface
     /**
      * Constructor.
      *
-     * @param Cache                               $cache
-     * @param PermissionGrantingStrategyInterface $permissionGrantingStrategy
-     * @param string                              $prefix
+     * @param string $prefix
      *
      * @throws \InvalidArgumentException
      */
     public function __construct(Cache $cache, PermissionGrantingStrategyInterface $permissionGrantingStrategy, $prefix = self::PREFIX)
     {
-        if (0 === strlen($prefix)) {
+        if (0 === \strlen($prefix)) {
             throw new \InvalidArgumentException('$prefix cannot be empty.');
         }
 
@@ -204,8 +202,6 @@ class DoctrineAclCache implements AclCacheInterface
 
     /**
      * Returns the key for the object identity.
-     *
-     * @param ObjectIdentityInterface $oid
      *
      * @return string
      */

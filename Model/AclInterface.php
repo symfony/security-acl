@@ -82,8 +82,6 @@ interface AclInterface extends \Serializable
      * Determines whether field access is granted.
      *
      * @param string $field
-     * @param array  $masks
-     * @param array  $securityIdentities
      * @param bool   $administrativeMode
      *
      * @return bool
@@ -93,9 +91,7 @@ interface AclInterface extends \Serializable
     /**
      * Determines whether access is granted.
      *
-     * @param array $masks
-     * @param array $securityIdentities
-     * @param bool  $administrativeMode
+     * @param bool $administrativeMode
      *
      * @throws NoAceFoundException when no ACE was applicable for this request
      *

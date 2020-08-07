@@ -12,11 +12,11 @@
 namespace Symfony\Component\Security\Acl\Tests\Domain;
 
 use Symfony\Component\Security\Acl\Domain\RoleSecurityIdentity;
-use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\SecurityIdentityRetrievalStrategy;
+use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Core\Role\Role;
 
-class SecurityIdentityRetrievalStrategyTest extends \PHPUnit_Framework_TestCase
+class SecurityIdentityRetrievalStrategyTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @dataProvider getSecurityIdentityRetrievalTests
@@ -29,7 +29,7 @@ class SecurityIdentityRetrievalStrategyTest extends \PHPUnit_Framework_TestCase
                                 ->getMock();
         } else {
             $class = '';
-            if (is_string($user)) {
+            if (\is_string($user)) {
                 $class = 'MyCustomTokenImpl';
             }
 
@@ -44,7 +44,7 @@ class SecurityIdentityRetrievalStrategyTest extends \PHPUnit_Framework_TestCase
             $token
                 ->expects($this->once())
                 ->method('getRoleNames')
-                ->will($this->returnValue(array('foo')))
+                ->willReturn(['foo'])
             ;
         } else {
             $strategy = $this->getStrategy($roles, $authenticationStatus, true);
@@ -52,7 +52,7 @@ class SecurityIdentityRetrievalStrategyTest extends \PHPUnit_Framework_TestCase
             $token
                 ->expects($this->once())
                 ->method('getRoles')
-                ->will($this->returnValue(array(new Role('foo'))))
+                ->willReturn([new Role('foo')])
             ;
         }
 
@@ -65,7 +65,7 @@ class SecurityIdentityRetrievalStrategyTest extends \PHPUnit_Framework_TestCase
             $token
                 ->expects($this->once())
                 ->method('getUser')
-                ->will($this->returnValue($user))
+                ->willReturn($user)
             ;
         }
 
@@ -84,55 +84,55 @@ class SecurityIdentityRetrievalStrategyTest extends \PHPUnit_Framework_TestCase
 
     public function getSecurityIdentityRetrievalTests()
     {
-        return array(
-            array($this->getAccount('johannes', 'FooUser'), array('ROLE_USER', 'ROLE_SUPERADMIN'), 'fullFledged', array(
+        return [
+            [$this->getAccount('johannes', 'FooUser'), ['ROLE_USER', 'ROLE_SUPERADMIN'], 'fullFledged', [
                 new UserSecurityIdentity('johannes', 'FooUser'),
                 new RoleSecurityIdentity('ROLE_USER'),
                 new RoleSecurityIdentity('ROLE_SUPERADMIN'),
                 new RoleSecurityIdentity('IS_AUTHENTICATED_FULLY'),
                 new RoleSecurityIdentity('IS_AUTHENTICATED_REMEMBERED'),
                 new RoleSecurityIdentity('IS_AUTHENTICATED_ANONYMOUSLY'),
-            )),
-            array('johannes', array('ROLE_FOO'), 'fullFledged', array(
+            ]],
+            ['johannes', ['ROLE_FOO'], 'fullFledged', [
                 new UserSecurityIdentity('johannes', 'MyCustomTokenImpl'),
                 new RoleSecurityIdentity('ROLE_FOO'),
                 new RoleSecurityIdentity('IS_AUTHENTICATED_FULLY'),
                 new RoleSecurityIdentity('IS_AUTHENTICATED_REMEMBERED'),
                 new RoleSecurityIdentity('IS_AUTHENTICATED_ANONYMOUSLY'),
-            )),
-            array(new CustomUserImpl('johannes'), array('ROLE_FOO'), 'fullFledged', array(
+            ]],
+            [new CustomUserImpl('johannes'), ['ROLE_FOO'], 'fullFledged', [
                 new UserSecurityIdentity('johannes', 'Symfony\Component\Security\Acl\Tests\Domain\CustomUserImpl'),
                 new RoleSecurityIdentity('ROLE_FOO'),
                 new RoleSecurityIdentity('IS_AUTHENTICATED_FULLY'),
                 new RoleSecurityIdentity('IS_AUTHENTICATED_REMEMBERED'),
                 new RoleSecurityIdentity('IS_AUTHENTICATED_ANONYMOUSLY'),
-            )),
-            array($this->getAccount('foo', 'FooBarUser'), array('ROLE_FOO'), 'rememberMe', array(
+            ]],
+            [$this->getAccount('foo', 'FooBarUser'), ['ROLE_FOO'], 'rememberMe', [
                 new UserSecurityIdentity('foo', 'FooBarUser'),
                 new RoleSecurityIdentity('ROLE_FOO'),
                 new RoleSecurityIdentity('IS_AUTHENTICATED_REMEMBERED'),
                 new RoleSecurityIdentity('IS_AUTHENTICATED_ANONYMOUSLY'),
-            )),
-            array('guest', array('ROLE_FOO'), 'anonymous', array(
+            ]],
+            ['guest', ['ROLE_FOO'], 'anonymous', [
                 new RoleSecurityIdentity('ROLE_FOO'),
                 new RoleSecurityIdentity('IS_AUTHENTICATED_ANONYMOUSLY'),
-            )),
-        );
+            ]],
+        ];
     }
 
     protected function getAccount($username, $class)
     {
-        $account = $this->getMock('Symfony\Component\Security\Core\User\UserInterface', array(), array(), $class);
+        $account = $this->getMock('Symfony\Component\Security\Core\User\UserInterface', [], [], $class);
         $account
             ->expects($this->any())
             ->method('getUsername')
-            ->will($this->returnValue($username))
+            ->willReturn($username)
         ;
 
         return $account;
     }
 
-    protected function getStrategy(array $roles = array(), $authenticationStatus = 'fullFledged', $isBC = false)
+    protected function getStrategy(array $roles = [], $authenticationStatus = 'fullFledged', $isBC = false)
     {
         $roleHierarchyBuilder = $this->getMockBuilder('Symfony\Component\Security\Core\Role\RoleHierarchyInterface')
             ->disableProxyingToOriginalMethods()
@@ -146,7 +146,7 @@ class SecurityIdentityRetrievalStrategyTest extends \PHPUnit_Framework_TestCase
                 ->expects($this->any())
                 ->method('getReachableRoles')
                 ->with($this->equalTo([new Role('foo')]))
-                ->will($this->returnValue($roles));
+                ->willReturn($roles);
         } else {
             $roleHierarchy = $roleHierarchyBuilder->setMethods(['getReachableRoleNames'])
                 ->getMockForAbstractClass();
@@ -155,23 +155,22 @@ class SecurityIdentityRetrievalStrategyTest extends \PHPUnit_Framework_TestCase
                 ->expects($this->any())
                 ->method('getReachableRoleNames')
                 ->with($this->equalTo(['foo']))
-                ->will($this->returnValue($roles));
+                ->willReturn($roles);
         }
 
-
-        $trustResolver = $this->getMock('Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolverInterface', array(), array('', ''));
+        $trustResolver = $this->getMock('Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolverInterface', [], ['', '']);
 
         $trustResolver
             ->expects($this->at(0))
             ->method('isAnonymous')
-            ->will($this->returnValue('anonymous' === $authenticationStatus))
+            ->willReturn('anonymous' === $authenticationStatus)
         ;
 
         if ('fullFledged' === $authenticationStatus) {
             $trustResolver
                 ->expects($this->once())
                 ->method('isFullFledged')
-                ->will($this->returnValue(true))
+                ->willReturn(true)
             ;
             $trustResolver
                 ->expects($this->never())
@@ -181,28 +180,28 @@ class SecurityIdentityRetrievalStrategyTest extends \PHPUnit_Framework_TestCase
             $trustResolver
                 ->expects($this->once())
                 ->method('isFullFledged')
-                ->will($this->returnValue(false))
+                ->willReturn(false)
             ;
             $trustResolver
                 ->expects($this->once())
                 ->method('isRememberMe')
-                ->will($this->returnValue(true))
+                ->willReturn(true)
             ;
         } else {
             $trustResolver
                 ->expects($this->at(1))
                 ->method('isAnonymous')
-                ->will($this->returnValue(true))
+                ->willReturn(true)
             ;
             $trustResolver
                 ->expects($this->once())
                 ->method('isFullFledged')
-                ->will($this->returnValue(false))
+                ->willReturn(false)
             ;
             $trustResolver
                 ->expects($this->once())
                 ->method('isRememberMe')
-                ->will($this->returnValue(false))
+                ->willReturn(false)
             ;
         }
 

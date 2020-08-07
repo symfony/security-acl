@@ -13,7 +13,7 @@ namespace Symfony\Component\Security\Acl\Tests\Permission;
 
 use Symfony\Component\Security\Acl\Permission\BasicPermissionMap;
 
-class BasicPermissionMapTest extends \PHPUnit_Framework_TestCase
+class BasicPermissionMapTest extends \PHPUnit\Framework\TestCase
 {
     public function testGetMasksReturnsNullWhenNotSupportedMask()
     {

@@ -12,13 +12,13 @@
 namespace Symfony\Component\Security\Acl\Voter;
 
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Security\Acl\Exception\NoAceFoundException;
 use Symfony\Component\Security\Acl\Exception\AclNotFoundException;
+use Symfony\Component\Security\Acl\Exception\NoAceFoundException;
 use Symfony\Component\Security\Acl\Model\AclProviderInterface;
 use Symfony\Component\Security\Acl\Model\ObjectIdentityInterface;
-use Symfony\Component\Security\Acl\Permission\PermissionMapInterface;
-use Symfony\Component\Security\Acl\Model\SecurityIdentityRetrievalStrategyInterface;
 use Symfony\Component\Security\Acl\Model\ObjectIdentityRetrievalStrategyInterface;
+use Symfony\Component\Security\Acl\Model\SecurityIdentityRetrievalStrategyInterface;
+use Symfony\Component\Security\Acl\Permission\PermissionMapInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 
@@ -48,7 +48,7 @@ class AclVoter implements VoterInterface
 
     public function supportsAttribute($attribute)
     {
-        return is_string($attribute) && $this->permissionMap->contains($attribute);
+        return \is_string($attribute) && $this->permissionMap->contains($attribute);
     }
 
     public function vote(TokenInterface $token, $object, array $attributes)

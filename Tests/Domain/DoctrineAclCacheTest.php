@@ -11,33 +11,34 @@
 
 namespace Symfony\Component\Security\Acl\Tests\Domain;
 
-use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
-use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
-use Symfony\Component\Security\Acl\Domain\PermissionGrantingStrategy;
+use Doctrine\Common\Cache\ArrayCache;
 use Symfony\Component\Security\Acl\Domain\Acl;
 use Symfony\Component\Security\Acl\Domain\DoctrineAclCache;
-use Doctrine\Common\Cache\ArrayCache;
+use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
+use Symfony\Component\Security\Acl\Domain\PermissionGrantingStrategy;
+use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 
-class DoctrineAclCacheTest extends \PHPUnit_Framework_TestCase
+class DoctrineAclCacheTest extends \PHPUnit\Framework\TestCase
 {
     protected $permissionGrantingStrategy;
 
     /**
-     * @expectedException \InvalidArgumentException
      * @dataProvider getEmptyValue
      */
     public function testConstructorDoesNotAcceptEmptyPrefix($empty)
     {
+        $this->expectException(\InvalidArgumentException::class);
+
         new DoctrineAclCache(new ArrayCache(), $this->getPermissionGrantingStrategy(), $empty);
     }
 
     public function getEmptyValue()
     {
-        return array(
-            array(null),
-            array(false),
-            array(''),
-        );
+        return [
+            [null],
+            [false],
+            [''],
+        ];
     }
 
     public function test()
@@ -64,7 +65,7 @@ class DoctrineAclCacheTest extends \PHPUnit_Framework_TestCase
     {
         static $id = 1;
 
-        $acl = new Acl($id, new ObjectIdentity($id, 'foo'), $this->getPermissionGrantingStrategy(), array(), $depth > 0);
+        $acl = new Acl($id, new ObjectIdentity($id, 'foo'), $this->getPermissionGrantingStrategy(), [], $depth > 0);
 
         // insert some ACEs
         $sid = new UserSecurityIdentity('johannes', 'Foo');

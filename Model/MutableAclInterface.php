@@ -61,46 +61,42 @@ interface MutableAclInterface extends AclInterface
     /**
      * Inserts a class-based ACE.
      *
-     * @param SecurityIdentityInterface $sid
-     * @param int                       $mask
-     * @param int                       $index
-     * @param bool                      $granting
-     * @param string                    $strategy
+     * @param int    $mask
+     * @param int    $index
+     * @param bool   $granting
+     * @param string $strategy
      */
     public function insertClassAce(SecurityIdentityInterface $sid, $mask, $index = 0, $granting = true, $strategy = null);
 
     /**
      * Inserts a class-field-based ACE.
      *
-     * @param string                    $field
-     * @param SecurityIdentityInterface $sid
-     * @param int                       $mask
-     * @param int                       $index
-     * @param bool                      $granting
-     * @param string                    $strategy
+     * @param string $field
+     * @param int    $mask
+     * @param int    $index
+     * @param bool   $granting
+     * @param string $strategy
      */
     public function insertClassFieldAce($field, SecurityIdentityInterface $sid, $mask, $index = 0, $granting = true, $strategy = null);
 
     /**
      * Inserts an object-based ACE.
      *
-     * @param SecurityIdentityInterface $sid
-     * @param int                       $mask
-     * @param int                       $index
-     * @param bool                      $granting
-     * @param string                    $strategy
+     * @param int    $mask
+     * @param int    $index
+     * @param bool   $granting
+     * @param string $strategy
      */
     public function insertObjectAce(SecurityIdentityInterface $sid, $mask, $index = 0, $granting = true, $strategy = null);
 
     /**
      * Inserts an object-field-based ACE.
      *
-     * @param string                    $field
-     * @param SecurityIdentityInterface $sid
-     * @param int                       $mask
-     * @param int                       $index
-     * @param bool                      $granting
-     * @param string                    $strategy
+     * @param string $field
+     * @param int    $mask
+     * @param int    $index
+     * @param bool   $granting
+     * @param string $strategy
      */
     public function insertObjectFieldAce($field, SecurityIdentityInterface $sid, $mask, $index = 0, $granting = true, $strategy = null);
 
@@ -113,8 +109,6 @@ interface MutableAclInterface extends AclInterface
 
     /**
      * Sets the parent ACL.
-     *
-     * @param AclInterface|null $acl
      */
     public function setParentAcl(AclInterface $acl = null);
 

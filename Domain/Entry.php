@@ -34,14 +34,12 @@ class Entry implements AuditableEntryInterface
     /**
      * Constructor.
      *
-     * @param int                       $id
-     * @param AclInterface              $acl
-     * @param SecurityIdentityInterface $sid
-     * @param string                    $strategy
-     * @param int                       $mask
-     * @param bool                      $granting
-     * @param bool                      $auditFailure
-     * @param bool                      $auditSuccess
+     * @param int    $id
+     * @param string $strategy
+     * @param int    $mask
+     * @param bool   $granting
+     * @param bool   $auditFailure
+     * @param bool   $auditSuccess
      */
     public function __construct($id, AclInterface $acl, SecurityIdentityInterface $sid, $strategy, $mask, $granting, $auditFailure, $auditSuccess)
     {
@@ -178,7 +176,7 @@ class Entry implements AuditableEntryInterface
      */
     public function serialize()
     {
-        return serialize(array(
+        return serialize([
             $this->mask,
             $this->id,
             $this->securityIdentity,
@@ -186,7 +184,7 @@ class Entry implements AuditableEntryInterface
             $this->auditFailure,
             $this->auditSuccess,
             $this->granting,
-        ));
+        ]);
     }
 
     /**

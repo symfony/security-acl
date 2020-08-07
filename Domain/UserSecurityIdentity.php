@@ -50,8 +50,6 @@ final class UserSecurityIdentity implements SecurityIdentityInterface
     /**
      * Creates a user security identity from a UserInterface.
      *
-     * @param UserInterface $user
-     *
      * @return UserSecurityIdentity
      */
     public static function fromAccount(UserInterface $user)
@@ -61,8 +59,6 @@ final class UserSecurityIdentity implements SecurityIdentityInterface
 
     /**
      * Creates a user security identity from a TokenInterface.
-     *
-     * @param TokenInterface $token
      *
      * @return UserSecurityIdentity
      */
@@ -74,7 +70,7 @@ final class UserSecurityIdentity implements SecurityIdentityInterface
             return self::fromAccount($user);
         }
 
-        return new self((string) $user, is_object($user) ? ClassUtils::getRealClass($user) : ClassUtils::getRealClass($token));
+        return new self((string) $user, \is_object($user) ? ClassUtils::getRealClass($user) : ClassUtils::getRealClass($token));
     }
 
     /**

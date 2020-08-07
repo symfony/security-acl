@@ -54,7 +54,7 @@ final class ClassUtils
      */
     public static function getRealClass($object)
     {
-        $class = is_object($object) ? get_class($object) : $object;
+        $class = \is_object($object) ? \get_class($object) : $object;
 
         if (class_exists('Doctrine\Common\Util\ClassUtils')) {
             return DoctrineClassUtils::getRealClass($class);

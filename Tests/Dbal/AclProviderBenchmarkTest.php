@@ -11,16 +11,16 @@
 
 namespace Symfony\Component\Security\Acl\Tests\Dbal;
 
-use Symfony\Component\Security\Acl\Dbal\AclProvider;
-use Symfony\Component\Security\Acl\Domain\PermissionGrantingStrategy;
-use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
-use Symfony\Component\Security\Acl\Dbal\Schema;
 use Doctrine\DBAL\DriverManager;
+use Symfony\Component\Security\Acl\Dbal\AclProvider;
+use Symfony\Component\Security\Acl\Dbal\Schema;
+use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
+use Symfony\Component\Security\Acl\Domain\PermissionGrantingStrategy;
 
 /**
  * @group benchmark
  */
-class AclProviderBenchmarkTest extends \PHPUnit_Framework_TestCase
+class AclProviderBenchmarkTest extends \PHPUnit\Framework\TestCase
 {
     /** @var \Doctrine\DBAL\Connection */
     protected $con;
@@ -33,12 +33,12 @@ class AclProviderBenchmarkTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         try {
-            $this->con = DriverManager::getConnection(array(
+            $this->con = DriverManager::getConnection([
                 'driver' => 'pdo_mysql',
                 'host' => 'localhost',
                 'user' => 'root',
                 'dbname' => 'testdb',
-            ));
+            ]);
             $this->con->connect();
         } catch (\Exception $e) {
             $this->markTestSkipped('Unable to connect to the database: '.$e->getMessage());
@@ -55,7 +55,7 @@ class AclProviderBenchmarkTest extends \PHPUnit_Framework_TestCase
         // $this->generateTestData();
 
         // get some random test object identities from the database
-        $oids = array();
+        $oids = [];
         $stmt = $this->con->executeQuery('SELECT object_identifier, class_type FROM acl_object_identities o INNER JOIN acl_classes c ON c.id = o.class_id ORDER BY RAND() LIMIT 25');
         foreach ($stmt->fetchAll() as $oid) {
             $oids[] = new ObjectIdentity($oid['object_identifier'], $oid['class_type']);
@@ -99,19 +99,19 @@ class AclProviderBenchmarkTest extends \PHPUnit_Framework_TestCase
 
     protected function generateAclHierarchy()
     {
-        $rootId = $this->generateAcl($this->chooseClassId(), null, array());
+        $rootId = $this->generateAcl($this->chooseClassId(), null, []);
 
-        $this->generateAclLevel(rand(1, 15), $rootId, array($rootId));
+        $this->generateAclLevel(rand(1, 15), $rootId, [$rootId]);
     }
 
     protected function generateAclLevel($depth, $parentId, $ancestors)
     {
-        $level = count($ancestors);
+        $level = \count($ancestors);
         for ($i = 0, $t = rand(1, 10); $i < $t; ++$i) {
             $id = $this->generateAcl($this->chooseClassId(), $parentId, $ancestors);
 
             if ($level < $depth) {
-                $this->generateAclLevel($depth, $id, array_merge($ancestors, array($id)));
+                $this->generateAclLevel($depth, $id, array_merge($ancestors, [$id]));
             }
         }
     }
@@ -120,8 +120,8 @@ class AclProviderBenchmarkTest extends \PHPUnit_Framework_TestCase
     {
         static $id = 1000;
 
-        if ($id === 1000 || ($id < 1500 && rand(0, 1))) {
-            $this->insertClassStmt->execute(array($id, $this->getRandomString(rand(20, 100), 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\\_')));
+        if (1000 === $id || ($id < 1500 && rand(0, 1))) {
+            $this->insertClassStmt->execute([$id, $this->getRandomString(rand(20, 100), 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\\_')]);
             ++$id;
 
             return $id - 1;
@@ -134,17 +134,17 @@ class AclProviderBenchmarkTest extends \PHPUnit_Framework_TestCase
     {
         static $id = 1000;
 
-        $this->insertOidStmt->execute(array(
+        $this->insertOidStmt->execute([
             $id,
             $classId,
             $this->getRandomString(rand(20, 50)),
             $parentId,
             rand(0, 1),
-        ));
+        ]);
 
-        $this->insertOidAncestorStmt->execute(array($id, $id));
+        $this->insertOidAncestorStmt->execute([$id, $id]);
         foreach ($ancestors as $ancestor) {
-            $this->insertOidAncestorStmt->execute(array($id, $ancestor));
+            $this->insertOidAncestorStmt->execute([$id, $ancestor]);
         }
 
         $this->generateAces($classId, $id);
@@ -157,12 +157,12 @@ class AclProviderBenchmarkTest extends \PHPUnit_Framework_TestCase
     {
         static $id = 1000;
 
-        if ($id === 1000 || ($id < 11000 && rand(0, 1))) {
-            $this->insertSidStmt->execute(array(
+        if (1000 === $id || ($id < 11000 && rand(0, 1))) {
+            $this->insertSidStmt->execute([
                 $id,
                 $this->getRandomString(rand(5, 30)),
                 rand(0, 1),
-            ));
+            ]);
             ++$id;
 
             return $id - 1;
@@ -175,33 +175,33 @@ class AclProviderBenchmarkTest extends \PHPUnit_Framework_TestCase
     {
         static $id = 1000;
 
-        $sids = array();
-        $fieldOrder = array();
+        $sids = [];
+        $fieldOrder = [];
 
         for ($i = 0; $i <= 30; ++$i) {
             $fieldName = rand(0, 1) ? null : $this->getRandomString(rand(10, 20));
 
             do {
                 $sid = $this->chooseSid();
-            } while (array_key_exists($sid, $sids) && in_array($fieldName, $sids[$sid], true));
+            } while (\array_key_exists($sid, $sids) && \in_array($fieldName, $sids[$sid], true));
 
-            $fieldOrder[$fieldName] = array_key_exists($fieldName, $fieldOrder) ? $fieldOrder[$fieldName] + 1 : 0;
+            $fieldOrder[$fieldName] = \array_key_exists($fieldName, $fieldOrder) ? $fieldOrder[$fieldName] + 1 : 0;
             if (!isset($sids[$sid])) {
-                $sids[$sid] = array();
+                $sids[$sid] = [];
             }
             $sids[$sid][] = $fieldName;
 
             $strategy = rand(0, 2);
-            if ($strategy === 0) {
+            if (0 === $strategy) {
                 $strategy = PermissionGrantingStrategy::ALL;
-            } elseif ($strategy === 1) {
+            } elseif (1 === $strategy) {
                 $strategy = PermissionGrantingStrategy::ANY;
             } else {
                 $strategy = PermissionGrantingStrategy::EQUAL;
             }
 
             // id, cid, oid, field, order, sid, mask, granting, strategy, a success, a failure
-            $this->insertEntryStmt->execute(array(
+            $this->insertEntryStmt->execute([
                 $id,
                 $classId,
                 rand(0, 5) ? $objectId : null,
@@ -213,7 +213,7 @@ class AclProviderBenchmarkTest extends \PHPUnit_Framework_TestCase
                 $strategy,
                 rand(0, 1),
                 rand(0, 1),
-            ));
+            ]);
 
             ++$id;
         }
@@ -235,9 +235,9 @@ class AclProviderBenchmarkTest extends \PHPUnit_Framework_TestCase
     protected function getRandomString($length, $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
     {
         $s = '';
-        $cLength = strlen($chars);
+        $cLength = \strlen($chars);
 
-        while (strlen($s) < $length) {
+        while (\strlen($s) < $length) {
             $s .= $chars[mt_rand(0, $cLength - 1)];
         }
 
@@ -246,13 +246,13 @@ class AclProviderBenchmarkTest extends \PHPUnit_Framework_TestCase
 
     protected function getOptions()
     {
-        return array(
+        return [
             'oid_table_name' => 'acl_object_identities',
             'oid_ancestors_table_name' => 'acl_object_identity_ancestors',
             'class_table_name' => 'acl_classes',
             'sid_table_name' => 'acl_security_identities',
             'entry_table_name' => 'acl_entries',
-        );
+        ];
     }
 
     protected function getStrategy()

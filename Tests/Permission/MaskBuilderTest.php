@@ -13,25 +13,26 @@ namespace Symfony\Component\Security\Acl\Tests\Permission;
 
 use Symfony\Component\Security\Acl\Permission\MaskBuilder;
 
-class MaskBuilderTest extends \PHPUnit_Framework_TestCase
+class MaskBuilderTest extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @expectedException \InvalidArgumentException
      * @dataProvider getInvalidConstructorData
      */
     public function testConstructorWithNonInteger($invalidMask)
     {
+        $this->expectException(\InvalidArgumentException::class);
+
         new MaskBuilder($invalidMask);
     }
 
     public function getInvalidConstructorData()
     {
-        return array(
-            array(234.463),
-            array('asdgasdf'),
-            array(array()),
-            array(new \stdClass()),
-        );
+        return [
+            [234.463],
+            ['asdgasdf'],
+            [[]],
+            [new \stdClass()],
+        ];
     }
 
     public function testConstructorWithoutArguments()

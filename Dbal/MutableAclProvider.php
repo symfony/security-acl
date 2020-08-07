@@ -51,7 +51,7 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
     public function createAcl(ObjectIdentityInterface $oid)
     {
         if (false !== $this->retrieveObjectIdentityPrimaryKey($oid)) {
-            $objectName = method_exists($oid, '__toString') ? $oid : get_class($oid);
+            $objectName = method_exists($oid, '__toString') ? $oid : \get_class($oid);
             throw new AclAlreadyExistsException(sprintf('%s is already associated with an ACL.', $objectName));
         }
 
@@ -113,8 +113,6 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
      * Deletes the security identity from the database.
      * ACL entries have the CASCADE option on their foreign key so they will also get deleted.
      *
-     * @param SecurityIdentityInterface $sid
-     *
      * @throws \InvalidArgumentException
      */
     public function deleteSecurityIdentity(SecurityIdentityInterface $sid)
@@ -125,7 +123,7 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
     /**
      * {@inheritdoc}
      */
-    public function findAcls(array $oids, array $sids = array())
+    public function findAcls(array $oids, array $sids = [])
     {
         $result = parent::findAcls($oids, $sids);
 
@@ -134,14 +132,14 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
 
             if (false === $this->propertyChanges->contains($acl) && $acl instanceof MutableAclInterface) {
                 $acl->addPropertyChangedListener($this);
-                $this->propertyChanges->attach($acl, array());
+                $this->propertyChanges->attach($acl, []);
             }
 
             $parentAcl = $acl->getParentAcl();
             while (null !== $parentAcl) {
                 if (false === $this->propertyChanges->contains($parentAcl) && $acl instanceof MutableAclInterface) {
                     $parentAcl->addPropertyChangedListener($this);
-                    $this->propertyChanges->attach($parentAcl, array());
+                    $this->propertyChanges->attach($parentAcl, []);
                 }
 
                 $parentAcl = $parentAcl->getParentAcl();
@@ -192,35 +190,35 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
                 if ($oldValue === $newValue) {
                     unset($propertyChanges[$propertyName]);
                 } else {
-                    $propertyChanges[$propertyName] = array($oldValue, $newValue);
+                    $propertyChanges[$propertyName] = [$oldValue, $newValue];
                 }
             } else {
-                $propertyChanges[$propertyName] = array($oldValue, $newValue);
+                $propertyChanges[$propertyName] = [$oldValue, $newValue];
             }
         } else {
             if (!isset($propertyChanges['aces'])) {
                 $propertyChanges['aces'] = new \SplObjectStorage();
             }
 
-            $acePropertyChanges = $propertyChanges['aces']->contains($ace) ? $propertyChanges['aces']->offsetGet($ace) : array();
+            $acePropertyChanges = $propertyChanges['aces']->contains($ace) ? $propertyChanges['aces']->offsetGet($ace) : [];
 
             if (isset($acePropertyChanges[$propertyName])) {
                 $oldValue = $acePropertyChanges[$propertyName][0];
                 if ($oldValue === $newValue) {
                     unset($acePropertyChanges[$propertyName]);
                 } else {
-                    $acePropertyChanges[$propertyName] = array($oldValue, $newValue);
+                    $acePropertyChanges[$propertyName] = [$oldValue, $newValue];
                 }
             } else {
-                $acePropertyChanges[$propertyName] = array($oldValue, $newValue);
+                $acePropertyChanges[$propertyName] = [$oldValue, $newValue];
             }
 
-            if (count($acePropertyChanges) > 0) {
+            if (\count($acePropertyChanges) > 0) {
                 $propertyChanges['aces']->offsetSet($ace, $acePropertyChanges);
             } else {
                 $propertyChanges['aces']->offsetUnset($ace);
 
-                if (0 === count($propertyChanges['aces'])) {
+                if (0 === \count($propertyChanges['aces'])) {
                     unset($propertyChanges['aces']);
                 }
             }
@@ -240,11 +238,11 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
 
         $propertyChanges = $this->propertyChanges->offsetGet($acl);
         // check if any changes were made to this ACL
-        if (0 === count($propertyChanges)) {
+        if (0 === \count($propertyChanges)) {
             return;
         }
 
-        $sets = $sharedPropertyChanges = array();
+        $sets = $sharedPropertyChanges = [];
 
         $this->connection->beginTransaction();
         try {
@@ -307,7 +305,7 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
 
             // if there have been changes to shared properties, we need to synchronize other
             // ACL instances for object identities of the same type that are already in-memory
-            if (count($sharedPropertyChanges) > 0) {
+            if (\count($sharedPropertyChanges) > 0) {
                 $classAcesProperty = new \ReflectionProperty('Symfony\Component\Security\Acl\Domain\Acl', 'classAces');
                 $classAcesProperty->setAccessible(true);
                 $classFieldAcesProperty = new \ReflectionProperty('Symfony\Component\Security\Acl\Domain\Acl', 'classFieldAces');
@@ -333,7 +331,7 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
             }
 
             // persist any changes to the acl_object_identities table
-            if (count($sets) > 0) {
+            if (\count($sets) > 0) {
                 $this->connection->executeUpdate($this->getUpdateObjectIdentitySql($acl->getId(), $sets));
             }
 
@@ -344,10 +342,10 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
             throw $e;
         }
 
-        $this->propertyChanges->offsetSet($acl, array());
+        $this->propertyChanges->offsetSet($acl, []);
 
         if (null !== $this->cache) {
-            if (count($sharedPropertyChanges) > 0) {
+            if (\count($sharedPropertyChanges) > 0) {
                 // FIXME: Currently, there is no easy way to clear the cache for ACLs
                 //        of a certain type. The problem here is that we need to make
                 //        sure to clear the cache of all child ACLs as well, and these
@@ -368,8 +366,7 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
     /**
      * Updates a user security identity when the user's username changes.
      *
-     * @param UserSecurityIdentity $usid
-     * @param string               $oldUsername
+     * @param string $oldUsername
      */
     public function updateUserSecurityIdentity(UserSecurityIdentity $usid, $oldUsername)
     {
@@ -552,8 +549,6 @@ QUERY;
     /**
      * Constructs the SQL for inserting a security identity.
      *
-     * @param SecurityIdentityInterface $sid
-     *
      * @throws \InvalidArgumentException
      *
      * @return string
@@ -624,8 +619,6 @@ QUERY;
     /**
      * Constructs the SQL for selecting the primary key of a security identity.
      *
-     * @param SecurityIdentityInterface $sid
-     *
      * @throws \InvalidArgumentException
      *
      * @return string
@@ -653,8 +646,6 @@ QUERY;
     /**
      * Constructs the SQL to delete a security identity.
      *
-     * @param SecurityIdentityInterface $sid
-     *
      * @throws \InvalidArgumentException
      *
      * @return string
@@ -670,8 +661,7 @@ QUERY;
     /**
      * Constructs the SQL for updating an object identity.
      *
-     * @param int   $pk
-     * @param array $changes
+     * @param int $pk
      *
      * @throws \InvalidArgumentException
      *
@@ -679,7 +669,7 @@ QUERY;
      */
     protected function getUpdateObjectIdentitySql($pk, array $changes)
     {
-        if (0 === count($changes)) {
+        if (0 === \count($changes)) {
             throw new \InvalidArgumentException('There are no changes.');
         }
 
@@ -694,8 +684,7 @@ QUERY;
     /**
      * Constructs the SQL for updating a user security identity.
      *
-     * @param UserSecurityIdentity $usid
-     * @param string               $oldUsername
+     * @param string $oldUsername
      *
      * @return string
      */
@@ -720,8 +709,7 @@ QUERY;
     /**
      * Constructs the SQL for updating an ACE.
      *
-     * @param int   $pk
-     * @param array $sets
+     * @param int $pk
      *
      * @throws \InvalidArgumentException
      *
@@ -729,7 +717,7 @@ QUERY;
      */
     protected function getUpdateAccessControlEntrySql($pk, array $sets)
     {
-        if (0 === count($sets)) {
+        if (0 === \count($sets)) {
             throw new \InvalidArgumentException('There are no changes.');
         }
 
@@ -743,8 +731,6 @@ QUERY;
 
     /**
      * Creates the ACL for the passed object identity.
-     *
-     * @param ObjectIdentityInterface $oid
      */
     private function createObjectIdentity(ObjectIdentityInterface $oid)
     {
@@ -778,8 +764,6 @@ QUERY;
      *
      * If the security identity does not yet exist in the database, it will be
      * created.
-     *
-     * @param SecurityIdentityInterface $sid
      *
      * @return int
      */
@@ -826,8 +810,6 @@ QUERY;
 
     /**
      * This regenerates the ancestor table which is used for fast read access.
-     *
-     * @param AclInterface $acl
      */
     private function regenerateAncestorRelations(AclInterface $acl)
     {
@@ -847,14 +829,13 @@ QUERY;
      * This processes new entries changes on an ACE related property (classFieldAces, or objectFieldAces).
      *
      * @param string $name
-     * @param array  $changes
      */
     private function updateNewFieldAceProperty($name, array $changes)
     {
         $sids = new \SplObjectStorage();
         $classIds = new \SplObjectStorage();
         foreach ($changes[1] as $field => $new) {
-            for ($i = 0, $c = count($new); $i < $c; ++$i) {
+            for ($i = 0, $c = \count($new); $i < $c; ++$i) {
                 $ace = $new[$i];
 
                 if (null === $ace->getId()) {
@@ -871,7 +852,7 @@ QUERY;
                         $classId = $this->createOrRetrieveClassId($oid->getType());
                     }
 
-                    $objectIdentityId = $name === 'classFieldAces' ? null : $ace->getAcl()->getId();
+                    $objectIdentityId = 'classFieldAces' === $name ? null : $ace->getAcl()->getId();
 
                     $this->connection->executeUpdate($this->getInsertAccessControlEntrySql($classId, $objectIdentityId, $field, $i, $sid, $ace->getStrategy(), $ace->getMask(), $ace->isGranting(), $ace->isAuditSuccess(), $ace->isAuditFailure()));
                     $aceId = $this->connection->executeQuery($this->getSelectAccessControlEntryIdSql($classId, $objectIdentityId, $field, $i))->fetchColumn();
@@ -889,13 +870,12 @@ QUERY;
      * This processes old entries changes on an ACE related property (classFieldAces, or objectFieldAces).
      *
      * @param string $name
-     * @param array  $changes
      */
     private function updateOldFieldAceProperty($name, array $changes)
     {
-        $currentIds = array();
+        $currentIds = [];
         foreach ($changes[1] as $field => $new) {
-            for ($i = 0, $c = count($new); $i < $c; ++$i) {
+            for ($i = 0, $c = \count($new); $i < $c; ++$i) {
                 $ace = $new[$i];
 
                 if (null !== $ace->getId()) {
@@ -905,7 +885,7 @@ QUERY;
         }
 
         foreach ($changes[0] as $old) {
-            for ($i = 0, $c = count($old); $i < $c; ++$i) {
+            for ($i = 0, $c = \count($old); $i < $c; ++$i) {
                 $ace = $old[$i];
 
                 if (!isset($currentIds[$ace->getId()])) {
@@ -920,7 +900,6 @@ QUERY;
      * This processes new entries changes on an ACE related property (classAces, or objectAces).
      *
      * @param string $name
-     * @param array  $changes
      */
     private function updateNewAceProperty($name, array $changes)
     {
@@ -928,7 +907,7 @@ QUERY;
 
         $sids = new \SplObjectStorage();
         $classIds = new \SplObjectStorage();
-        for ($i = 0, $c = count($new); $i < $c; ++$i) {
+        for ($i = 0, $c = \count($new); $i < $c; ++$i) {
             $ace = $new[$i];
 
             if (null === $ace->getId()) {
@@ -945,7 +924,7 @@ QUERY;
                     $classId = $this->createOrRetrieveClassId($oid->getType());
                 }
 
-                $objectIdentityId = $name === 'classAces' ? null : $ace->getAcl()->getId();
+                $objectIdentityId = 'classAces' === $name ? null : $ace->getAcl()->getId();
 
                 $this->connection->executeUpdate($this->getInsertAccessControlEntrySql($classId, $objectIdentityId, null, $i, $sid, $ace->getStrategy(), $ace->getMask(), $ace->isGranting(), $ace->isAuditSuccess(), $ace->isAuditFailure()));
                 $aceId = $this->connection->executeQuery($this->getSelectAccessControlEntryIdSql($classId, $objectIdentityId, null, $i))->fetchColumn();
@@ -962,14 +941,13 @@ QUERY;
      * This processes old entries changes on an ACE related property (classAces, or objectAces).
      *
      * @param string $name
-     * @param array  $changes
      */
     private function updateOldAceProperty($name, array $changes)
     {
         list($old, $new) = $changes;
-        $currentIds = array();
+        $currentIds = [];
 
-        for ($i = 0, $c = count($new); $i < $c; ++$i) {
+        for ($i = 0, $c = \count($new); $i < $c; ++$i) {
             $ace = $new[$i];
 
             if (null !== $ace->getId()) {
@@ -977,7 +955,7 @@ QUERY;
             }
         }
 
-        for ($i = 0, $c = count($old); $i < $c; ++$i) {
+        for ($i = 0, $c = \count($old); $i < $c; ++$i) {
             $ace = $old[$i];
 
             if (!isset($currentIds[$ace->getId()])) {
@@ -989,8 +967,6 @@ QUERY;
 
     /**
      * Persists the changes which were made to ACEs to the database.
-     *
-     * @param \SplObjectStorage $aces
      */
     private function updateAces(\SplObjectStorage $aces)
     {
@@ -1002,7 +978,7 @@ QUERY;
     private function updateAce(\SplObjectStorage $aces, $ace)
     {
         $propertyChanges = $aces->offsetGet($ace);
-        $sets = array();
+        $sets = [];
 
         if (isset($propertyChanges['aceOrder'])
             && $propertyChanges['aceOrder'][1] > $propertyChanges['aceOrder'][0]
