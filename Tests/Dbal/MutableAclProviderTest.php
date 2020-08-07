@@ -262,7 +262,7 @@ class MutableAclProviderTest extends \PHPUnit_Framework_TestCase
         ;
         $con
             ->expects($this->never())
-            ->method('executeQuery')
+            ->method('executeUpdate')
         ;
 
         $provider = new MutableAclProvider($con, new PermissionGrantingStrategy(), array());
@@ -477,12 +477,12 @@ class MutableAclProviderTest extends \PHPUnit_Framework_TestCase
                 $aclIds[$name] = $aclId;
 
                 $sql = $this->callMethod($provider, 'getInsertObjectIdentityRelationSql', array($aclId, $aclId));
-                $con->executeQuery($sql);
+                $con->executeUpdate($sql);
 
                 if (isset($aclData['parent_acl'])) {
                     if (isset($aclIds[$aclData['parent_acl']])) {
-                        $con->executeQuery('UPDATE acl_object_identities SET parent_object_identity_id = '.$aclIds[$aclData['parent_acl']].' WHERE id = '.$aclId);
-                        $con->executeQuery($this->callMethod($provider, 'getInsertObjectIdentityRelationSql', array($aclId, $aclIds[$aclData['parent_acl']])));
+                        $con->executeUpdate('UPDATE acl_object_identities SET parent_object_identity_id = '.$aclIds[$aclData['parent_acl']].' WHERE id = '.$aclId);
+                        $con->executeUpdate($this->callMethod($provider, 'getInsertObjectIdentityRelationSql', array($aclId, $aclIds[$aclData['parent_acl']])));
                     } else {
                         $parentAcls[$aclId] = $aclData['parent_acl'];
                     }
@@ -494,8 +494,8 @@ class MutableAclProviderTest extends \PHPUnit_Framework_TestCase
                     throw new \InvalidArgumentException(sprintf('"%s" does not exist.', $name));
                 }
 
-                $con->executeQuery(sprintf('UPDATE acl_object_identities SET parent_object_identity_id = %d WHERE id = %d', $aclIds[$name], $aclId));
-                $con->executeQuery($this->callMethod($provider, 'getInsertObjectIdentityRelationSql', array($aclId, $aclIds[$name])));
+                $con->executeUpdate(sprintf('UPDATE acl_object_identities SET parent_object_identity_id = %d WHERE id = %d', $aclIds[$name], $aclId));
+                $con->executeUpdate($this->callMethod($provider, 'getInsertObjectIdentityRelationSql', array($aclId, $aclIds[$name])));
             }
 
             $con->commit();

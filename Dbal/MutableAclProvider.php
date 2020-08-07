@@ -60,7 +60,7 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
             $this->createObjectIdentity($oid);
 
             $pk = $this->retrieveObjectIdentityPrimaryKey($oid);
-            $this->connection->executeQuery($this->getInsertObjectIdentityRelationSql($pk, $pk));
+            $this->connection->executeUpdate($this->getInsertObjectIdentityRelationSql($pk, $pk));
 
             $this->connection->commit();
         } catch (\Exception $e) {
@@ -119,7 +119,7 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
      */
     public function deleteSecurityIdentity(SecurityIdentityInterface $sid)
     {
-        $this->connection->executeQuery($this->getDeleteSecurityIdentityIdSql($sid));
+        $this->connection->executeUpdate($this->getDeleteSecurityIdentityIdSql($sid));
     }
 
     /**
@@ -334,7 +334,7 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
 
             // persist any changes to the acl_object_identities table
             if (count($sets) > 0) {
-                $this->connection->executeQuery($this->getUpdateObjectIdentitySql($acl->getId(), $sets));
+                $this->connection->executeUpdate($this->getUpdateObjectIdentitySql($acl->getId(), $sets));
             }
 
             $this->connection->commit();
@@ -373,7 +373,7 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
      */
     public function updateUserSecurityIdentity(UserSecurityIdentity $usid, $oldUsername)
     {
-        $this->connection->executeQuery($this->getUpdateUserSecurityIdentitySql($usid, $oldUsername));
+        $this->connection->executeUpdate($this->getUpdateUserSecurityIdentitySql($usid, $oldUsername));
     }
 
     /**
@@ -750,7 +750,7 @@ QUERY;
     {
         $classId = $this->createOrRetrieveClassId($oid->getType());
 
-        $this->connection->executeQuery($this->getInsertObjectIdentitySql($oid->getIdentifier(), $classId, true));
+        $this->connection->executeUpdate($this->getInsertObjectIdentitySql($oid->getIdentifier(), $classId, true));
     }
 
     /**
@@ -768,7 +768,7 @@ QUERY;
             return $id;
         }
 
-        $this->connection->executeQuery($this->getInsertClassSql($classType));
+        $this->connection->executeUpdate($this->getInsertClassSql($classType));
 
         return $this->connection->executeQuery($this->getSelectClassIdSql($classType))->fetchColumn();
     }
@@ -789,7 +789,7 @@ QUERY;
             return $id;
         }
 
-        $this->connection->executeQuery($this->getInsertSecurityIdentitySql($sid));
+        $this->connection->executeUpdate($this->getInsertSecurityIdentitySql($sid));
 
         return $this->connection->executeQuery($this->getSelectSecurityIdentityIdSql($sid))->fetchColumn();
     }
@@ -801,7 +801,7 @@ QUERY;
      */
     private function deleteAccessControlEntries($oidPK)
     {
-        $this->connection->executeQuery($this->getDeleteAccessControlEntriesSql($oidPK));
+        $this->connection->executeUpdate($this->getDeleteAccessControlEntriesSql($oidPK));
     }
 
     /**
@@ -811,7 +811,7 @@ QUERY;
      */
     private function deleteObjectIdentity($pk)
     {
-        $this->connection->executeQuery($this->getDeleteObjectIdentitySql($pk));
+        $this->connection->executeUpdate($this->getDeleteObjectIdentitySql($pk));
     }
 
     /**
@@ -821,7 +821,7 @@ QUERY;
      */
     private function deleteObjectIdentityRelations($pk)
     {
-        $this->connection->executeQuery($this->getDeleteObjectIdentityRelationsSql($pk));
+        $this->connection->executeUpdate($this->getDeleteObjectIdentityRelationsSql($pk));
     }
 
     /**
@@ -832,12 +832,12 @@ QUERY;
     private function regenerateAncestorRelations(AclInterface $acl)
     {
         $pk = $acl->getId();
-        $this->connection->executeQuery($this->getDeleteObjectIdentityRelationsSql($pk));
-        $this->connection->executeQuery($this->getInsertObjectIdentityRelationSql($pk, $pk));
+        $this->connection->executeUpdate($this->getDeleteObjectIdentityRelationsSql($pk));
+        $this->connection->executeUpdate($this->getInsertObjectIdentityRelationSql($pk, $pk));
 
         $parentAcl = $acl->getParentAcl();
         while (null !== $parentAcl) {
-            $this->connection->executeQuery($this->getInsertObjectIdentityRelationSql($pk, $parentAcl->getId()));
+            $this->connection->executeUpdate($this->getInsertObjectIdentityRelationSql($pk, $parentAcl->getId()));
 
             $parentAcl = $parentAcl->getParentAcl();
         }
@@ -873,7 +873,7 @@ QUERY;
 
                     $objectIdentityId = $name === 'classFieldAces' ? null : $ace->getAcl()->getId();
 
-                    $this->connection->executeQuery($this->getInsertAccessControlEntrySql($classId, $objectIdentityId, $field, $i, $sid, $ace->getStrategy(), $ace->getMask(), $ace->isGranting(), $ace->isAuditSuccess(), $ace->isAuditFailure()));
+                    $this->connection->executeUpdate($this->getInsertAccessControlEntrySql($classId, $objectIdentityId, $field, $i, $sid, $ace->getStrategy(), $ace->getMask(), $ace->isGranting(), $ace->isAuditSuccess(), $ace->isAuditFailure()));
                     $aceId = $this->connection->executeQuery($this->getSelectAccessControlEntryIdSql($classId, $objectIdentityId, $field, $i))->fetchColumn();
                     $this->loadedAces[$aceId] = $ace;
 
@@ -909,7 +909,7 @@ QUERY;
                 $ace = $old[$i];
 
                 if (!isset($currentIds[$ace->getId()])) {
-                    $this->connection->executeQuery($this->getDeleteAccessControlEntrySql($ace->getId()));
+                    $this->connection->executeUpdate($this->getDeleteAccessControlEntrySql($ace->getId()));
                     unset($this->loadedAces[$ace->getId()]);
                 }
             }
@@ -947,7 +947,7 @@ QUERY;
 
                 $objectIdentityId = $name === 'classAces' ? null : $ace->getAcl()->getId();
 
-                $this->connection->executeQuery($this->getInsertAccessControlEntrySql($classId, $objectIdentityId, null, $i, $sid, $ace->getStrategy(), $ace->getMask(), $ace->isGranting(), $ace->isAuditSuccess(), $ace->isAuditFailure()));
+                $this->connection->executeUpdate($this->getInsertAccessControlEntrySql($classId, $objectIdentityId, null, $i, $sid, $ace->getStrategy(), $ace->getMask(), $ace->isGranting(), $ace->isAuditSuccess(), $ace->isAuditFailure()));
                 $aceId = $this->connection->executeQuery($this->getSelectAccessControlEntryIdSql($classId, $objectIdentityId, null, $i))->fetchColumn();
                 $this->loadedAces[$aceId] = $ace;
 
@@ -981,7 +981,7 @@ QUERY;
             $ace = $old[$i];
 
             if (!isset($currentIds[$ace->getId()])) {
-                $this->connection->executeQuery($this->getDeleteAccessControlEntrySql($ace->getId()));
+                $this->connection->executeUpdate($this->getDeleteAccessControlEntrySql($ace->getId()));
                 unset($this->loadedAces[$ace->getId()]);
             }
         }
@@ -1029,6 +1029,6 @@ QUERY;
             $sets[] = sprintf('audit_failure = %s', $this->connection->getDatabasePlatform()->convertBooleans($propertyChanges['auditFailure'][1]));
         }
 
-        $this->connection->executeQuery($this->getUpdateAccessControlEntrySql($ace->getId(), $sets));
+        $this->connection->executeUpdate($this->getUpdateAccessControlEntrySql($ace->getId(), $sets));
     }
 }
