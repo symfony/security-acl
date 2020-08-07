@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\Security\Acl\Dbal;
 
+use Doctrine\DBAL\Driver\AbstractMySQLDriver;
 use Doctrine\DBAL\Schema\Schema as BaseSchema;
 use Doctrine\DBAL\Connection;
 
@@ -21,7 +22,15 @@ use Doctrine\DBAL\Connection;
  */
 final class Schema extends BaseSchema
 {
+    /*
+     * 3bit and 4bit index differentiation for MySQL InnoDB storage
+     */
+    const INNODB_UTF8_UNIQUE_VARCHAR_LENGTH     = 255;
+    const INNODB_UTF8MB4_UNIQUE_VARCHAR_LENGTH  = 191;
+
     protected $options;
+
+    protected $charset;
 
     /**
      * Constructor.
@@ -32,6 +41,17 @@ final class Schema extends BaseSchema
     public function __construct(array $options, Connection $connection = null)
     {
         $schemaConfig = null === $connection ? null : $connection->getSchemaManager()->createSchemaConfig();
+
+        $params = $connection->getParams();
+        if(array_key_exists('charset2', $params)) {
+            $this->charset = $params['charset'];
+        } else {
+            if ($connection->getDriver() instanceof AbstractMySQLDriver) {
+                $this->charset = 'utf8mb4';
+            } else {
+                $this->charset = 'utf8';
+            }
+        }
 
         parent::__construct(array(), array(), $schemaConfig);
 
@@ -67,7 +87,7 @@ final class Schema extends BaseSchema
     {
         $table = $this->createTable($this->options['class_table_name']);
         $table->addColumn('id', 'integer', array('unsigned' => true, 'autoincrement' => true));
-        $table->addColumn('class_type', 'string', array('length' => 200));
+        $table->addColumn('class_type', 'string', array('length' => $this->getVarcharMaxLength()));
         $table->setPrimaryKey(array('id'));
         $table->addUniqueIndex(array('class_type'));
     }
@@ -145,10 +165,24 @@ final class Schema extends BaseSchema
         $table = $this->createTable($this->options['sid_table_name']);
 
         $table->addColumn('id', 'integer', array('unsigned' => true, 'autoincrement' => true));
-        $table->addColumn('identifier', 'string', array('length' => 200));
+        $table->addColumn('identifier', 'string', array('length' => $this->getVarcharMaxLength()));
         $table->addColumn('username', 'boolean');
 
         $table->setPrimaryKey(array('id'));
         $table->addUniqueIndex(array('identifier', 'username'));
+    }
+
+    /**
+     * Get maximum field size based on charset encoding
+     *
+     * @return int
+     */
+    private function getVarcharMaxLength()
+    {
+        if($this->charset === 'utf8mb4') {
+            return self::INNODB_UTF8MB4_UNIQUE_VARCHAR_LENGTH;
+        } else {
+            return self::INNODB_UTF8_UNIQUE_VARCHAR_LENGTH;
+        }
     }
 }
