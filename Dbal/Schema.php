@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\Security\Acl\Dbal;
 
+use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Schema\Schema as BaseSchema;
 use Doctrine\DBAL\Connection;
 
@@ -22,6 +23,12 @@ use Doctrine\DBAL\Connection;
 final class Schema extends BaseSchema
 {
     protected $options;
+
+    /*
+     * Uniq type stockage
+     */
+
+    protected $columnUniqList = array();
 
     /**
      * Constructor.
@@ -60,6 +67,36 @@ final class Schema extends BaseSchema
         }
     }
 
+    public function toSql(AbstractPlatform $platform)
+    {
+        $sqlAllQuery = parent::toSql($platform);
+        foreach ($this->columnUniqList as $column){
+            $sql = 'ALTER TABLE `'.$column['table_name'].'` ADD UNIQUE('.join(', ',$column['column']).')';
+            array_push($sqlAllQuery, $sql);
+        }
+        return $sqlAllQuery;
+    }
+
+    private function addUniqueIndex($table, array $columnNames, $indexName = null, $flags = [], array $options = [])
+    {
+        $table->addIndex($columnNames, $indexName, $flags, $options);
+        $columnList = [];
+        foreach ($columnNames as $col){
+            $colType = $table->getColumn($col)->getType()->getName();
+            $colVal = $col;
+            if($colType == 'string'){
+                $len = $table->getColumn($col)->getLength();
+                $len = ($len > 180)? 180: $len;
+                $colVal = $col.' ('.$len.')';
+            }
+            array_push($columnList, $colVal);
+        }
+        array_push($this->columnUniqList, [
+            'table_name' => $table->getName(),
+            'column' => $columnList
+        ]);
+    }
+
     /**
      * Adds the class table to the schema.
      */
@@ -69,7 +106,7 @@ final class Schema extends BaseSchema
         $table->addColumn('id', 'integer', array('unsigned' => true, 'autoincrement' => true));
         $table->addColumn('class_type', 'string', array('length' => 200));
         $table->setPrimaryKey(array('id'));
-        $table->addUniqueIndex(array('class_type'));
+        $this->addUniqueIndex($table, array('class_type'));
     }
 
     /**
@@ -92,7 +129,7 @@ final class Schema extends BaseSchema
         $table->addColumn('audit_failure', 'boolean');
 
         $table->setPrimaryKey(array('id'));
-        $table->addUniqueIndex(array('class_id', 'object_identity_id', 'field_name', 'ace_order'));
+        $this->addUniqueIndex($table, array('class_id', 'object_identity_id', 'field_name', 'ace_order'));
         $table->addIndex(array('class_id', 'object_identity_id', 'security_identity_id'));
 
         $table->addForeignKeyConstraint($this->getTable($this->options['class_table_name']), array('class_id'), array('id'), array('onDelete' => 'CASCADE', 'onUpdate' => 'CASCADE'));
@@ -114,7 +151,7 @@ final class Schema extends BaseSchema
         $table->addColumn('entries_inheriting', 'boolean');
 
         $table->setPrimaryKey(array('id'));
-        $table->addUniqueIndex(array('object_identifier', 'class_id'));
+        $this->addUniqueIndex($table, array('object_identifier', 'class_id'));
         $table->addIndex(array('parent_object_identity_id'));
 
         $table->addForeignKeyConstraint($table, array('parent_object_identity_id'), array('id'));
@@ -149,6 +186,6 @@ final class Schema extends BaseSchema
         $table->addColumn('username', 'boolean');
 
         $table->setPrimaryKey(array('id'));
-        $table->addUniqueIndex(array('identifier', 'username'));
+        $this->addUniqueIndex($table, array('identifier', 'username'));
     }
 }
