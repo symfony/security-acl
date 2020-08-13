@@ -17,6 +17,8 @@ use Symfony\Component\Security\Acl\Exception\AclAlreadyExistsException;
  * Provides support for creating and storing ACL instances.
  *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
+ *
+ * @method MutableAclInterface findAcl(ObjectIdentityInterface $oid, array $sids = [])
  */
 interface MutableAclProviderInterface extends AclProviderInterface
 {
