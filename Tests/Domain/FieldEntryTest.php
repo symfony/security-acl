@@ -40,6 +40,40 @@ class FieldEntryTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($ace->isAuditFailure(), $uAce->isAuditFailure());
     }
 
+    /**
+     * Test that two FieldEntry objects correctly serialized and unserialized
+     */
+    public function testSerializeUnserializeMoreAceWithSameSecurityIdentity()
+    {
+        $sid = $this->getSid();
+
+        $aceFirst = $this->getAce(null, $sid);
+        $aceSecond = $this->getAce(null, $sid);
+
+        // as used in DoctrineAclCache::putInCache (line 142)
+        $serialized = serialize(
+            array( // Acl:serialize (line 260)
+                [  // classFieldAces
+                    'fieldOne' => [$aceFirst], 
+                    'fieldTwo' => [$aceSecond],
+                ]
+            )
+        );
+
+        $unserialized = unserialize($serialized);
+        $uAceFirst  = $unserialized[0]['fieldOne'][0];
+        $uAceSecond = $unserialized[0]['fieldTwo'][0];
+
+        $this->assertInstanceOf(
+            'Symfony\Component\Security\Acl\Model\SecurityIdentityInterface',
+            $uAceFirst->getSecurityIdentity()
+        );
+        $this->assertInstanceOf(
+            'Symfony\Component\Security\Acl\Model\SecurityIdentityInterface',
+            $uAceSecond->getSecurityIdentity()
+        );
+    }
+
     protected function getAce($acl = null, $sid = null)
     {
         if (null === $acl) {

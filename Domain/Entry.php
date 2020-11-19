@@ -179,7 +179,9 @@ class Entry implements AuditableEntryInterface
         return serialize([
             $this->mask,
             $this->id,
-            $this->securityIdentity,
+            // clone due to the unserialize issue in php 5.4-5.6
+            // when Acl has few FieldEntry objects with the same SecurityIdentityInterface instance
+            clone $this->securityIdentity,
             $this->strategy,
             $this->auditFailure,
             $this->auditSuccess,
