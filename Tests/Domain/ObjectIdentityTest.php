@@ -40,11 +40,14 @@ namespace Symfony\Component\Security\Acl\Tests\Domain
                 ->method('getObjectIdentifier')
                 ->willReturn('getObjectIdentifier()')
             ;
-            $domainObject
-                ->expects($this->never())
-                ->method('getId')
-                ->willReturn('getId()')
-            ;
+// The following commented code makes PHPUnit complain about method
+// "getId" which cannot be configured because it does not exist, has not
+// been specified, is final, or is static
+//            $domainObject
+//                ->expects($this->never())
+//                ->method('getId')
+//                ->willReturn('getId()')
+//            ;
 
             $id = ObjectIdentity::fromDomainObject($domainObject);
             $this->assertEquals('getObjectIdentifier()', $id->getIdentifier());
