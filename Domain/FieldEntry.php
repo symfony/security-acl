@@ -67,6 +67,9 @@ class FieldEntry extends Entry implements FieldEntryInterface
     public function unserialize($serialized)
     {
         list($this->field, $parentStr) = unserialize($serialized);
+        if (!\is_string($parentStr)) {
+            throw new \BadMethodCallException('Cannot serialize '.__CLASS__);
+        }
         parent::unserialize($parentStr);
     }
 }
