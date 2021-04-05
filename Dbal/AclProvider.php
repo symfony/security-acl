@@ -12,7 +12,7 @@
 namespace Symfony\Component\Security\Acl\Dbal;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Driver\Statement;
+use Doctrine\DBAL\Result;
 use Symfony\Component\Security\Acl\Domain\Acl;
 use Symfony\Component\Security\Acl\Domain\Entry;
 use Symfony\Component\Security\Acl\Domain\FieldEntry;
@@ -481,7 +481,7 @@ QUERY;
      *
      * @throws \RuntimeException
      */
-    private function hydrateObjectIdentities(Statement $stmt, array $oidLookup, array $sids)
+    private function hydrateObjectIdentities(Result $stmt, array $oidLookup, array $sids)
     {
         $parentIdToFill = new \SplObjectStorage();
         $acls = $aces = $emptyArray = [];
