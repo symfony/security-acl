@@ -1,0 +1,15 @@
+---------------------------------------------------------------------------
+
+by bobvandevijver at 2021-04-07T10:30:12Z
+
+Maybe it should be `ResultStatement` instead of `Result`? See https://github.com/doctrine/dbal/issues/4588
+
+---------------------------------------------------------------------------
+
+by acrobat at 2021-04-07T11:31:04Z
+
+I think the used interface is correct as the forward compatibility layer also implements `Doctrine\DBAL\Result`
+
+https://github.com/doctrine/dbal/blob/79a6a843d49de8676efd38f30d29023c69ebff02/lib/Doctrine/DBAL/ForwardCompatibility/Result.php#L21
+
+And in dbal v3 that [interface is replaced by the `Result` class](https://github.com/doctrine/dbal/blob/ab91c62efb8a4cc8dce70a98b4228ceada3b57f2/src/Result.php), so this typehint will still work correctly I think.
