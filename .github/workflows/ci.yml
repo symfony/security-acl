@@ -1,0 +1,43 @@
+name: CI
+
+on:
+    [push, pull_request]
+
+jobs:
+    test:
+        name: Test on PHP ${{ matrix.php }}
+        runs-on: ubuntu-latest
+
+        strategy:
+            fail-fast: false
+            matrix:
+                php: ['7.1', '7.2', '7.3', '7.4', '8.0']
+
+        steps:
+            -   uses: actions/checkout@v2
+
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: ${{ matrix.php }}
+                    coverage: none
+
+            -   name: Determine composer cache directory
+                id: composer-cache
+                run: echo "::set-output name=directory::$(composer config cache-dir)"
+
+            -   name: Cache composer dependencies
+                uses: actions/cache@v2
+                with:
+                    path: ${{ steps.composer-cache.outputs.directory }}
+                    key: ${{ matrix.php }}-composer-${{ hashFiles('**/composer.lock') }}
+                    restore-keys: ${{ matrix.php }}-composer-
+
+            -   name: Install dependencies
+                run: composer update --no-progress --ansi
+
+            -   name: Install simple-phpunit
+                run: vendor/bin/simple-phpunit install
+
+            -   name: Run phpunit
+                run: vendor/bin/simple-phpunit
