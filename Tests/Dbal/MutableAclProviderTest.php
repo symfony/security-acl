@@ -383,6 +383,9 @@ class MutableAclProviderTest extends \PHPUnit\Framework\TestCase
         $acl = $provider->findAcl($oid);
         $acl->insertObjectFieldAce($fieldName, $sid3, 4);
         $provider->updateAcl($acl);
+
+        $acls = $provider->findAcl($oid);
+        $this->assertCount(3, $acls->getObjectFieldAces($fieldName));
     }
 
     public function testUpdateAclDeletingObjectFieldAcesThrowsDBConstraintViolations()
@@ -409,6 +412,9 @@ class MutableAclProviderTest extends \PHPUnit\Framework\TestCase
         $acl = $provider->findAcl($oid);
         $acl->insertObjectFieldAce($fieldName, $sid3, 4);
         $provider->updateAcl($acl);
+
+        $acls = $provider->findAcl($oid);
+        $this->assertCount(2, $acls->getObjectFieldAces($fieldName));
     }
 
     public function testUpdateUserSecurityIdentity()

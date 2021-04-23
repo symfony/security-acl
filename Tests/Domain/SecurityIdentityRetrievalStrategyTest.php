@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\Security\Acl\Tests\Domain;
 
+use Symfony\Bridge\PhpUnit\ExpectDeprecationTrait;
 use Symfony\Component\Security\Acl\Domain\RoleSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\SecurityIdentityRetrievalStrategy;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
@@ -22,11 +23,19 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class SecurityIdentityRetrievalStrategyTest extends \PHPUnit\Framework\TestCase
 {
+    use ExpectDeprecationTrait;
+
     /**
      * @dataProvider getSecurityIdentityRetrievalTests
      */
     public function testGetSecurityIdentities($user, array $roles, $authenticationStatus, array $sids)
     {
+        if (class_exists(Role::class)) {
+            $this->markTestSkipped();
+
+            return;
+        }
+
         if ('anonymous' === $authenticationStatus) {
             $token = $this->getMockBuilder(AnonymousToken::class)
                 ->disableOriginalConstructor()
@@ -42,23 +51,79 @@ class SecurityIdentityRetrievalStrategyTest extends \PHPUnit\Framework\TestCase
                 ->getMock();
         }
 
-        if (method_exists($token, 'getRoleNames')) {
-            $strategy = $this->getStrategy($roles, $authenticationStatus, false);
+        $strategy = $this->getStrategy($roles, $authenticationStatus, false);
 
+        $token
+            ->expects($this->once())
+            ->method('getRoleNames')
+            ->willReturn(['foo'])
+        ;
+
+        if ('anonymous' === $authenticationStatus) {
             $token
-                ->expects($this->once())
-                ->method('getRoleNames')
-                ->willReturn(['foo'])
+                ->expects($this->never())
+                ->method('getUser')
             ;
         } else {
-            $strategy = $this->getStrategy($roles, $authenticationStatus, true);
-
             $token
                 ->expects($this->once())
-                ->method('getRoles')
-                ->willReturn([new Role('foo')])
+                ->method('getUser')
+                ->willReturn($user)
             ;
         }
+
+        $extractedSids = $strategy->getSecurityIdentities($token);
+
+        foreach ($extractedSids as $index => $extractedSid) {
+            if (!isset($sids[$index])) {
+                $this->fail(sprintf('Expected SID at index %d, but there was none.', true));
+            }
+
+            if (false === $sids[$index]->equals($extractedSid)) {
+                $this->fail(sprintf('Index: %d, expected SID "%s", but got "%s".', $index, $sids[$index], $extractedSid));
+            }
+        }
+    }
+
+    /**
+     * @group legacy
+     * @dataProvider getSecurityIdentityRetrievalTests
+     */
+    public function testLegacyGetSecurityIdentities($user, array $roles, $authenticationStatus, array $sids)
+    {
+        if (!class_exists(Role::class)) {
+            $this->markTestSkipped();
+
+            return;
+        }
+
+        if (method_exists(TokenInterface::class, 'getRoleNames')) {
+            $this->expectDeprecation('The "Symfony\Component\Security\Core\Role\Role" class is deprecated since Symfony 4.3 and will be removed in 5.0. Use strings as roles instead.');
+            $this->expectDeprecation('The Symfony\Component\Security\Core\Authentication\Token\TokenInterface::getRoles method is deprecated (since Symfony 4.3, use the getRoleNames() method instead).');
+        }
+
+        if ('anonymous' === $authenticationStatus) {
+            $token = $this->getMockBuilder(AnonymousToken::class)
+                ->disableOriginalConstructor()
+                ->getMock();
+        } else {
+            $class = '';
+            if (\is_string($user)) {
+                $class = 'MyCustomTokenImpl';
+            }
+
+            $token = $this->getMockBuilder(TokenInterface::class)
+                ->setMockClassName($class)
+                ->getMock();
+        }
+
+        $strategy = $this->getStrategy($roles, $authenticationStatus, true);
+
+        $token
+            ->expects($this->once())
+            ->method('getRoles')
+            ->willReturn([new Role('foo')])
+        ;
 
         if ('anonymous' === $authenticationStatus) {
             $token
