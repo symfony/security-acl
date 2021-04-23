@@ -13,6 +13,7 @@ namespace Symfony\Component\Security\Acl\Tests\Dbal;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Acl\Dbal\AclProvider;
 use Symfony\Component\Security\Acl\Dbal\MutableAclProvider;
 use Symfony\Component\Security\Acl\Dbal\Schema;
@@ -31,7 +32,7 @@ use Symfony\Component\Security\Acl\Model\FieldEntryInterface;
 /**
  * @requires extension pdo_sqlite
  */
-class MutableAclProviderTest extends \PHPUnit\Framework\TestCase
+class MutableAclProviderTest extends TestCase
 {
     protected $con;
 
@@ -383,6 +384,9 @@ class MutableAclProviderTest extends \PHPUnit\Framework\TestCase
         $acl = $provider->findAcl($oid);
         $acl->insertObjectFieldAce($fieldName, $sid3, 4);
         $provider->updateAcl($acl);
+
+        $acls = $provider->findAcl($oid);
+        $this->assertCount(3, $acls->getObjectFieldAces($fieldName));
     }
 
     public function testUpdateAclDeletingObjectFieldAcesThrowsDBConstraintViolations()
@@ -409,6 +413,9 @@ class MutableAclProviderTest extends \PHPUnit\Framework\TestCase
         $acl = $provider->findAcl($oid);
         $acl->insertObjectFieldAce($fieldName, $sid3, 4);
         $provider->updateAcl($acl);
+
+        $acls = $provider->findAcl($oid);
+        $this->assertCount(2, $acls->getObjectFieldAces($fieldName));
     }
 
     public function testUpdateUserSecurityIdentity()
