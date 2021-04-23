@@ -26,6 +26,10 @@ class RoleSecurityIdentityTest extends \PHPUnit\Framework\TestCase
 
     public function testConstructorWithRoleInstance()
     {
+        if (!class_exists(\Symfony\Component\Security\Core\Role\Role::class)) {
+            $this->markTestSkipped();
+        }
+
         $id = new RoleSecurityIdentity(new Role('ROLE_FOO'));
 
         $this->assertEquals('ROLE_FOO', $id->getRole());
@@ -43,11 +47,24 @@ class RoleSecurityIdentityTest extends \PHPUnit\Framework\TestCase
         }
     }
 
+    /**
+     * @group legacy
+     */
+    public function testDeprecatedRoleClassEquals()
+    {
+        if (!class_exists(Role::class)) {
+            $this->markTestSkipped();
+        }
+
+        $id1 = new RoleSecurityIdentity('ROLE_FOO');
+        $id2 = new RoleSecurityIdentity(new Role('ROLE_FOO'));
+        $this->assertTrue($id1->equals($id2));
+    }
+
     public function getCompareData()
     {
         return [
             [new RoleSecurityIdentity('ROLE_FOO'), new RoleSecurityIdentity('ROLE_FOO'), true],
-            [new RoleSecurityIdentity('ROLE_FOO'), new RoleSecurityIdentity(new Role('ROLE_FOO')), true],
             [new RoleSecurityIdentity('ROLE_USER'), new RoleSecurityIdentity('ROLE_FOO'), false],
             [new RoleSecurityIdentity('ROLE_FOO'), new UserSecurityIdentity('ROLE_FOO', 'Foo'), false],
         ];

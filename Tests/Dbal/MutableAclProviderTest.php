@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\Security\Acl\Tests\Dbal;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Symfony\Component\Security\Acl\Dbal\AclProvider;
 use Symfony\Component\Security\Acl\Dbal\MutableAclProvider;
@@ -103,11 +104,10 @@ class MutableAclProviderTest extends \PHPUnit\Framework\TestCase
         $provider->updateAcl($acl);
         $provider->deleteAcl($parentAcl->getObjectIdentity());
 
-        try {
-            $provider->findAcl(new ObjectIdentity(1, 'Foo'));
-            $this->fail('Child-ACLs have not been deleted.');
-        } catch (AclNotFoundException $e) {
-        }
+        $this->expectException(AclNotFoundException::class);
+        $this->expectExceptionMessage('There is no ACL for the given object identity.');
+
+        $provider->findAcl(new ObjectIdentity(1, 'Foo'));
     }
 
     public function testFindAclsAddsPropertyListener()
@@ -252,7 +252,8 @@ class MutableAclProviderTest extends \PHPUnit\Framework\TestCase
 
     public function testUpdateDoesNothingWhenThereAreNoChanges()
     {
-        $con = $this->getMock('Doctrine\DBAL\Connection', [], [], '', false);
+        $con = $this->createMock(Connection::class);
+
         $con
             ->expects($this->never())
             ->method('beginTransaction')
@@ -287,11 +288,11 @@ class MutableAclProviderTest extends \PHPUnit\Framework\TestCase
 
         $acl1->insertClassAce($sid, 3);
         $acl2->insertClassAce($sid, 5);
-        try {
-            $provider->updateAcl($acl1);
-            $this->fail('Provider failed to detect a concurrent modification.');
-        } catch (ConcurrentModificationException $e) {
-        }
+
+        $this->expectException(ConcurrentModificationException::class);
+        $this->expectExceptionMessage('The "classAces" property has been modified concurrently.');
+
+        $provider->updateAcl($acl1);
     }
 
     public function testUpdateAcl()

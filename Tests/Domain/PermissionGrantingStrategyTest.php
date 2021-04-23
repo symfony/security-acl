@@ -150,11 +150,10 @@ class PermissionGrantingStrategyTest extends \PHPUnit\Framework\TestCase
         $acl->insertObjectAce($sid, $aceMask, 0, true, $maskStrategy);
 
         if (false === $result) {
-            try {
-                $strategy->isGranted($acl, [$requiredMask], [$sid]);
-                $this->fail('The ACE is not supposed to match.');
-            } catch (NoAceFoundException $e) {
-            }
+            $this->expectException(NoAceFoundException::class);
+            $this->expectExceptionMessage('No applicable ACE was found.');
+
+            $strategy->isGranted($acl, [$requiredMask], [$sid]);
         } else {
             $this->assertTrue($strategy->isGranted($acl, [$requiredMask], [$sid]));
         }

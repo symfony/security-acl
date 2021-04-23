@@ -16,6 +16,7 @@ use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Acl\Domain\PermissionGrantingStrategy;
 use Symfony\Component\Security\Acl\Domain\RoleSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
+use Doctrine\Persistence\PropertyChangedListener;
 
 class AclTest extends \PHPUnit\Framework\TestCase
 {
@@ -497,7 +498,8 @@ class AclTest extends \PHPUnit\Framework\TestCase
     {
         $aceProperties = ['aceOrder', 'mask', 'strategy', 'auditSuccess', 'auditFailure'];
 
-        $listener = $this->createMock('Doctrine\Persistence\PropertyChangedListener;');
+        $arguments = [];
+        $listener = $this->createMock(PropertyChangedListener::class);
         foreach ($expectedChanges as $index => $property) {
             if (\in_array($property, $aceProperties)) {
                 $class = 'Symfony\Component\Security\Acl\Domain\Entry';
@@ -505,12 +507,12 @@ class AclTest extends \PHPUnit\Framework\TestCase
                 $class = 'Symfony\Component\Security\Acl\Domain\Acl';
             }
 
-            $listener
-                ->expects($this->at($index))
-                ->method('propertyChanged')
-                ->with($this->isInstanceOf($class), $this->equalTo($property))
-            ;
+            $arguments[] = [$this->isInstanceOf($class), $this->equalTo($property)];
         }
+        $listener
+            ->method('propertyChanged')
+            ->withConsecutive(...$arguments)
+        ;
 
         return $listener;
     }
