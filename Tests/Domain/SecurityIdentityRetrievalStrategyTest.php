@@ -11,16 +11,17 @@
 
 namespace Symfony\Component\Security\Acl\Tests\Domain;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Acl\Domain\RoleSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\SecurityIdentityRetrievalStrategy;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
+use Symfony\Component\Security\Core\Authentication\Token\AbstractToken;
 use Symfony\Component\Security\Core\Role\Role;
 use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
-use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolverInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class SecurityIdentityRetrievalStrategyTest extends \PHPUnit\Framework\TestCase
+class SecurityIdentityRetrievalStrategyTest extends TestCase
 {
     /**
      * @dataProvider getSecurityIdentityRetrievalTests
@@ -37,7 +38,7 @@ class SecurityIdentityRetrievalStrategyTest extends \PHPUnit\Framework\TestCase
                 $class = 'MyCustomTokenImpl';
             }
 
-            $token = $this->getMockBuilder(TokenInterface::class)
+            $token = $this->getMockBuilder(AbstractToken::class)
                 ->setMockClassName($class)
                 ->getMock();
         }

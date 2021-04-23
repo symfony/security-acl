@@ -24,6 +24,9 @@ class RoleSecurityIdentityTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('ROLE_FOO', $id->getRole());
     }
 
+    /**
+     * @group legacy
+     */
     public function testConstructorWithRoleInstance()
     {
         if (!class_exists(\Symfony\Component\Security\Core\Role\Role::class)) {
