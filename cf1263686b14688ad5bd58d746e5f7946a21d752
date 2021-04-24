@@ -1,0 +1,43 @@
+---------------------------------------------------------------------------
+
+by derrabus at 2021-04-24T13:34:17Z
+
+@wouterj What version of DBAL did you test with?
+
+---------------------------------------------------------------------------
+
+by wouterj at 2021-04-24T13:45:38Z
+
+@derrabus I checked out this branch locally and ran:
+
+```
+§ sf composer update --prefer-lowest
+Loading composer repositories with package information
+Updating dependencies
+Lock file operations: 16 installs, 0 updates, 0 removals
+  - Locking doctrine/annotations (v1.0)
+  - Locking doctrine/cache (v1.0)
+  - Locking doctrine/collections (v1.0)
+  - Locking doctrine/common (2.13.1)
+  - Locking doctrine/dbal (2.13.0)
+  - Locking doctrine/deprecations (v0.5.3)
+  - Locking doctrine/event-manager (1.1.1)
+  - Locking doctrine/inflector (v1.0)
+  - Locking doctrine/lexer (v1.0)
+  - Locking doctrine/persistence (1.3.8)
+  - Locking doctrine/reflection (1.2.2)
+  - Locking psr/log (1.0.0)
+  - Locking symfony/phpunit-bridge (v5.2.0)
+  - Locking symfony/polyfill-php56 (v1.0.0)
+  - Locking symfony/polyfill-util (v1.0.0)
+  - Locking symfony/security-core (v3.4.0)
+Writing lock file
+Installing dependencies from lock file (including require-dev)
+...
+```
+
+---------------------------------------------------------------------------
+
+by derrabus at 2021-04-24T14:24:23Z
+
+Seems like the forward compatibility layer of DBAL 2.13.0 was incomplete. That method does not exist in DBAL 3.0 either, so I've bumped to `^2.13.1|^3.1` now. Good catch, @wouterj!
