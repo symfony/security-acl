@@ -34,7 +34,7 @@ use Symfony\Component\Security\Acl\Model\FieldEntryInterface;
  */
 class MutableAclProviderTest extends TestCase
 {
-    protected $con;
+    protected $connection;
 
     public static function assertAceEquals(EntryInterface $a, EntryInterface $b)
     {
@@ -479,12 +479,12 @@ class MutableAclProviderTest extends TestCase
                 $aclIds[$name] = $aclId;
 
                 $sql = $this->callMethod($provider, 'getInsertObjectIdentityRelationSql', [$aclId, $aclId]);
-                $con->executeUpdate($sql);
+                $con->executeStatement($sql);
 
                 if (isset($aclData['parent_acl'])) {
                     if (isset($aclIds[$aclData['parent_acl']])) {
-                        $con->executeUpdate('UPDATE acl_object_identities SET parent_object_identity_id = '.$aclIds[$aclData['parent_acl']].' WHERE id = '.$aclId);
-                        $con->executeUpdate($this->callMethod($provider, 'getInsertObjectIdentityRelationSql', [$aclId, $aclIds[$aclData['parent_acl']]]));
+                        $con->executeStatement('UPDATE acl_object_identities SET parent_object_identity_id = '.$aclIds[$aclData['parent_acl']].' WHERE id = '.$aclId);
+                        $con->executeStatement($this->callMethod($provider, 'getInsertObjectIdentityRelationSql', [$aclId, $aclIds[$aclData['parent_acl']]]));
                     } else {
                         $parentAcls[$aclId] = $aclData['parent_acl'];
                     }
@@ -496,8 +496,8 @@ class MutableAclProviderTest extends TestCase
                     throw new \InvalidArgumentException(sprintf('"%s" does not exist.', $name));
                 }
 
-                $con->executeUpdate(sprintf('UPDATE acl_object_identities SET parent_object_identity_id = %d WHERE id = %d', $aclIds[$name], $aclId));
-                $con->executeUpdate($this->callMethod($provider, 'getInsertObjectIdentityRelationSql', [$aclId, $aclIds[$name]]));
+                $con->executeStatement(sprintf('UPDATE acl_object_identities SET parent_object_identity_id = %d WHERE id = %d', $aclIds[$name], $aclId));
+                $con->executeStatement($this->callMethod($provider, 'getInsertObjectIdentityRelationSql', [$aclId, $aclIds[$name]]));
             }
 
             $con->commit();
@@ -518,21 +518,21 @@ class MutableAclProviderTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->con = DriverManager::getConnection([
+        $this->connection = DriverManager::getConnection([
             'driver' => 'pdo_sqlite',
             'memory' => true,
         ]);
 
         // import the schema
         $schema = new Schema($this->getOptions());
-        foreach ($schema->toSql($this->con->getDatabasePlatform()) as $sql) {
-            $this->con->exec($sql);
+        foreach ($schema->toSql($this->connection->getDatabasePlatform()) as $sql) {
+            $this->connection->executeStatement($sql);
         }
     }
 
     protected function tearDown(): void
     {
-        $this->con = null;
+        $this->connection = null;
     }
 
     protected function getField($object, $field)
@@ -569,6 +569,6 @@ class MutableAclProviderTest extends TestCase
 
     protected function getProvider($cache = null)
     {
-        return new MutableAclProvider($this->con, $this->getStrategy(), $this->getOptions(), $cache);
+        return new MutableAclProvider($this->connection, $this->getStrategy(), $this->getOptions(), $cache);
     }
 }

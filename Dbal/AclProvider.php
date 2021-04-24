@@ -77,7 +77,7 @@ class AclProvider implements AclProviderInterface
         $sql = $this->getFindChildrenSql($parentOid, $directChildrenOnly);
 
         $children = [];
-        foreach ($this->connection->executeQuery($sql)->fetchAll() as $data) {
+        foreach ($this->connection->executeQuery($sql)->fetchAllAssociative() as $data) {
             $children[] = new ObjectIdentity($data['object_identifier'], $data['class_type']);
         }
 
@@ -384,7 +384,7 @@ QUERY;
      */
     final protected function retrieveObjectIdentityPrimaryKey(ObjectIdentityInterface $oid)
     {
-        return $this->connection->executeQuery($this->getSelectObjectIdentityIdSql($oid))->fetchColumn();
+        return $this->connection->executeQuery($this->getSelectObjectIdentityIdSql($oid))->fetchOne();
     }
 
     /**
@@ -421,7 +421,7 @@ QUERY;
         $sql = $this->getAncestorLookupSql($batch);
 
         $ancestorIds = [];
-        foreach ($this->connection->executeQuery($sql)->fetchAll() as $data) {
+        foreach ($this->connection->executeQuery($sql)->fetchAllAssociative() as $data) {
             // FIXME: skip ancestors which are cached
             // Fix: Oracle returns keys in uppercase
             $ancestorIds[] = reset($data);
@@ -506,7 +506,7 @@ QUERY;
 
         // fetchAll() consumes more memory than consecutive calls to fetch(),
         // but it is faster
-        foreach ($stmt->fetchAll(\PDO::FETCH_NUM) as $data) {
+        foreach ($stmt->fetchAllNumeric() as $data) {
             list($aclId,
                  $objectIdentifier,
                  $parentObjectIdentityId,
