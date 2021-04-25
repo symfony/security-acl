@@ -76,7 +76,7 @@ class MaskBuilder extends AbstractMaskBuilder
     {
         $pattern = self::ALL_OFF;
         $length = \strlen($pattern);
-        $bitmask = str_pad(decbin($this->mask), $length, '0', STR_PAD_LEFT);
+        $bitmask = str_pad(decbin($this->mask), $length, '0', \STR_PAD_LEFT);
 
         for ($i = $length - 1; $i >= 0; --$i) {
             if ('1' === $bitmask[$i]) {
