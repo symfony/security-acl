@@ -41,3 +41,15 @@ jobs:
               run: vendor/bin/simple-phpunit
               env:
                   SYMFONY_DEPRECATIONS_HELPER: '${{ matrix.deprecations }}'
+
+    cs:
+        name: 'Code Style'
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+            - name: PHP-CS-Fixer
+              uses: docker://oskarstark/php-cs-fixer-ga:2.18.5
+              with:
+                  args: --diff --dry-run

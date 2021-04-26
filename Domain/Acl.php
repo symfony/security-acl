@@ -115,7 +115,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
      */
     public function getClassFieldAces($field)
     {
-        return isset($this->classFieldAces[$field]) ? $this->classFieldAces[$field] : [];
+        return $this->classFieldAces[$field] ?? [];
     }
 
     /**
@@ -131,7 +131,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
      */
     public function getObjectFieldAces($field)
     {
-        return isset($this->objectFieldAces[$field]) ? $this->objectFieldAces[$field] : [];
+        return $this->objectFieldAces[$field] ?? [];
     }
 
     /**
@@ -271,7 +271,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
      */
     public function unserialize($serialized)
     {
-        list($this->parentAcl,
+        [$this->parentAcl,
              $this->objectIdentity,
              $this->classAces,
              $this->classFieldAces,
@@ -280,7 +280,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
              $this->id,
              $this->loadedSids,
              $this->entriesInheriting
-        ) = unserialize($serialized);
+        ] = unserialize($serialized);
 
         $this->listeners = [];
     }
