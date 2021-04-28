@@ -194,13 +194,13 @@ class Entry implements AuditableEntryInterface
      */
     public function unserialize($serialized)
     {
-        list($this->mask,
+        [$this->mask,
              $this->id,
              $this->securityIdentity,
              $this->strategy,
              $this->auditFailure,
              $this->auditSuccess,
              $this->granting
-        ) = unserialize($serialized);
+        ] = unserialize($serialized);
     }
 }

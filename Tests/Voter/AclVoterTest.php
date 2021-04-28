@@ -27,7 +27,7 @@ class AclVoterTest extends \PHPUnit\Framework\TestCase
      */
     public function testSupportsAttribute($attribute, $supported)
     {
-        list($voter, , $permissionMap) = $this->getVoter(true, false);
+        [$voter, , $permissionMap] = $this->getVoter(true, false);
 
         $permissionMap
             ->expects($this->once())
@@ -44,7 +44,7 @@ class AclVoterTest extends \PHPUnit\Framework\TestCase
      */
     public function testSupportsAttributeNonString($attribute)
     {
-        list($voter) = $this->getVoter(true, false);
+        [$voter] = $this->getVoter(true, false);
 
         $this->assertFalse($voter->supportsAttribute($attribute));
     }
@@ -72,7 +72,7 @@ class AclVoterTest extends \PHPUnit\Framework\TestCase
      */
     public function testSupportsClass($class)
     {
-        list($voter) = $this->getVoter();
+        [$voter] = $this->getVoter();
 
         $this->assertTrue($voter->supportsClass($class));
     }
@@ -88,7 +88,7 @@ class AclVoterTest extends \PHPUnit\Framework\TestCase
 
     public function testVote()
     {
-        list($voter, , $permissionMap) = $this->getVoter();
+        [$voter, , $permissionMap] = $this->getVoter();
         $permissionMap
             ->expects($this->atLeastOnce())
             ->method('getMasks')
@@ -103,7 +103,7 @@ class AclVoterTest extends \PHPUnit\Framework\TestCase
      */
     public function testVoteWhenNoObjectIsPassed($allowIfObjectIdentityUnavailable)
     {
-        list($voter, , $permissionMap) = $this->getVoter($allowIfObjectIdentityUnavailable);
+        [$voter, , $permissionMap] = $this->getVoter($allowIfObjectIdentityUnavailable);
         $permissionMap
             ->expects($this->once())
             ->method('getMasks')
@@ -124,7 +124,7 @@ class AclVoterTest extends \PHPUnit\Framework\TestCase
      */
     public function testVoteWhenOidStrategyReturnsNull($allowIfUnavailable)
     {
-        list($voter, , $permissionMap, $oidStrategy) = $this->getVoter($allowIfUnavailable);
+        [$voter, , $permissionMap, $oidStrategy] = $this->getVoter($allowIfUnavailable);
         $permissionMap
             ->expects($this->once())
             ->method('getMasks')
@@ -153,7 +153,7 @@ class AclVoterTest extends \PHPUnit\Framework\TestCase
 
     public function testVoteNoAclFound()
     {
-        list($voter, $provider, $permissionMap, $oidStrategy, $sidStrategy) = $this->getVoter();
+        [$voter, $provider, $permissionMap, $oidStrategy, $sidStrategy] = $this->getVoter();
 
         $permissionMap
             ->expects($this->once())
@@ -188,7 +188,7 @@ class AclVoterTest extends \PHPUnit\Framework\TestCase
      */
     public function testVoteGrantsAccess($grant)
     {
-        list($voter, $provider, $permissionMap, $oidStrategy, $sidStrategy) = $this->getVoter();
+        [$voter, $provider, $permissionMap, $oidStrategy, $sidStrategy] = $this->getVoter();
 
         $permissionMap
             ->expects($this->once())
@@ -234,7 +234,7 @@ class AclVoterTest extends \PHPUnit\Framework\TestCase
 
     public function testVoteNoAceFound()
     {
-        list($voter, $provider, $permissionMap, $oidStrategy, $sidStrategy) = $this->getVoter();
+        [$voter, $provider, $permissionMap, $oidStrategy, $sidStrategy] = $this->getVoter();
 
         $permissionMap
             ->expects($this->once())
@@ -277,7 +277,7 @@ class AclVoterTest extends \PHPUnit\Framework\TestCase
      */
     public function testVoteGrantsFieldAccess($grant)
     {
-        list($voter, $provider, $permissionMap, $oidStrategy, $sidStrategy) = $this->getVoter();
+        [$voter, $provider, $permissionMap, $oidStrategy, $sidStrategy] = $this->getVoter();
 
         $permissionMap
             ->expects($this->once())
@@ -323,7 +323,7 @@ class AclVoterTest extends \PHPUnit\Framework\TestCase
 
     public function testVoteNoFieldAceFound()
     {
-        list($voter, $provider, $permissionMap, $oidStrategy, $sidStrategy) = $this->getVoter();
+        [$voter, $provider, $permissionMap, $oidStrategy, $sidStrategy] = $this->getVoter();
 
         $permissionMap
             ->expects($this->once())
@@ -363,7 +363,7 @@ class AclVoterTest extends \PHPUnit\Framework\TestCase
 
     public function testWhenReceivingAnObjectIdentityInterfaceWeDontRetrieveANewObjectIdentity()
     {
-        list($voter, $provider, $permissionMap, $oidStrategy, $sidStrategy) = $this->getVoter();
+        [$voter, $provider, $permissionMap, $oidStrategy, $sidStrategy] = $this->getVoter();
 
         $oid = new ObjectIdentity('someID', 'someType');
 

@@ -507,7 +507,7 @@ QUERY;
         // fetchAll() consumes more memory than consecutive calls to fetch(),
         // but it is faster
         foreach ($stmt->fetchAllNumeric() as $data) {
-            list($aclId,
+            [$aclId,
                  $objectIdentifier,
                  $parentObjectIdentityId,
                  $entriesInheriting,
@@ -522,7 +522,7 @@ QUERY;
                  $auditSuccess,
                  $auditFailure,
                  $username,
-                 $securityIdentifier) = array_values($data);
+                 $securityIdentifier] = array_values($data);
 
             // has the ACL been hydrated during this hydration cycle?
             if (isset($acls[$aclId])) {
