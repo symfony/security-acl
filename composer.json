@@ -20,8 +20,10 @@
         "symfony/security-core": "^3.4|^4.4|^5.0"
     },
     "require-dev": {
+        "symfony/cache": "^3.4|^4.4|^5.0",
         "symfony/finder": "^3.4|^4.4|^5.0",
         "symfony/phpunit-bridge": "^5.2",
+        "doctrine/cache": "^1.6",
         "doctrine/common": "^2.2|^3",
         "doctrine/persistence": "^1.3.3|^2",
         "doctrine/dbal": "^2.13.1|^3.1",
