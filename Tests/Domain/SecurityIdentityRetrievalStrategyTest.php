@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\Security\Acl\Tests\Domain;
 
+use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Acl\Domain\RoleSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\SecurityIdentityRetrievalStrategy;
@@ -18,7 +19,7 @@ use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolverInterface;
 use Symfony\Component\Security\Core\Authentication\Token\AbstractToken;
 use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
-use Symfony\Component\Security\Core\Role\Role;
+use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class SecurityIdentityRetrievalStrategyTest extends TestCase
@@ -26,7 +27,7 @@ class SecurityIdentityRetrievalStrategyTest extends TestCase
     /**
      * @dataProvider getSecurityIdentityRetrievalTests
      */
-    public function testGetSecurityIdentities($user, array $roles, $authenticationStatus, array $sids)
+    public function testGetSecurityIdentities($user, array $roles, string $authenticationStatus, array $sids)
     {
         if ('anonymous' === $authenticationStatus) {
             $token = $this->getMockBuilder(AnonymousToken::class)
@@ -43,23 +44,13 @@ class SecurityIdentityRetrievalStrategyTest extends TestCase
                 ->getMock();
         }
 
-        if (method_exists($token, 'getRoleNames')) {
-            $strategy = $this->getStrategy($roles, $authenticationStatus, false);
+        $strategy = $this->getStrategy($roles, $authenticationStatus);
 
-            $token
-                ->expects($this->once())
-                ->method('getRoleNames')
-                ->willReturn(['foo'])
-            ;
-        } else {
-            $strategy = $this->getStrategy($roles, $authenticationStatus, true);
-
-            $token
-                ->expects($this->once())
-                ->method('getRoles')
-                ->willReturn([new Role('foo')])
-            ;
-        }
+        $token
+            ->expects($this->once())
+            ->method('getRoleNames')
+            ->willReturn(['foo'])
+        ;
 
         if ('anonymous' === $authenticationStatus) {
             $token
@@ -87,7 +78,7 @@ class SecurityIdentityRetrievalStrategyTest extends TestCase
         }
     }
 
-    public function getSecurityIdentityRetrievalTests()
+    public function getSecurityIdentityRetrievalTests(): array
     {
         return [
             [$this->getAccount('johannes', 'FooUser'), ['ROLE_USER', 'ROLE_SUPERADMIN'], 'fullFledged', [
@@ -106,7 +97,7 @@ class SecurityIdentityRetrievalStrategyTest extends TestCase
                 new RoleSecurityIdentity('IS_AUTHENTICATED_ANONYMOUSLY'),
             ]],
             [new CustomUserImpl('johannes'), ['ROLE_FOO'], 'fullFledged', [
-                new UserSecurityIdentity('johannes', 'Symfony\Component\Security\Acl\Tests\Domain\CustomUserImpl'),
+                new UserSecurityIdentity('johannes', CustomUserImpl::class),
                 new RoleSecurityIdentity('ROLE_FOO'),
                 new RoleSecurityIdentity('IS_AUTHENTICATED_FULLY'),
                 new RoleSecurityIdentity('IS_AUTHENTICATED_REMEMBERED'),
@@ -125,7 +116,7 @@ class SecurityIdentityRetrievalStrategyTest extends TestCase
         ];
     }
 
-    protected function getAccount($username, $class)
+    private function getAccount(string $username, string $class): UserInterface
     {
         $account = $this->getMockBuilder(UserInterface::class)
             ->setMockClassName($class)
@@ -140,31 +131,23 @@ class SecurityIdentityRetrievalStrategyTest extends TestCase
         return $account;
     }
 
-    protected function getStrategy(array $roles = [], $authenticationStatus = 'fullFledged', $isBC = false)
+    private function getStrategy(array $roles, string $authenticationStatus): SecurityIdentityRetrievalStrategy
     {
-        $roleHierarchyBuilder = $this->getMockBuilder('Symfony\Component\Security\Core\Role\RoleHierarchyInterface')
-            ->disableProxyingToOriginalMethods()
-            ->disableOriginalConstructor();
+        $roleHierarchy = new class($roles) implements RoleHierarchyInterface {
+            private $roles;
 
-        if ($isBC) {
-            $roleHierarchy = $roleHierarchyBuilder->setMethods(['getReachableRoles'])
-                ->getMockForAbstractClass();
+            public function __construct(array $roles)
+            {
+                $this->roles = $roles;
+            }
 
-            $roleHierarchy
-                ->expects($this->any())
-                ->method('getReachableRoles')
-                ->with($this->equalTo([new Role('foo')]))
-                ->willReturn($roles);
-        } else {
-            $roleHierarchy = $roleHierarchyBuilder->setMethods(['getReachableRoleNames'])
-                ->getMockForAbstractClass();
+            public function getReachableRoleNames(array $roles): array
+            {
+                Assert::assertSame(['foo'], $roles);
 
-            $roleHierarchy
-                ->expects($this->any())
-                ->method('getReachableRoleNames')
-                ->with($this->equalTo(['foo']))
-                ->willReturn($roles);
-        }
+                return $this->roles;
+            }
+        };
 
         $trustResolver = $this->createMock(AuthenticationTrustResolverInterface::class);
 

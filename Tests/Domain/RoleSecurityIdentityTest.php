@@ -11,11 +11,12 @@
 
 namespace Symfony\Component\Security\Acl\Tests\Domain;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Acl\Domain\RoleSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
-use Symfony\Component\Security\Core\Role\Role;
+use Symfony\Component\Security\Acl\Model\SecurityIdentityInterface;
 
-class RoleSecurityIdentityTest extends \PHPUnit\Framework\TestCase
+class RoleSecurityIdentityTest extends TestCase
 {
     public function testConstructor()
     {
@@ -25,23 +26,9 @@ class RoleSecurityIdentityTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @group legacy
-     */
-    public function testConstructorWithRoleInstance()
-    {
-        if (!class_exists(\Symfony\Component\Security\Core\Role\Role::class)) {
-            $this->markTestSkipped();
-        }
-
-        $id = new RoleSecurityIdentity(new Role('ROLE_FOO'));
-
-        $this->assertEquals('ROLE_FOO', $id->getRole());
-    }
-
-    /**
      * @dataProvider getCompareData
      */
-    public function testEquals($id1, $id2, $equal)
+    public function testEquals(RoleSecurityIdentity $id1, SecurityIdentityInterface $id2, bool $equal)
     {
         if ($equal) {
             $this->assertTrue($id1->equals($id2));
@@ -50,21 +37,7 @@ class RoleSecurityIdentityTest extends \PHPUnit\Framework\TestCase
         }
     }
 
-    /**
-     * @group legacy
-     */
-    public function testDeprecatedRoleClassEquals()
-    {
-        if (!class_exists(Role::class)) {
-            $this->markTestSkipped();
-        }
-
-        $id1 = new RoleSecurityIdentity('ROLE_FOO');
-        $id2 = new RoleSecurityIdentity(new Role('ROLE_FOO'));
-        $this->assertTrue($id1->equals($id2));
-    }
-
-    public function getCompareData()
+    public function getCompareData(): array
     {
         return [
             [new RoleSecurityIdentity('ROLE_FOO'), new RoleSecurityIdentity('ROLE_FOO'), true],
