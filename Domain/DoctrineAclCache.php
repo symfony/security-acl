@@ -27,7 +27,7 @@ class DoctrineAclCache implements AclCacheInterface
 {
     use AclCacheTrait;
 
-    const PREFIX = 'sf2_acl_';
+    public const PREFIX = 'sf2_acl_';
 
     private $cache;
 

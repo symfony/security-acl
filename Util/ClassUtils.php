@@ -29,14 +29,14 @@ final class ClassUtils
      *
      * @var string
      */
-    const MARKER = '__CG__';
+    public const MARKER = '__CG__';
 
     /**
      * Length of the proxy marker.
      *
      * @var int
      */
-    const MARKER_LENGTH = 6;
+    public const MARKER_LENGTH = 6;
 
     /**
      * This class should not be instantiated.

@@ -26,7 +26,7 @@ class PsrAclCache implements AclCacheInterface
 {
     use AclCacheTrait;
 
-    const PREFIX = 'sf_acl_';
+    public const PREFIX = 'sf_acl_';
 
     private $cache;
 

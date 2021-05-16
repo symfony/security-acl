@@ -50,6 +50,6 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v2
             - name: PHP-CS-Fixer
-              uses: docker://oskarstark/php-cs-fixer-ga:2.18.5
+              uses: docker://oskarstark/php-cs-fixer-ga:3.0.0
               with:
                   args: --diff --dry-run
