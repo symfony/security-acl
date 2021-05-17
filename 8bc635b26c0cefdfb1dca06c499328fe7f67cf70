@@ -1,0 +1,31 @@
+---------------------------------------------------------------------------
+
+by derrabus at 2021-04-28T13:02:38Z
+
+~~Apparently, `getReachableRoleNames` did not exist on Symfony 4.4 already. I'll revert that part later.~~ Done.
+
+---------------------------------------------------------------------------
+
+by acrobat at 2021-04-28T18:15:30Z
+
+Would it be an option to first release a minor with the dbal 2.13 compatibility fixes? And have this PR included in the next minor?
+
+---------------------------------------------------------------------------
+
+by derrabus at 2021-04-28T18:25:45Z
+
+> Would it be an option to first release a minor with the dbal 2.13 compatibility fixes? And have this PR included in the next minor?
+
+I can tag a patch release for the DBAL compatibility, I suppose.
+
+---------------------------------------------------------------------------
+
+by derrabus at 2021-04-28T18:36:57Z
+
+@acrobat v3.1.2 was tagged.
+
+---------------------------------------------------------------------------
+
+by acrobat at 2021-04-28T19:41:03Z
+
+Thanks @derrabus!
