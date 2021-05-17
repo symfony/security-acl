@@ -36,7 +36,7 @@ use Symfony\Component\Security\Acl\Model\PermissionGrantingStrategyInterface;
  */
 class AclProvider implements AclProviderInterface
 {
-    const MAX_BATCH_SIZE = 30;
+    public const MAX_BATCH_SIZE = 30;
 
     /**
      * @var AclCacheInterface|null
