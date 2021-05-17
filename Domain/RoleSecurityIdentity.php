@@ -12,7 +12,6 @@
 namespace Symfony\Component\Security\Acl\Domain;
 
 use Symfony\Component\Security\Acl\Model\SecurityIdentityInterface;
-use Symfony\Component\Security\Core\Role\Role;
 
 /**
  * A SecurityIdentity implementation for roles.
@@ -23,17 +22,8 @@ final class RoleSecurityIdentity implements SecurityIdentityInterface
 {
     private $role;
 
-    /**
-     * Constructor.
-     *
-     * @param mixed $role a Role instance, or its string representation
-     */
-    public function __construct($role)
+    public function __construct(string $role)
     {
-        if ($role instanceof Role) {
-            $role = $role->getRole();
-        }
-
         $this->role = $role;
     }
 
