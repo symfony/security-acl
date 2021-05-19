@@ -54,7 +54,7 @@ final class UserSecurityIdentity implements SecurityIdentityInterface
      */
     public static function fromAccount(UserInterface $user)
     {
-        return new self($user->getUsername(), ClassUtils::getRealClass($user));
+        return new self(method_exists($user, 'getUserIdentifier') ? $user->getUserIdentifier() : $user->getUsername(), ClassUtils::getRealClass($user));
     }
 
     /**

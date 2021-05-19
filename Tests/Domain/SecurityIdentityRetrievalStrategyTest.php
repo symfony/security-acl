@@ -16,11 +16,11 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Acl\Domain\RoleSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\SecurityIdentityRetrievalStrategy;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
+use Symfony\Component\Security\Acl\Tests\Fixtures\Account;
 use Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolverInterface;
 use Symfony\Component\Security\Core\Authentication\Token\AbstractToken;
 use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 class SecurityIdentityRetrievalStrategyTest extends TestCase
 {
@@ -81,8 +81,8 @@ class SecurityIdentityRetrievalStrategyTest extends TestCase
     public function getSecurityIdentityRetrievalTests(): array
     {
         return [
-            [$this->getAccount('johannes', 'FooUser'), ['ROLE_USER', 'ROLE_SUPERADMIN'], 'fullFledged', [
-                new UserSecurityIdentity('johannes', 'FooUser'),
+            [new Account('johannes'), ['ROLE_USER', 'ROLE_SUPERADMIN'], 'fullFledged', [
+                new UserSecurityIdentity('johannes', Account::class),
                 new RoleSecurityIdentity('ROLE_USER'),
                 new RoleSecurityIdentity('ROLE_SUPERADMIN'),
                 new RoleSecurityIdentity('IS_AUTHENTICATED_FULLY'),
@@ -103,8 +103,8 @@ class SecurityIdentityRetrievalStrategyTest extends TestCase
                 new RoleSecurityIdentity('IS_AUTHENTICATED_REMEMBERED'),
                 new RoleSecurityIdentity('IS_AUTHENTICATED_ANONYMOUSLY'),
             ]],
-            [$this->getAccount('foo', 'FooBarUser'), ['ROLE_FOO'], 'rememberMe', [
-                new UserSecurityIdentity('foo', 'FooBarUser'),
+            [new Account('foo'), ['ROLE_FOO'], 'rememberMe', [
+                new UserSecurityIdentity('foo', Account::class),
                 new RoleSecurityIdentity('ROLE_FOO'),
                 new RoleSecurityIdentity('IS_AUTHENTICATED_REMEMBERED'),
                 new RoleSecurityIdentity('IS_AUTHENTICATED_ANONYMOUSLY'),
@@ -114,21 +114,6 @@ class SecurityIdentityRetrievalStrategyTest extends TestCase
                 new RoleSecurityIdentity('IS_AUTHENTICATED_ANONYMOUSLY'),
             ]],
         ];
-    }
-
-    private function getAccount(string $username, string $class): UserInterface
-    {
-        $account = $this->getMockBuilder(UserInterface::class)
-            ->setMockClassName($class)
-            ->getMock()
-        ;
-        $account
-            ->expects($this->any())
-            ->method('getUsername')
-            ->willReturn($username)
-        ;
-
-        return $account;
     }
 
     private function getStrategy(array $roles, string $authenticationStatus): SecurityIdentityRetrievalStrategy
