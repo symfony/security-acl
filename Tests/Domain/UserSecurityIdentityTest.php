@@ -13,6 +13,9 @@ namespace Symfony\Component\Security\Acl\Tests\Domain;
 
 use Symfony\Component\Security\Acl\Domain\RoleSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
+use Symfony\Component\Security\Acl\Model\SecurityIdentityInterface;
+use Symfony\Component\Security\Acl\Tests\Fixtures\Account;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 class UserSecurityIdentityTest extends \PHPUnit\Framework\TestCase
 {
@@ -36,23 +39,16 @@ class UserSecurityIdentityTest extends \PHPUnit\Framework\TestCase
     /**
      * @dataProvider getCompareData
      */
-    public function testEquals($id1, $id2, $equal)
+    public function testEquals(UserSecurityIdentity $id1, SecurityIdentityInterface $id2, bool $equal)
     {
         $this->assertSame($equal, $id1->equals($id2));
     }
 
-    public function getCompareData()
+    public function getCompareData(): array
     {
-        $account = $this->getMockBuilder('Symfony\Component\Security\Core\User\UserInterface')
-                            ->setMockClassName('USI_AccountImpl')
-                            ->getMock();
-        $account
-            ->expects($this->any())
-            ->method('getUsername')
-            ->willReturn('foo')
-        ;
+        $account = new Account('foo');
 
-        $token = $this->createMock('Symfony\Component\Security\Core\Authentication\Token\TokenInterface');
+        $token = $this->createMock(TokenInterface::class);
         $token
             ->expects($this->any())
             ->method('getUser')
@@ -67,7 +63,7 @@ class UserSecurityIdentityTest extends \PHPUnit\Framework\TestCase
             [new UserSecurityIdentity('bla', 'Foo'), new UserSecurityIdentity('blub', 'Foo'), false],
             [new UserSecurityIdentity('foo', 'Foo'), new RoleSecurityIdentity('foo'), false],
             [new UserSecurityIdentity('foo', 'Foo'), UserSecurityIdentity::fromToken($token), false],
-            [new UserSecurityIdentity('foo', 'USI_AccountImpl'), UserSecurityIdentity::fromToken($token), true],
+            [new UserSecurityIdentity('foo', Account::class), UserSecurityIdentity::fromToken($token), true],
         ];
     }
 }

@@ -18,6 +18,8 @@ jobs:
                     - php: '7.4'
                       deps: lowest
                       deprecations: max[self]=0
+                    - php: '8.0'
+                      deps: highest
 
         steps:
             - name: Checkout code
@@ -28,6 +30,10 @@ jobs:
               with:
                   php-version: '${{ matrix.php }}'
                   coverage: none
+
+            - name: Configure composer
+              if: "${{ matrix.deps == 'highest' }}"
+              run: composer config minimum-stability dev
 
             - name: Composer install
               uses: ramsey/composer-install@v1
