@@ -11,14 +11,16 @@
 
 namespace Symfony\Component\Security\Acl\Tests\Domain;
 
-use Doctrine\Common\Cache\ArrayCache;
+use Doctrine\Common\Cache\Psr6\DoctrineProvider;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Security\Acl\Domain\Acl;
 use Symfony\Component\Security\Acl\Domain\DoctrineAclCache;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Acl\Domain\PermissionGrantingStrategy;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 
-class DoctrineAclCacheTest extends \PHPUnit\Framework\TestCase
+class DoctrineAclCacheTest extends TestCase
 {
     protected $permissionGrantingStrategy;
 
@@ -29,7 +31,7 @@ class DoctrineAclCacheTest extends \PHPUnit\Framework\TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        new DoctrineAclCache(new ArrayCache(), $this->getPermissionGrantingStrategy(), $empty);
+        new DoctrineAclCache(DoctrineProvider::wrap(new ArrayAdapter()), $this->getPermissionGrantingStrategy(), $empty);
     }
 
     public function getEmptyValue()
@@ -94,7 +96,7 @@ class DoctrineAclCacheTest extends \PHPUnit\Framework\TestCase
     protected function getCache($cacheDriver = null, $prefix = DoctrineAclCache::PREFIX)
     {
         if (null === $cacheDriver) {
-            $cacheDriver = new ArrayCache();
+            $cacheDriver = DoctrineProvider::wrap(new ArrayAdapter());
         }
 
         return new DoctrineAclCache($cacheDriver, $this->getPermissionGrantingStrategy(), $prefix);
