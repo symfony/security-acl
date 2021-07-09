@@ -12,6 +12,7 @@
 namespace Symfony\Component\Security\Acl\Model;
 
 use Symfony\Component\Security\Acl\Exception\AclAlreadyExistsException;
+use Symfony\Component\Security\Acl\Exception\AclNotFoundException;
 
 /**
  * Provides support for creating and storing ACL instances.
@@ -20,6 +21,29 @@ use Symfony\Component\Security\Acl\Exception\AclAlreadyExistsException;
  */
 interface MutableAclProviderInterface extends AclProviderInterface
 {
+    /**
+     * Returns the ACL that belongs to the given object identity.
+     *
+     * @param SecurityIdentityInterface[] $sids
+     *
+     * @return MutableAclInterface
+     *
+     * @throws AclNotFoundException when there is no ACL
+     */
+    public function findAcl(ObjectIdentityInterface $oid, array $sids = []);
+
+    /**
+     * Returns the ACLs that belong to the given object identities.
+     *
+     * @param ObjectIdentityInterface[]   $oids an array of ObjectIdentityInterface implementations
+     * @param SecurityIdentityInterface[] $sids an array of SecurityIdentityInterface implementations
+     *
+     * @return \SplObjectStorage<ObjectIdentityInterface, MutableAclInterface> mapping the passed object identities to ACLs
+     *
+     * @throws AclNotFoundException when we cannot find an ACL for all identities
+     */
+    public function findAcls(array $oids, array $sids = []);
+
     /**
      * Creates a new ACL for the given object identity.
      *
