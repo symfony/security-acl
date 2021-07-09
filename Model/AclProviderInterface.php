@@ -46,7 +46,7 @@ interface AclProviderInterface
      * @param ObjectIdentityInterface[]   $oids an array of ObjectIdentityInterface implementations
      * @param SecurityIdentityInterface[] $sids an array of SecurityIdentityInterface implementations
      *
-     * @return \SplObjectStorage mapping the passed object identities to ACLs
+     * @return \SplObjectStorage<ObjectIdentityInterface, AclInterface> mapping the passed object identities to ACLs
      *
      * @throws AclNotFoundException when we cannot find an ACL for all identities
      */
