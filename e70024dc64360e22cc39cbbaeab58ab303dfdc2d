@@ -1,0 +1,19 @@
+---------------------------------------------------------------------------
+
+by VincentLanglet at 2021-07-13T14:55:34Z
+
+Friendly ping @nicolas-grekas @fabpot.
+
+Would you agree to merge such a PR in this repository in order to fix some static analysis (and also narrow the API) issue about the return type of `MutableAclProviderInterface::findAcl` or should we find a solution with psalm-symfony and phpstan-symfony repository ?
+
+Also, should I target main or 3.1 branch ?
+
+Thanks
+
+---------------------------------------------------------------------------
+
+by derrabus at 2021-07-14T15:09:05Z
+
+> Also, should I target main or 3.1 branch ?
+
+The main branch is fine.
