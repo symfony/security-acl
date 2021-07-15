@@ -21,6 +21,20 @@ use Symfony\Component\Security\Acl\Exception\AclAlreadyExistsException;
 interface MutableAclProviderInterface extends AclProviderInterface
 {
     /**
+     * {@inheritdoc}
+     *
+     * @return MutableAclInterface
+     */
+    public function findAcl(ObjectIdentityInterface $oid, array $sids = []);
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return \SplObjectStorage<ObjectIdentityInterface, MutableAclInterface> mapping the passed object identities to ACLs
+     */
+    public function findAcls(array $oids, array $sids = []);
+
+    /**
      * Creates a new ACL for the given object identity.
      *
      * @throws AclAlreadyExistsException when there already is an ACL for the given
