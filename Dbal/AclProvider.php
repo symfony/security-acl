@@ -97,6 +97,7 @@ class AclProvider implements AclProviderInterface
      */
     public function findAcls(array $oids, array $sids = [])
     {
+        /** @var \SplObjectStorage<ObjectIdentityInterface,AclInterface> */
         $result = new \SplObjectStorage();
         $currentBatch = [];
         $oidLookup = [];
@@ -451,7 +452,7 @@ QUERY;
      * This method is called for object identities which could not be retrieved
      * from the cache, and for which thus a database query is required.
      *
-     * @return \SplObjectStorage mapping object identities to ACL instances
+     * @return \SplObjectStorage<ObjectIdentityInterface,AclInterface> mapping object identities to ACL instances
      *
      * @throws AclNotFoundException
      */
@@ -477,15 +478,17 @@ QUERY;
      * Keep in mind that changes to this method might severely reduce the
      * performance of the entire ACL system.
      *
-     * @return \SplObjectStorage
+     * @return \SplObjectStorage<ObjectIdentityInterface,AclInterface>
      *
      * @throws \RuntimeException
      */
     private function hydrateObjectIdentities(Result $stmt, array $oidLookup, array $sids)
     {
+        /** @var \SplObjectStorage<Acl,string> */
         $parentIdToFill = new \SplObjectStorage();
         $acls = $aces = $emptyArray = [];
         $oidCache = $oidLookup;
+        /** @var \SplObjectStorage<ObjectIdentityInterface,AclInterface> */
         $result = new \SplObjectStorage();
         $loadedAces = &$this->loadedAces;
         $loadedAcls = &$this->loadedAcls;

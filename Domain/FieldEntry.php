@@ -24,18 +24,7 @@ class FieldEntry extends Entry implements FieldEntryInterface
 {
     private $field;
 
-    /**
-     * Constructor.
-     *
-     * @param int    $id
-     * @param string $field
-     * @param string $strategy
-     * @param int    $mask
-     * @param bool   $granting
-     * @param bool   $auditFailure
-     * @param bool   $auditSuccess
-     */
-    public function __construct($id, AclInterface $acl, $field, SecurityIdentityInterface $sid, $strategy, $mask, $granting, $auditFailure, $auditSuccess)
+    public function __construct(?int $id, AclInterface $acl, string $field, SecurityIdentityInterface $sid, string $strategy, int $mask, bool $granting, bool $auditFailure, $auditSuccess)
     {
         parent::__construct($id, $acl, $sid, $strategy, $mask, $granting, $auditFailure, $auditSuccess);
 

@@ -24,5 +24,5 @@ interface SecurityIdentityInterface
      * This method is used to compare two security identities in order to
      * not rely on referential equality.
      */
-    public function equals(self $identity);
+    public function equals(self $sid);
 }

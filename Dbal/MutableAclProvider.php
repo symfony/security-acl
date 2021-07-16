@@ -576,10 +576,10 @@ QUERY;
     /**
      * Constructs the SQL for selecting an ACE.
      *
-     * @param int    $classId
-     * @param int    $oid
-     * @param string $field
-     * @param int    $order
+     * @param int         $classId
+     * @param int|null    $oid
+     * @param string|null $field
+     * @param int         $order
      *
      * @return string
      */
