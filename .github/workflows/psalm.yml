@@ -1,0 +1,48 @@
+name: Static analysis
+
+on:
+  pull_request: ~
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  psalm:
+    name: Psalm
+    runs-on: Ubuntu-20.04
+
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.0'
+          ini-values: "memory_limit=-1"
+          coverage: none
+
+      - name: Checkout target branch
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.base_ref }}
+
+      - name: Checkout PR
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          composer remove --dev --no-update --no-interaction symfony/phpunit-bridge
+          composer require --no-update psalm/phar phpunit/phpunit:^9.5
+          composer update --no-progress --ansi
+          git checkout -- composer.json
+
+          ./vendor/bin/psalm.phar --version
+
+      - name: Generate Psalm baseline
+        run: |
+          git checkout -m ${{ github.base_ref }}
+          ./vendor/bin/psalm.phar --set-baseline=.github/psalm/psalm.baseline.xml --no-progress
+          git checkout -m FETCH_HEAD
+
+      - name: Psalm
+        run: |
+          ./vendor/bin/psalm.phar --output-format=github --no-progress
