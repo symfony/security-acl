@@ -11,16 +11,23 @@
 
 namespace Symfony\Component\Security\Acl\Tests\Voter;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Acl\Domain\RoleSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Acl\Exception\AclNotFoundException;
 use Symfony\Component\Security\Acl\Exception\NoAceFoundException;
+use Symfony\Component\Security\Acl\Model\AclInterface;
+use Symfony\Component\Security\Acl\Model\AclProviderInterface;
+use Symfony\Component\Security\Acl\Model\ObjectIdentityRetrievalStrategyInterface;
+use Symfony\Component\Security\Acl\Model\SecurityIdentityRetrievalStrategyInterface;
+use Symfony\Component\Security\Acl\Permission\PermissionMapInterface;
 use Symfony\Component\Security\Acl\Voter\AclVoter;
 use Symfony\Component\Security\Acl\Voter\FieldVote;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 
-class AclVoterTest extends \PHPUnit\Framework\TestCase
+class AclVoterTest extends TestCase
 {
     /**
      * @dataProvider getSupportsAttributeTests
@@ -213,7 +220,7 @@ class AclVoterTest extends \PHPUnit\Framework\TestCase
             ->expects($this->once())
             ->method('findAcl')
             ->with($this->equalTo($oid), $this->equalTo($sids))
-            ->willReturn($acl = $this->createMock('Symfony\Component\Security\Acl\Model\AclInterface'))
+            ->willReturn($acl = $this->createMock(AclInterface::class))
         ;
 
         $acl
@@ -259,7 +266,7 @@ class AclVoterTest extends \PHPUnit\Framework\TestCase
             ->expects($this->once())
             ->method('findAcl')
             ->with($this->equalTo($oid), $this->equalTo($sids))
-            ->willReturn($acl = $this->createMock('Symfony\Component\Security\Acl\Model\AclInterface'))
+            ->willReturn($acl = $this->createMock(AclInterface::class))
         ;
 
         $acl
@@ -302,7 +309,7 @@ class AclVoterTest extends \PHPUnit\Framework\TestCase
             ->expects($this->once())
             ->method('findAcl')
             ->with($this->equalTo($oid), $this->equalTo($sids))
-            ->willReturn($acl = $this->createMock('Symfony\Component\Security\Acl\Model\AclInterface'))
+            ->willReturn($acl = $this->createMock(AclInterface::class))
         ;
 
         $acl
@@ -348,7 +355,7 @@ class AclVoterTest extends \PHPUnit\Framework\TestCase
             ->expects($this->once())
             ->method('findAcl')
             ->with($this->equalTo($oid), $this->equalTo($sids))
-            ->willReturn($acl = $this->createMock('Symfony\Component\Security\Acl\Model\AclInterface'))
+            ->willReturn($acl = $this->createMock(AclInterface::class))
         ;
 
         $acl
@@ -389,7 +396,7 @@ class AclVoterTest extends \PHPUnit\Framework\TestCase
             ->expects($this->once())
             ->method('findAcl')
             ->with($this->equalTo($oid), $this->equalTo($sids))
-            ->willReturn($acl = $this->createMock('Symfony\Component\Security\Acl\Model\AclInterface'))
+            ->willReturn($acl = $this->createMock(AclInterface::class))
         ;
 
         $acl
@@ -404,15 +411,15 @@ class AclVoterTest extends \PHPUnit\Framework\TestCase
 
     protected function getToken()
     {
-        return $this->createMock('Symfony\Component\Security\Core\Authentication\Token\TokenInterface');
+        return $this->createMock(TokenInterface::class);
     }
 
     protected function getVoter($allowIfObjectIdentityUnavailable = true, $alwaysContains = true)
     {
-        $provider = $this->createMock('Symfony\Component\Security\Acl\Model\AclProviderInterface');
-        $permissionMap = $this->createMock('Symfony\Component\Security\Acl\Permission\PermissionMapInterface');
-        $oidStrategy = $this->createMock('Symfony\Component\Security\Acl\Model\ObjectIdentityRetrievalStrategyInterface');
-        $sidStrategy = $this->createMock('Symfony\Component\Security\Acl\Model\SecurityIdentityRetrievalStrategyInterface');
+        $provider = $this->createMock(AclProviderInterface::class);
+        $permissionMap = $this->createMock(PermissionMapInterface::class);
+        $oidStrategy = $this->createMock(ObjectIdentityRetrievalStrategyInterface::class);
+        $sidStrategy = $this->createMock(SecurityIdentityRetrievalStrategyInterface::class);
 
         if ($alwaysContains) {
             $permissionMap

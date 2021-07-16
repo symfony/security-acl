@@ -12,13 +12,16 @@
 namespace Symfony\Component\Security\Acl\Tests\Domain;
 
 use Doctrine\Persistence\PropertyChangedListener;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Acl\Domain\Acl;
+use Symfony\Component\Security\Acl\Domain\Entry;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Acl\Domain\PermissionGrantingStrategy;
 use Symfony\Component\Security\Acl\Domain\RoleSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
+use Symfony\Component\Security\Acl\Model\PermissionGrantingStrategyInterface;
 
-class AclTest extends \PHPUnit\Framework\TestCase
+class AclTest extends TestCase
 {
     public function testConstructor()
     {
@@ -35,9 +38,9 @@ class AclTest extends \PHPUnit\Framework\TestCase
      */
     public function testDeleteAceThrowsExceptionOnInvalidIndex($type)
     {
-        $this->expectException(\OutOfBoundsException::class);
-
         $acl = $this->getAcl();
+
+        $this->expectException(\OutOfBoundsException::class);
         $acl->{'delete'.$type.'Ace'}(0);
     }
 
@@ -81,9 +84,9 @@ class AclTest extends \PHPUnit\Framework\TestCase
      */
     public function testDeleteFieldAceThrowsExceptionOnInvalidIndex($type)
     {
-        $this->expectException(\OutOfBoundsException::class);
-
         $acl = $this->getAcl();
+
+        $this->expectException(\OutOfBoundsException::class);
         $acl->{'delete'.$type.'Ace'}('foo', 0);
     }
 
@@ -150,9 +153,9 @@ class AclTest extends \PHPUnit\Framework\TestCase
      */
     public function testInsertClassAceThrowsExceptionOnInvalidIndex($property, $method)
     {
-        $this->expectException(\OutOfBoundsException::class);
-
         $acl = $this->getAcl();
+
+        $this->expectException(\OutOfBoundsException::class);
         $acl->$method(new RoleSecurityIdentity('foo'), 1, 1);
     }
 
@@ -195,9 +198,9 @@ class AclTest extends \PHPUnit\Framework\TestCase
      */
     public function testInsertClassFieldAceThrowsExceptionOnInvalidIndex($property, $method)
     {
-        $this->expectException(\OutOfBoundsException::class);
-
         $acl = $this->getAcl();
+
+        $this->expectException(\OutOfBoundsException::class);
         $acl->$method('foo', new RoleSecurityIdentity('foo'), 1, 1);
     }
 
@@ -213,7 +216,7 @@ class AclTest extends \PHPUnit\Framework\TestCase
     {
         $sids = [new RoleSecurityIdentity('ROLE_FOO'), new RoleSecurityIdentity('ROLE_IDDQD')];
         $masks = [1, 2, 4];
-        $strategy = $this->createMock('Symfony\Component\Security\Acl\Model\PermissionGrantingStrategyInterface');
+        $strategy = $this->createMock(PermissionGrantingStrategyInterface::class);
         $acl = new Acl(1, new ObjectIdentity(1, 'foo'), $strategy, [], true);
 
         $strategy
@@ -230,7 +233,7 @@ class AclTest extends \PHPUnit\Framework\TestCase
     {
         $sids = [new RoleSecurityIdentity('ROLE_FOO'), new RoleSecurityIdentity('ROLE_IDDQD')];
         $masks = [1, 2, 4];
-        $strategy = $this->createMock('Symfony\Component\Security\Acl\Model\PermissionGrantingStrategyInterface');
+        $strategy = $this->createMock(PermissionGrantingStrategyInterface::class);
         $acl = new Acl(1, new ObjectIdentity(1, 'foo'), $strategy, [], true);
 
         $strategy
@@ -303,9 +306,9 @@ class AclTest extends \PHPUnit\Framework\TestCase
      */
     public function testUpdateAceThrowsOutOfBoundsExceptionOnInvalidIndex($type)
     {
-        $this->expectException(\OutOfBoundsException::class);
-
         $acl = $this->getAcl();
+
+        $this->expectException(\OutOfBoundsException::class);
         $acl->{'update'.$type}(0, 1);
     }
 
@@ -349,9 +352,9 @@ class AclTest extends \PHPUnit\Framework\TestCase
      */
     public function testUpdateFieldAceThrowsExceptionOnInvalidIndex($type)
     {
-        $this->expectException(\OutOfBoundsException::class);
-
         $acl = $this->getAcl();
+
+        $this->expectException(\OutOfBoundsException::class);
         $acl->{'update'.$type}(0, 'foo', 1);
     }
 
@@ -395,9 +398,9 @@ class AclTest extends \PHPUnit\Framework\TestCase
      */
     public function testUpdateAuditingThrowsExceptionOnInvalidIndex($type)
     {
-        $this->expectException(\OutOfBoundsException::class);
-
         $acl = $this->getAcl();
+
+        $this->expectException(\OutOfBoundsException::class);
         $acl->{'update'.$type.'Auditing'}(0, true, false);
     }
 
@@ -441,9 +444,9 @@ class AclTest extends \PHPUnit\Framework\TestCase
      */
     public function testUpdateFieldAuditingThrowsExceptionOnInvalidField($type)
     {
-        $this->expectException(\InvalidArgumentException::class);
-
         $acl = $this->getAcl();
+
+        $this->expectException(\InvalidArgumentException::class);
         $acl->{'update'.$type.'Auditing'}(0, 'foo', true, true);
     }
 
@@ -452,10 +455,10 @@ class AclTest extends \PHPUnit\Framework\TestCase
      */
     public function testUpdateFieldAuditingThrowsExceptionOnInvalidIndex($type)
     {
-        $this->expectException(\OutOfBoundsException::class);
-
         $acl = $this->getAcl();
         $acl->{'insert'.$type.'Ace'}('foo', new RoleSecurityIdentity('foo'), 1);
+
+        $this->expectException(\OutOfBoundsException::class);
         $acl->{'update'.$type.'Auditing'}(1, 'foo', true, false);
     }
 
@@ -502,9 +505,9 @@ class AclTest extends \PHPUnit\Framework\TestCase
         $listener = $this->createMock(PropertyChangedListener::class);
         foreach ($expectedChanges as $index => $property) {
             if (\in_array($property, $aceProperties)) {
-                $class = 'Symfony\Component\Security\Acl\Domain\Entry';
+                $class = Entry::class;
             } else {
-                $class = 'Symfony\Component\Security\Acl\Domain\Acl';
+                $class = Acl::class;
             }
 
             $arguments[] = [$this->isInstanceOf($class), $this->equalTo($property)];
