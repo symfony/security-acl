@@ -23,33 +23,23 @@ interface MutableAclInterface extends AclInterface
 {
     /**
      * Deletes a class-based ACE.
-     *
-     * @param int $index
      */
-    public function deleteClassAce($index);
+    public function deleteClassAce(int $index);
 
     /**
      * Deletes a class-field-based ACE.
-     *
-     * @param int    $index
-     * @param string $field
      */
-    public function deleteClassFieldAce($index, $field);
+    public function deleteClassFieldAce(int $index, string $field);
 
     /**
      * Deletes an object-based ACE.
-     *
-     * @param int $index
      */
-    public function deleteObjectAce($index);
+    public function deleteObjectAce(int $index);
 
     /**
      * Deletes an object-field-based ACE.
-     *
-     * @param int    $index
-     * @param string $field
      */
-    public function deleteObjectFieldAce($index, $field);
+    public function deleteObjectFieldAce(int $index, string $field);
 
     /**
      * Returns the primary key of this ACL.
@@ -60,93 +50,59 @@ interface MutableAclInterface extends AclInterface
 
     /**
      * Inserts a class-based ACE.
-     *
-     * @param int    $mask
-     * @param int    $index
-     * @param bool   $granting
-     * @param string $strategy
      */
-    public function insertClassAce(SecurityIdentityInterface $sid, $mask, $index = 0, $granting = true, $strategy = null);
+    public function insertClassAce(SecurityIdentityInterface $sid, int $mask, int $index = 0, bool $granting = true, ?string $strategy = null);
 
     /**
      * Inserts a class-field-based ACE.
-     *
-     * @param string $field
-     * @param int    $mask
-     * @param int    $index
-     * @param bool   $granting
-     * @param string $strategy
      */
-    public function insertClassFieldAce($field, SecurityIdentityInterface $sid, $mask, $index = 0, $granting = true, $strategy = null);
+    public function insertClassFieldAce(string $field, SecurityIdentityInterface $sid, int $mask, int $index = 0, bool $granting = true, ?string $strategy = null);
 
     /**
      * Inserts an object-based ACE.
-     *
-     * @param int    $mask
-     * @param int    $index
-     * @param bool   $granting
-     * @param string $strategy
      */
-    public function insertObjectAce(SecurityIdentityInterface $sid, $mask, $index = 0, $granting = true, $strategy = null);
+    public function insertObjectAce(SecurityIdentityInterface $sid, int $mask, int $index = 0, bool $granting = true, ?string $strategy = null);
 
     /**
      * Inserts an object-field-based ACE.
-     *
-     * @param string $field
-     * @param int    $mask
-     * @param int    $index
-     * @param bool   $granting
-     * @param string $strategy
      */
-    public function insertObjectFieldAce($field, SecurityIdentityInterface $sid, $mask, $index = 0, $granting = true, $strategy = null);
+    public function insertObjectFieldAce(string $field, SecurityIdentityInterface $sid, int $mask, int $index = 0, bool $granting = true, ?string $strategy = null);
 
     /**
      * Sets whether entries are inherited.
-     *
-     * @param bool $boolean
      */
-    public function setEntriesInheriting($boolean);
+    public function setEntriesInheriting(bool $boolean);
 
     /**
      * Sets the parent ACL.
      */
-    public function setParentAcl(AclInterface $acl = null);
+    public function setParentAcl(?AclInterface $acl = null);
 
     /**
      * Updates a class-based ACE.
      *
-     * @param int    $index
-     * @param int    $mask
-     * @param string $strategy if null the strategy should not be changed
+     * @param string|null $strategy if null the strategy should not be changed
      */
-    public function updateClassAce($index, $mask, $strategy = null);
+    public function updateClassAce(int $index, int $mask, ?string $strategy = null);
 
     /**
      * Updates a class-field-based ACE.
      *
-     * @param int    $index
-     * @param string $field
-     * @param int    $mask
-     * @param string $strategy if null the strategy should not be changed
+     * @param string|null $strategy if null the strategy should not be changed
      */
-    public function updateClassFieldAce($index, $field, $mask, $strategy = null);
+    public function updateClassFieldAce(int $index, string $field, int $mask, ?string $strategy = null);
 
     /**
      * Updates an object-based ACE.
      *
-     * @param int    $index
-     * @param int    $mask
-     * @param string $strategy if null the strategy should not be changed
+     * @param string|null $strategy if null the strategy should not be changed
      */
-    public function updateObjectAce($index, $mask, $strategy = null);
+    public function updateObjectAce(int $index, int $mask, ?string $strategy = null);
 
     /**
      * Updates an object-field-based ACE.
      *
-     * @param int    $index
-     * @param string $field
-     * @param int    $mask
-     * @param string $strategy if null the strategy should not be changed
+     * @param string|null $strategy if null the strategy should not be changed
      */
-    public function updateObjectFieldAce($index, $field, $mask, $strategy = null);
+    public function updateObjectFieldAce(int $index, string $field, int $mask, ?string $strategy = null);
 }

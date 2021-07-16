@@ -87,7 +87,7 @@ class AclTest extends TestCase
         $acl = $this->getAcl();
 
         $this->expectException(\OutOfBoundsException::class);
-        $acl->{'delete'.$type.'Ace'}('foo', 0);
+        $acl->{'delete'.$type.'Ace'}(0, 'foo');
     }
 
     /**

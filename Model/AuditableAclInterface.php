@@ -20,39 +20,21 @@ interface AuditableAclInterface extends MutableAclInterface
 {
     /**
      * Updates auditing for class-based ACE.
-     *
-     * @param int  $index
-     * @param bool $auditSuccess
-     * @param bool $auditFailure
      */
-    public function updateClassAuditing($index, $auditSuccess, $auditFailure);
+    public function updateClassAuditing(int $index, bool $auditSuccess, bool $auditFailure);
 
     /**
      * Updates auditing for class-field-based ACE.
-     *
-     * @param int    $index
-     * @param string $field
-     * @param bool   $auditSuccess
-     * @param bool   $auditFailure
      */
-    public function updateClassFieldAuditing($index, $field, $auditSuccess, $auditFailure);
+    public function updateClassFieldAuditing(int $index, string $field, bool $auditSuccess, bool $auditFailure);
 
     /**
      * Updates auditing for object-based ACE.
-     *
-     * @param int  $index
-     * @param bool $auditSuccess
-     * @param bool $auditFailure
      */
-    public function updateObjectAuditing($index, $auditSuccess, $auditFailure);
+    public function updateObjectAuditing(int $index, bool $auditSuccess, bool $auditFailure);
 
     /**
      * Updates auditing for object-field-based ACE.
-     *
-     * @param int    $index
-     * @param string $field
-     * @param bool   $auditSuccess
-     * @param bool   $auditFailure
      */
-    public function updateObjectFieldAuditing($index, $field, $auditSuccess, $auditFailure);
+    public function updateObjectFieldAuditing(int $index, string $field, bool $auditSuccess, bool $auditFailure);
 }
