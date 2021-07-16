@@ -28,7 +28,7 @@ interface AclInterface extends \Serializable
     /**
      * Returns all class-based ACEs associated with this ACL.
      *
-     * @return array
+     * @return array<int, EntryInterface>
      */
     public function getClassAces();
 
@@ -37,14 +37,14 @@ interface AclInterface extends \Serializable
      *
      * @param string $field
      *
-     * @return array
+     * @return array<int, EntryInterface>
      */
     public function getClassFieldAces($field);
 
     /**
      * Returns all object-based ACEs associated with this ACL.
      *
-     * @return array
+     * @return array<int, EntryInterface>
      */
     public function getObjectAces();
 
@@ -53,7 +53,7 @@ interface AclInterface extends \Serializable
      *
      * @param string $field
      *
-     * @return array
+     * @return array<int, EntryInterface>
      */
     public function getObjectFieldAces($field);
 
