@@ -35,11 +35,9 @@ interface AclInterface extends \Serializable
     /**
      * Returns all class-field-based ACEs associated with this ACL.
      *
-     * @param string $field
-     *
      * @return array<int, EntryInterface>
      */
-    public function getClassFieldAces($field);
+    public function getClassFieldAces(string $field);
 
     /**
      * Returns all object-based ACEs associated with this ACL.
@@ -51,11 +49,9 @@ interface AclInterface extends \Serializable
     /**
      * Returns all object-field-based ACEs associated with this ACL.
      *
-     * @param string $field
-     *
      * @return array<int, EntryInterface>
      */
-    public function getObjectFieldAces($field);
+    public function getObjectFieldAces(string $field);
 
     /**
      * Returns the object identity associated with this ACL.
@@ -81,28 +77,23 @@ interface AclInterface extends \Serializable
     /**
      * Determines whether field access is granted.
      *
-     * @param string $field
-     * @param bool   $administrativeMode
-     *
      * @return bool
      */
-    public function isFieldGranted($field, array $masks, array $securityIdentities, $administrativeMode = false);
+    public function isFieldGranted(string $field, array $masks, array $securityIdentities, bool $administrativeMode = false);
 
     /**
      * Determines whether access is granted.
-     *
-     * @param bool $administrativeMode
      *
      * @throws NoAceFoundException when no ACE was applicable for this request
      *
      * @return bool
      */
-    public function isGranted(array $masks, array $securityIdentities, $administrativeMode = false);
+    public function isGranted(array $masks, array $securityIdentities, bool $administrativeMode = false);
 
     /**
      * Whether the ACL has loaded ACEs for all of the passed security identities.
      *
-     * @param mixed $securityIdentities an implementation of SecurityIdentityInterface, or an array thereof
+     * @param SecurityIdentityInterface|SecurityIdentityInterface[] $securityIdentities
      *
      * @return bool
      */

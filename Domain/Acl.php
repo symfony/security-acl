@@ -113,7 +113,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     /**
      * {@inheritdoc}
      */
-    public function getClassFieldAces($field)
+    public function getClassFieldAces(string $field)
     {
         return $this->classFieldAces[$field] ?? [];
     }
@@ -129,7 +129,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     /**
      * {@inheritdoc}
      */
-    public function getObjectFieldAces($field)
+    public function getObjectFieldAces(string $field)
     {
         return $this->objectFieldAces[$field] ?? [];
     }
@@ -201,7 +201,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     /**
      * {@inheritdoc}
      */
-    public function isFieldGranted($field, array $masks, array $securityIdentities, $administrativeMode = false)
+    public function isFieldGranted(string $field, array $masks, array $securityIdentities, bool $administrativeMode = false)
     {
         return $this->permissionGrantingStrategy->isFieldGranted($this, $field, $masks, $securityIdentities, $administrativeMode);
     }
@@ -209,7 +209,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     /**
      * {@inheritdoc}
      */
-    public function isGranted(array $masks, array $securityIdentities, $administrativeMode = false)
+    public function isGranted(array $masks, array $securityIdentities, bool $administrativeMode = false)
     {
         return $this->permissionGrantingStrategy->isGranted($this, $masks, $securityIdentities, $administrativeMode);
     }
