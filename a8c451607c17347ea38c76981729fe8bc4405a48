@@ -1,0 +1,25 @@
+---------------------------------------------------------------------------
+
+by wouterj at 2021-07-16T13:51:37Z
+
+We had the same idea!
+
+Fyi, I have a branch locally that fixes everything for Psalm level 6.
+
+---------------------------------------------------------------------------
+
+by wouterj at 2021-07-16T13:52:16Z
+
+Feel free to cherry pick the commit: https://github.com/wouterj/security-acl/commit/2841ef5999bd63e03de56919b381cb6441a68086
+
+---------------------------------------------------------------------------
+
+by derrabus at 2021-07-16T13:55:07Z
+
+> We had the same idea!
+
+Awesome!
+
+> Fyi, I have a branch locally that fixes everything for Psalm level 6.
+
+Let's merge my PR then, so we have Psalm in CI when we test your PR. 🚀
