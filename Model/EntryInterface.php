@@ -31,7 +31,7 @@ interface EntryInterface extends \Serializable
     /**
      * The primary key of this ACE.
      *
-     * @return int
+     * @return int|null
      */
     public function getId();
 

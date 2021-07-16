@@ -217,17 +217,17 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     /**
      * {@inheritdoc}
      */
-    public function isSidLoaded($sids)
+    public function isSidLoaded($securityIdentities)
     {
         if (!$this->loadedSids) {
             return true;
         }
 
-        if (!\is_array($sids)) {
-            $sids = [$sids];
+        if (!\is_array($securityIdentities)) {
+            $securityIdentities = [$securityIdentities];
         }
 
-        foreach ($sids as $sid) {
+        foreach ($securityIdentities as $sid) {
             if (!$sid instanceof SecurityIdentityInterface) {
                 throw new \InvalidArgumentException('$sid must be an instance of SecurityIdentityInterface.');
             }

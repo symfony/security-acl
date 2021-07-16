@@ -11,6 +11,9 @@
 
 namespace Symfony\Component\Security\Acl\Exception;
 
+use Symfony\Component\Security\Acl\Model\AclInterface;
+use Symfony\Component\Security\Acl\Model\ObjectIdentityInterface;
+
 /**
  * This exception is thrown when you have requested ACLs for multiple object
  * identities, but the AclProvider implementation failed to find ACLs for all
@@ -25,7 +28,7 @@ class NotAllAclsFoundException extends AclNotFoundException
     private $partialResult;
 
     /**
-     * Sets the partial result.
+     * @param \SplObjectStorage<ObjectIdentityInterface,AclInterface> $result
      */
     public function setPartialResult(\SplObjectStorage $result)
     {
@@ -35,7 +38,7 @@ class NotAllAclsFoundException extends AclNotFoundException
     /**
      * Returns the partial result.
      *
-     * @return \SplObjectStorage
+     * @return \SplObjectStorage<ObjectIdentityInterface,AclInterface>
      */
     public function getPartialResult()
     {

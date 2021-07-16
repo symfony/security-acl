@@ -51,33 +51,33 @@ class AclVoter implements VoterInterface
         return \is_string($attribute) && $this->permissionMap->contains($attribute);
     }
 
-    public function vote(TokenInterface $token, $object, array $attributes)
+    public function vote(TokenInterface $token, $subject, array $attributes)
     {
         foreach ($attributes as $attribute) {
             if (!$this->supportsAttribute($attribute)) {
                 continue;
             }
 
-            if (null === $masks = $this->permissionMap->getMasks($attribute, $object)) {
+            if (null === $masks = $this->permissionMap->getMasks($attribute, $subject)) {
                 continue;
             }
 
-            if (null === $object) {
+            if (null === $subject) {
                 if (null !== $this->logger) {
                     $this->logger->debug(sprintf('Object identity unavailable. Voting to %s.', $this->allowIfObjectIdentityUnavailable ? 'grant access' : 'abstain'));
                 }
 
                 return $this->allowIfObjectIdentityUnavailable ? self::ACCESS_GRANTED : self::ACCESS_ABSTAIN;
-            } elseif ($object instanceof FieldVote) {
-                $field = $object->getField();
-                $object = $object->getDomainObject();
+            } elseif ($subject instanceof FieldVote) {
+                $field = $subject->getField();
+                $subject = $subject->getDomainObject();
             } else {
                 $field = null;
             }
 
-            if ($object instanceof ObjectIdentityInterface) {
-                $oid = $object;
-            } elseif (null === $oid = $this->objectIdentityRetrievalStrategy->getObjectIdentity($object)) {
+            if ($subject instanceof ObjectIdentityInterface) {
+                $oid = $subject;
+            } elseif (null === $oid = $this->objectIdentityRetrievalStrategy->getObjectIdentity($subject)) {
                 if (null !== $this->logger) {
                     $this->logger->debug(sprintf('Object identity unavailable. Voting to %s.', $this->allowIfObjectIdentityUnavailable ? 'grant access' : 'abstain'));
                 }
