@@ -17,12 +17,12 @@
     ],
     "require": {
         "php": ">=7.2.5",
-        "symfony/security-core": "^4.4|^5.0|^6.0"
+        "symfony/security-core": "^4.4|^5.0"
     },
     "require-dev": {
-        "symfony/cache": "^4.4|^5.0|^6.0",
-        "symfony/finder": "^4.4|^5.0|^6.0",
-        "symfony/phpunit-bridge": "^5.2|^6.0",
+        "symfony/cache": "^4.4|^5.0",
+        "symfony/finder": "^4.4|^5.0",
+        "symfony/phpunit-bridge": "^5.2",
         "doctrine/cache": "^1.11|^2.0",
         "doctrine/common": "^2.2|^3",
         "doctrine/persistence": "^1.3.3|^2",
