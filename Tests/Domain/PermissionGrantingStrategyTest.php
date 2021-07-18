@@ -11,14 +11,16 @@
 
 namespace Symfony\Component\Security\Acl\Tests\Domain;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Acl\Domain\Acl;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Acl\Domain\PermissionGrantingStrategy;
 use Symfony\Component\Security\Acl\Domain\RoleSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Acl\Exception\NoAceFoundException;
+use Symfony\Component\Security\Acl\Model\AuditLoggerInterface;
 
-class PermissionGrantingStrategyTest extends \PHPUnit\Framework\TestCase
+class PermissionGrantingStrategyTest extends TestCase
 {
     public function testIsGrantedObjectAcesHavePriority()
     {
@@ -74,12 +76,11 @@ class PermissionGrantingStrategyTest extends \PHPUnit\Framework\TestCase
 
     public function testIsGrantedReturnsExceptionIfNoAceIsFound()
     {
-        $this->expectException(\Symfony\Component\Security\Acl\Exception\NoAceFoundException::class);
-
         $strategy = new PermissionGrantingStrategy();
         $acl = $this->getAcl($strategy);
         $sid = new UserSecurityIdentity('johannes', 'Foo');
 
+        $this->expectException(NoAceFoundException::class);
         $strategy->isGranted($acl, [1], [$sid]);
     }
 
@@ -106,7 +107,7 @@ class PermissionGrantingStrategyTest extends \PHPUnit\Framework\TestCase
         $acl = $this->getAcl($strategy);
         $sid = new UserSecurityIdentity('johannes', 'Foo');
 
-        $logger = $this->createMock('Symfony\Component\Security\Acl\Model\AuditLoggerInterface');
+        $logger = $this->createMock(AuditLoggerInterface::class);
         $logger
             ->expects($this->once())
             ->method('logIfNeeded')
@@ -125,7 +126,7 @@ class PermissionGrantingStrategyTest extends \PHPUnit\Framework\TestCase
         $acl = $this->getAcl($strategy);
         $sid = new UserSecurityIdentity('johannes', 'Foo');
 
-        $logger = $this->createMock('Symfony\Component\Security\Acl\Model\AuditLoggerInterface');
+        $logger = $this->createMock(AuditLoggerInterface::class);
         $logger
             ->expects($this->once())
             ->method('logIfNeeded')
