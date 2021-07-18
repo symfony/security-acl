@@ -159,14 +159,9 @@ class Entry implements AuditableEntryInterface
         $this->strategy = $strategy;
     }
 
-    /**
-     * Implementation of \Serializable.
-     *
-     * @return string
-     */
-    public function serialize()
+    public function __serialize(): array
     {
-        return serialize([
+        return [
             $this->mask,
             $this->id,
             $this->securityIdentity,
@@ -174,15 +169,10 @@ class Entry implements AuditableEntryInterface
             $this->auditFailure,
             $this->auditSuccess,
             $this->granting,
-        ]);
+        ];
     }
 
-    /**
-     * Implementation of \Serializable.
-     *
-     * @param string $serialized
-     */
-    public function unserialize($serialized)
+    public function __unserialize(array $data): void
     {
         [$this->mask,
              $this->id,
@@ -191,6 +181,28 @@ class Entry implements AuditableEntryInterface
              $this->auditFailure,
              $this->auditSuccess,
              $this->granting
-        ] = unserialize($serialized);
+        ] = $data;
+    }
+
+    /**
+     * @internal
+     * @final
+     *
+     * @return string
+     */
+    public function serialize()
+    {
+        return serialize($this->__serialize());
+    }
+
+    /**
+     * @internal
+     * @final
+     *
+     * @param string $serialized
+     */
+    public function unserialize($serialized)
+    {
+        $this->__unserialize(\is_array($serialized) ? $serialized : unserialize($serialized));
     }
 }

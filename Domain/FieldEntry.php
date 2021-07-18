@@ -42,23 +42,18 @@ class FieldEntry extends Entry implements FieldEntryInterface
     /**
      * {@inheritdoc}
      */
-    public function serialize()
+    public function __serialize(): array
     {
-        return serialize([
-            $this->field,
-            parent::serialize(),
-        ]);
+        return [$this->field, parent::__serialize()];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function unserialize($serialized)
+    public function __unserialize(array $data): void
     {
-        [$this->field, $parentStr] = unserialize($serialized);
-        if (!\is_string($parentStr)) {
-            throw new \BadMethodCallException('Cannot serialize '.__CLASS__);
-        }
-        parent::unserialize($parentStr);
+        [$this->field, $parentData] = $data;
+        $parentData = \is_array($parentData) ? $parentData : unserialize($parentData);
+        parent::__unserialize($parentData);
     }
 }

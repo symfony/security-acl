@@ -18,6 +18,9 @@ namespace Symfony\Component\Security\Acl\Model;
  * allow client modification.
  *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
+ *
+ * @method array __serialize()              returns all the necessary state of the object for serialization purposes
+ * @method void  __unserialize(array $data) restores the object state from an array given by {@see __serialize}
  */
 interface EntryInterface extends \Serializable
 {

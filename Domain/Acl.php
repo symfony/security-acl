@@ -244,14 +244,9 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
         return true;
     }
 
-    /**
-     * Implementation for the \Serializable interface.
-     *
-     * @return string
-     */
-    public function serialize()
+    public function __serialize(): array
     {
-        return serialize([
+        return [
             null === $this->parentAcl ? null : $this->parentAcl->getId(),
             $this->objectIdentity,
             $this->classAces,
@@ -261,15 +256,10 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
             $this->id,
             $this->loadedSids,
             $this->entriesInheriting,
-        ]);
+        ];
     }
 
-    /**
-     * Implementation for the \Serializable interface.
-     *
-     * @param string $serialized
-     */
-    public function unserialize($serialized)
+    public function __unserialize(array $data): void
     {
         [$this->parentAcl,
              $this->objectIdentity,
@@ -280,9 +270,31 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
              $this->id,
              $this->loadedSids,
              $this->entriesInheriting
-        ] = unserialize($serialized);
+        ] = $data;
 
         $this->listeners = [];
+    }
+
+    /**
+     * @internal
+     * @final
+     *
+     * @return string
+     */
+    public function serialize()
+    {
+        return serialize($this->__serialize());
+    }
+
+    /**
+     * @internal
+     * @final
+     *
+     * @param string $serialized
+     */
+    public function unserialize($serialized)
+    {
+        $this->__unserialize(\is_array($serialized) ? $serialized : unserialize($serialized));
     }
 
     /**

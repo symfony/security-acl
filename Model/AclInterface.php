@@ -22,6 +22,9 @@ use Symfony\Component\Security\Acl\Exception\NoAceFoundException;
  * use ObjectIdentity implementations as an additional level of indirection.
  *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
+ *
+ * @method array __serialize()              returns all the necessary state of the object for serialization purposes
+ * @method void  __unserialize(array $data) restores the object state from an array given by {@see __serialize}
  */
 interface AclInterface extends \Serializable
 {
