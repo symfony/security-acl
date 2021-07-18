@@ -73,7 +73,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     /**
      * {@inheritdoc}
      */
-    public function deleteClassAce($index)
+    public function deleteClassAce(int $index)
     {
         $this->deleteAce('classAces', $index);
     }
@@ -81,7 +81,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     /**
      * {@inheritdoc}
      */
-    public function deleteClassFieldAce($index, $field)
+    public function deleteClassFieldAce(int $index, string $field)
     {
         $this->deleteFieldAce('classFieldAces', $index, $field);
     }
@@ -89,7 +89,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     /**
      * {@inheritdoc}
      */
-    public function deleteObjectAce($index)
+    public function deleteObjectAce(int $index)
     {
         $this->deleteAce('objectAces', $index);
     }
@@ -97,7 +97,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     /**
      * {@inheritdoc}
      */
-    public function deleteObjectFieldAce($index, $field)
+    public function deleteObjectFieldAce(int $index, string $field)
     {
         $this->deleteFieldAce('objectFieldAces', $index, $field);
     }
@@ -161,7 +161,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     /**
      * {@inheritdoc}
      */
-    public function insertClassAce(SecurityIdentityInterface $sid, $mask, $index = 0, $granting = true, $strategy = null)
+    public function insertClassAce(SecurityIdentityInterface $sid, int $mask, int $index = 0, bool $granting = true, ?string $strategy = null)
     {
         $this->insertAce('classAces', $index, $mask, $sid, $granting, $strategy);
     }
@@ -169,7 +169,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     /**
      * {@inheritdoc}
      */
-    public function insertClassFieldAce($field, SecurityIdentityInterface $sid, $mask, $index = 0, $granting = true, $strategy = null)
+    public function insertClassFieldAce(string $field, SecurityIdentityInterface $sid, int $mask, int $index = 0, bool $granting = true, ?string $strategy = null)
     {
         $this->insertFieldAce('classFieldAces', $index, $field, $mask, $sid, $granting, $strategy);
     }
@@ -177,7 +177,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     /**
      * {@inheritdoc}
      */
-    public function insertObjectAce(SecurityIdentityInterface $sid, $mask, $index = 0, $granting = true, $strategy = null)
+    public function insertObjectAce(SecurityIdentityInterface $sid, int $mask, int $index = 0, bool $granting = true, ?string $strategy = null)
     {
         $this->insertAce('objectAces', $index, $mask, $sid, $granting, $strategy);
     }
@@ -185,7 +185,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     /**
      * {@inheritdoc}
      */
-    public function insertObjectFieldAce($field, SecurityIdentityInterface $sid, $mask, $index = 0, $granting = true, $strategy = null)
+    public function insertObjectFieldAce(string $field, SecurityIdentityInterface $sid, int $mask, int $index = 0, bool $granting = true, ?string $strategy = null)
     {
         $this->insertFieldAce('objectFieldAces', $index, $field, $mask, $sid, $granting, $strategy);
     }
@@ -300,7 +300,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     /**
      * {@inheritdoc}
      */
-    public function setEntriesInheriting($boolean)
+    public function setEntriesInheriting(bool $boolean)
     {
         if ($this->entriesInheriting !== $boolean) {
             $this->onPropertyChanged('entriesInheriting', $this->entriesInheriting, $boolean);
@@ -311,7 +311,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     /**
      * {@inheritdoc}
      */
-    public function setParentAcl(AclInterface $acl = null)
+    public function setParentAcl(?AclInterface $acl = null)
     {
         if (null !== $acl && null === $acl->getId()) {
             throw new \InvalidArgumentException('$acl must have an ID.');
@@ -326,7 +326,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     /**
      * {@inheritdoc}
      */
-    public function updateClassAce($index, $mask, $strategy = null)
+    public function updateClassAce(int $index, int $mask, ?string $strategy = null)
     {
         $this->updateAce('classAces', $index, $mask, $strategy);
     }
@@ -334,7 +334,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     /**
      * {@inheritdoc}
      */
-    public function updateClassFieldAce($index, $field, $mask, $strategy = null)
+    public function updateClassFieldAce(int $index, string $field, int $mask, ?string $strategy = null)
     {
         $this->updateFieldAce('classFieldAces', $index, $field, $mask, $strategy);
     }
@@ -342,7 +342,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     /**
      * {@inheritdoc}
      */
-    public function updateObjectAce($index, $mask, $strategy = null)
+    public function updateObjectAce(int $index, int $mask, ?string $strategy = null)
     {
         $this->updateAce('objectAces', $index, $mask, $strategy);
     }
@@ -350,7 +350,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     /**
      * {@inheritdoc}
      */
-    public function updateObjectFieldAce($index, $field, $mask, $strategy = null)
+    public function updateObjectFieldAce(int $index, string $field, int $mask, ?string $strategy = null)
     {
         $this->updateFieldAce('objectFieldAces', $index, $field, $mask, $strategy);
     }
@@ -358,7 +358,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     /**
      * {@inheritdoc}
      */
-    public function updateClassAuditing($index, $auditSuccess, $auditFailure)
+    public function updateClassAuditing(int $index, bool $auditSuccess, bool $auditFailure)
     {
         $this->updateAuditing($this->classAces, $index, $auditSuccess, $auditFailure);
     }
@@ -366,7 +366,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     /**
      * {@inheritdoc}
      */
-    public function updateClassFieldAuditing($index, $field, $auditSuccess, $auditFailure)
+    public function updateClassFieldAuditing(int $index, string $field, bool $auditSuccess, bool $auditFailure)
     {
         if (!isset($this->classFieldAces[$field])) {
             throw new \InvalidArgumentException(sprintf('There are no ACEs for field "%s".', $field));
@@ -378,7 +378,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     /**
      * {@inheritdoc}
      */
-    public function updateObjectAuditing($index, $auditSuccess, $auditFailure)
+    public function updateObjectAuditing(int $index, bool $auditSuccess, bool $auditFailure)
     {
         $this->updateAuditing($this->objectAces, $index, $auditSuccess, $auditFailure);
     }
@@ -386,7 +386,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     /**
      * {@inheritdoc}
      */
-    public function updateObjectFieldAuditing($index, $field, $auditSuccess, $auditFailure)
+    public function updateObjectFieldAuditing(int $index, string $field, bool $auditSuccess, bool $auditFailure)
     {
         if (!isset($this->objectFieldAces[$field])) {
             throw new \InvalidArgumentException(sprintf('There are no ACEs for field "%s".', $field));
