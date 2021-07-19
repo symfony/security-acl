@@ -12,6 +12,7 @@
 namespace Symfony\Component\Security\Acl\Tests\Domain;
 
 use Symfony\Component\Security\Acl\Domain\FieldEntry;
+use Symfony\Component\Security\Acl\Model\SecurityIdentityInterface;
 
 class FieldEntryTest extends \PHPUnit\Framework\TestCase
 {
@@ -38,6 +39,27 @@ class FieldEntryTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($ace->isGranting(), $uAce->isGranting());
         $this->assertEquals($ace->isAuditSuccess(), $uAce->isAuditSuccess());
         $this->assertEquals($ace->isAuditFailure(), $uAce->isAuditFailure());
+    }
+
+    public function testSerializeUnserializeMoreAceWithSameSecurityIdentity()
+    {
+        $sid = $this->getSid();
+
+        $aceFirst = $this->getAce(null, $sid);
+        $aceSecond = $this->getAce(null, $sid);
+
+        // as used in DoctrineAclCache::putInCache (line 142)
+        $serialized = serialize([[
+            'fieldOne' => [$aceFirst],
+            'fieldTwo' => [$aceSecond],
+        ]]);
+
+        $unserialized = unserialize($serialized);
+        $uAceFirst = $unserialized[0]['fieldOne'][0];
+        $uAceSecond = $unserialized[0]['fieldTwo'][0];
+
+        $this->assertInstanceOf(SecurityIdentityInterface::class, $uAceFirst->getSecurityIdentity());
+        $this->assertInstanceOf(SecurityIdentityInterface::class, $uAceSecond->getSecurityIdentity());
     }
 
     protected function getAce($acl = null, $sid = null)
