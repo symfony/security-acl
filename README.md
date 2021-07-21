@@ -11,7 +11,7 @@ Resources
 
 Documentation:
 
-https://symfony.com/doc/3.0/book/security.html
+https://github.com/symfony/acl-bundle/blob/main/src/Resources/doc/index.rst
 
 Tests
 -----
