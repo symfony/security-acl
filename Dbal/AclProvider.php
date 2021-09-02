@@ -520,6 +520,9 @@ QUERY;
                  $username,
                  $securityIdentifier] = array_values($data);
 
+            // FIX: remove duplicate slashes
+            $classType = str_replace('\\\\', '\\', $classType);
+
             // has the ACL been hydrated during this hydration cycle?
             if (isset($acls[$aclId])) {
                 $acl = $acls[$aclId];
