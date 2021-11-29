@@ -11,7 +11,11 @@
 
 namespace Symfony\Component\Security\Acl\Tests\Domain;
 
-class AuditLoggerTest extends \PHPUnit\Framework\TestCase
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\Security\Acl\Domain\AuditLogger;
+use Symfony\Component\Security\Acl\Tests\Fixtures\SerializableAuditableEntryInterface;
+
+class AuditLoggerTest extends TestCase
 {
     /**
      * @dataProvider getTestLogData
@@ -73,11 +77,11 @@ class AuditLoggerTest extends \PHPUnit\Framework\TestCase
 
     protected function getEntry()
     {
-        return $this->createMock('Symfony\Component\Security\Acl\Model\AuditableEntryInterface');
+        return $this->createMock(SerializableAuditableEntryInterface::class);
     }
 
     protected function getLogger()
     {
-        return $this->getMockForAbstractClass('Symfony\Component\Security\Acl\Domain\AuditLogger');
+        return $this->getMockForAbstractClass(AuditLogger::class);
     }
 }
