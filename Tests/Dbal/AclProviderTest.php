@@ -15,8 +15,13 @@ use Doctrine\DBAL\DriverManager;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Acl\Dbal\AclProvider;
 use Symfony\Component\Security\Acl\Dbal\Schema;
+use Symfony\Component\Security\Acl\Domain\Acl;
+use Symfony\Component\Security\Acl\Domain\Entry;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Acl\Domain\PermissionGrantingStrategy;
+use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
+use Symfony\Component\Security\Acl\Exception\AclNotFoundException;
+use Symfony\Component\Security\Acl\Exception\NotAllAclsFoundException;
 
 /**
  * @requires extension pdo_sqlite
@@ -30,7 +35,7 @@ class AclProviderTest extends TestCase
      */
     public function testFindAclThrowsExceptionWhenNoAclExists()
     {
-        $this->expectException(\Symfony\Component\Security\Acl\Exception\AclNotFoundException::class);
+        $this->expectException(AclNotFoundException::class);
 
         $this->getProvider()->findAcl(new ObjectIdentity('foo', 'foo'));
     }
@@ -46,8 +51,8 @@ class AclProviderTest extends TestCase
 
             $this->fail('Provider did not throw an expected exception.');
         } catch (\Exception $e) {
-            $this->assertInstanceOf('Symfony\Component\Security\Acl\Exception\AclNotFoundException', $e);
-            $this->assertInstanceOf('Symfony\Component\Security\Acl\Exception\NotAllAclsFoundException', $e);
+            $this->assertInstanceOf(AclNotFoundException::class, $e);
+            $this->assertInstanceOf(NotAllAclsFoundException::class, $e);
 
             $partialResult = $e->getPartialResult();
             $this->assertTrue($partialResult->contains($oids[0]));
@@ -66,8 +71,8 @@ class AclProviderTest extends TestCase
         $acls = $provider->findAcls($oids);
         $this->assertInstanceOf('SplObjectStorage', $acls);
         $this->assertCount(2, $acls);
-        $this->assertInstanceOf('Symfony\Component\Security\Acl\Domain\Acl', $acl0 = $acls->offsetGet($oids[0]));
-        $this->assertInstanceOf('Symfony\Component\Security\Acl\Domain\Acl', $acl1 = $acls->offsetGet($oids[1]));
+        $this->assertInstanceOf(Acl::class, $acl0 = $acls->offsetGet($oids[0]));
+        $this->assertInstanceOf(Acl::class, $acl1 = $acls->offsetGet($oids[1]));
         $this->assertTrue($oids[0]->equals($acl0->getObjectIdentity()));
         $this->assertTrue($oids[1]->equals($acl1->getObjectIdentity()));
     }
@@ -83,8 +88,8 @@ class AclProviderTest extends TestCase
         $acls = $provider->findAcls($oids);
         $this->assertInstanceOf('SplObjectStorage', $acls);
         $this->assertCount(2, $acls);
-        $this->assertInstanceOf('Symfony\Component\Security\Acl\Domain\Acl', $acl0 = $acls->offsetGet($oids[0]));
-        $this->assertInstanceOf('Symfony\Component\Security\Acl\Domain\Acl', $acl1 = $acls->offsetGet($oids[1]));
+        $this->assertInstanceOf(Acl::class, $acl0 = $acls->offsetGet($oids[0]));
+        $this->assertInstanceOf(Acl::class, $acl1 = $acls->offsetGet($oids[1]));
         $this->assertTrue($oids[0]->equals($acl0->getObjectIdentity()));
         $this->assertTrue($oids[1]->equals($acl1->getObjectIdentity()));
     }
@@ -110,7 +115,7 @@ class AclProviderTest extends TestCase
 
         $acl = $provider->findAcl($oid);
 
-        $this->assertInstanceOf('Symfony\Component\Security\Acl\Domain\Acl', $acl);
+        $this->assertInstanceOf(Acl::class, $acl);
         $this->assertTrue($oid->equals($acl->getObjectIdentity()));
         $this->assertEquals(4, $acl->getId());
         $this->assertCount(0, $acl->getClassAces());
@@ -119,7 +124,7 @@ class AclProviderTest extends TestCase
         $this->assertCount(0, $this->getField($acl, 'objectFieldAces'));
 
         $aces = $acl->getObjectAces();
-        $this->assertInstanceOf('Symfony\Component\Security\Acl\Domain\Entry', $aces[0]);
+        $this->assertInstanceOf(Entry::class, $aces[0]);
         $this->assertTrue($aces[0]->isGranting());
         $this->assertTrue($aces[0]->isAuditSuccess());
         $this->assertTrue($aces[0]->isAuditFailure());
@@ -134,7 +139,7 @@ class AclProviderTest extends TestCase
         }
 
         $sid = $aces[0]->getSecurityIdentity();
-        $this->assertInstanceOf('Symfony\Component\Security\Acl\Domain\UserSecurityIdentity', $sid);
+        $this->assertInstanceOf(UserSecurityIdentity::class, $sid);
         $this->assertEquals('john.doe', $sid->getUsername());
         $this->assertEquals('SomeClass', $sid->getClass());
     }

@@ -493,7 +493,7 @@ QUERY;
         $permissionGrantingStrategy = $this->permissionGrantingStrategy;
 
         // we need these to set protected properties on hydrated objects
-        $aclReflection = new \ReflectionClass('Symfony\Component\Security\Acl\Domain\Acl');
+        $aclReflection = new \ReflectionClass(Acl::class);
         $aclClassAcesProperty = $aclReflection->getProperty('classAces');
         $aclClassAcesProperty->setAccessible(true);
         $aclClassFieldAcesProperty = $aclReflection->getProperty('classFieldAces');
