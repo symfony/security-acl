@@ -74,7 +74,7 @@ class MutableAclProviderTest extends TestCase
         $acl = $provider->createAcl($oid);
         $cachedAcl = $provider->findAcl($oid);
 
-        $this->assertInstanceOf('Symfony\Component\Security\Acl\Domain\Acl', $acl);
+        $this->assertInstanceOf(Acl::class, $acl);
         $this->assertSame($acl, $cachedAcl);
         $this->assertTrue($acl->getObjectIdentity()->equals($oid));
     }

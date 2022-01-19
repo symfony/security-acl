@@ -13,6 +13,8 @@ namespace Symfony\Component\Security\Acl\Dbal;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\Persistence\PropertyChangedListener;
+use Symfony\Component\Security\Acl\Domain\Acl;
+use Symfony\Component\Security\Acl\Domain\Entry;
 use Symfony\Component\Security\Acl\Domain\RoleSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Acl\Exception\AclAlreadyExistsException;
@@ -306,9 +308,9 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
             // if there have been changes to shared properties, we need to synchronize other
             // ACL instances for object identities of the same type that are already in-memory
             if (\count($sharedPropertyChanges) > 0) {
-                $classAcesProperty = new \ReflectionProperty('Symfony\Component\Security\Acl\Domain\Acl', 'classAces');
+                $classAcesProperty = new \ReflectionProperty(Acl::class, 'classAces');
                 $classAcesProperty->setAccessible(true);
-                $classFieldAcesProperty = new \ReflectionProperty('Symfony\Component\Security\Acl\Domain\Acl', 'classFieldAces');
+                $classFieldAcesProperty = new \ReflectionProperty(Acl::class, 'classFieldAces');
                 $classFieldAcesProperty->setAccessible(true);
 
                 foreach ($this->loadedAcls[$acl->getObjectIdentity()->getType()] as $sameTypeAcl) {
@@ -858,7 +860,7 @@ QUERY;
                     $aceId = $this->connection->executeQuery($this->getSelectAccessControlEntryIdSql($classId, $objectIdentityId, $field, $i))->fetchOne();
                     $this->loadedAces[$aceId] = $ace;
 
-                    $aceIdProperty = new \ReflectionProperty('Symfony\Component\Security\Acl\Domain\Entry', 'id');
+                    $aceIdProperty = new \ReflectionProperty(Entry::class, 'id');
                     $aceIdProperty->setAccessible(true);
                     $aceIdProperty->setValue($ace, (int) $aceId);
                 }

@@ -55,14 +55,14 @@ namespace Symfony\Component\Security\Acl\Tests\Domain
         {
             $id = ObjectIdentity::fromDomainObject(new TestDomainObject());
             $this->assertEquals('getId()', $id->getIdentifier());
-            $this->assertEquals('Symfony\Component\Security\Acl\Tests\Domain\TestDomainObject', $id->getType());
+            $this->assertEquals(TestDomainObject::class, $id->getType());
         }
 
         public function testFromDomainObjectWithProxy()
         {
             $id = ObjectIdentity::fromDomainObject(new \Acme\DemoBundle\Proxy\__CG__\Symfony\Component\Security\Acl\Tests\Domain\TestDomainObject());
             $this->assertEquals('getId()', $id->getIdentifier());
-            $this->assertEquals('Symfony\Component\Security\Acl\Tests\Domain\TestDomainObject', $id->getType());
+            $this->assertEquals(TestDomainObject::class, $id->getType());
         }
 
         public function testFromDomainObjectWithoutInterfaceEnforcesStringIdentifier()
@@ -72,7 +72,7 @@ namespace Symfony\Component\Security\Acl\Tests\Domain
             $id = ObjectIdentity::fromDomainObject($domainObject);
 
             $this->assertSame('1', $id->getIdentifier());
-            $this->assertEquals('Symfony\Component\Security\Acl\Tests\Domain\TestDomainObject', $id->getType());
+            $this->assertEquals(TestDomainObject::class, $id->getType());
         }
 
         public function testFromDomainObjectWithoutInterfaceAllowsZeroAsIdentifier()
@@ -82,7 +82,7 @@ namespace Symfony\Component\Security\Acl\Tests\Domain
             $id = ObjectIdentity::fromDomainObject($domainObject);
 
             $this->assertSame('0', $id->getIdentifier());
-            $this->assertEquals('Symfony\Component\Security\Acl\Tests\Domain\TestDomainObject', $id->getType());
+            $this->assertEquals(TestDomainObject::class, $id->getType());
         }
 
         /**
