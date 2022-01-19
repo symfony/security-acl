@@ -13,6 +13,7 @@ namespace Symfony\Component\Security\Acl\Dbal;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Schema as BaseSchema;
+use Doctrine\DBAL\Schema\SchemaConfig;
 
 /**
  * The schema used for the ACL system.
@@ -24,14 +25,11 @@ final class Schema extends BaseSchema
     protected $options;
 
     /**
-     * Constructor.
-     *
-     * @param array      $options    the names for tables
-     * @param Connection $connection
+     * @param array $options the names for tables
      */
     public function __construct(array $options, Connection $connection = null)
     {
-        $schemaConfig = null === $connection ? null : $connection->getSchemaManager()->createSchemaConfig();
+        $schemaConfig = $this->createSchemaConfig($connection);
 
         parent::__construct([], [], $schemaConfig);
 
@@ -148,5 +146,19 @@ final class Schema extends BaseSchema
 
         $table->setPrimaryKey(['id']);
         $table->addUniqueIndex(['identifier', 'username']);
+    }
+
+    private function createSchemaConfig(?Connection $connection): ?SchemaConfig
+    {
+        if (null === $connection) {
+            return null;
+        }
+
+        $schemaManager = method_exists($connection, 'createSchemaManager')
+            ? $connection->createSchemaManager()
+            : $connection->getSchemaManager()
+        ;
+
+        return $schemaManager->createSchemaConfig();
     }
 }

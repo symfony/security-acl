@@ -56,11 +56,6 @@ class AclProvider implements AclProviderInterface
      */
     private $permissionGrantingStrategy;
 
-    /**
-     * Constructor.
-     *
-     * @param AclCacheInterface $cache
-     */
     public function __construct(Connection $connection, PermissionGrantingStrategyInterface $permissionGrantingStrategy, array $options, AclCacheInterface $cache = null)
     {
         $this->cache = $cache;
@@ -250,7 +245,7 @@ class AclProvider implements AclProviderInterface
                 {$this->options['oid_table_name']} o
             INNER JOIN {$this->options['class_table_name']} c ON c.id = o.class_id
             LEFT JOIN {$this->options['entry_table_name']} e ON (
-                e.class_id = o.class_id AND (e.object_identity_id = o.id OR {$this->connection->getDatabasePlatform()->getIsNullExpression('e.object_identity_id')})
+                e.class_id = o.class_id AND (e.object_identity_id = o.id OR e.object_identity_id IS NULL)
             )
             LEFT JOIN {$this->options['sid_table_name']} s ON (
                 s.id = e.security_identity_id
