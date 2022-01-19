@@ -17,11 +17,11 @@ use Symfony\Component\Security\Acl\Domain\RoleSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Acl\Exception\AclNotFoundException;
 use Symfony\Component\Security\Acl\Exception\NoAceFoundException;
-use Symfony\Component\Security\Acl\Model\AclInterface;
 use Symfony\Component\Security\Acl\Model\AclProviderInterface;
 use Symfony\Component\Security\Acl\Model\ObjectIdentityRetrievalStrategyInterface;
 use Symfony\Component\Security\Acl\Model\SecurityIdentityRetrievalStrategyInterface;
 use Symfony\Component\Security\Acl\Permission\PermissionMapInterface;
+use Symfony\Component\Security\Acl\Tests\Fixtures\SerializableAclInterface;
 use Symfony\Component\Security\Acl\Voter\AclVoter;
 use Symfony\Component\Security\Acl\Voter\FieldVote;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -220,7 +220,7 @@ class AclVoterTest extends TestCase
             ->expects($this->once())
             ->method('findAcl')
             ->with($this->equalTo($oid), $this->equalTo($sids))
-            ->willReturn($acl = $this->createMock(AclInterface::class))
+            ->willReturn($acl = $this->createMock(SerializableAclInterface::class))
         ;
 
         $acl
@@ -266,7 +266,7 @@ class AclVoterTest extends TestCase
             ->expects($this->once())
             ->method('findAcl')
             ->with($this->equalTo($oid), $this->equalTo($sids))
-            ->willReturn($acl = $this->createMock(AclInterface::class))
+            ->willReturn($acl = $this->createMock(SerializableAclInterface::class))
         ;
 
         $acl
@@ -309,7 +309,7 @@ class AclVoterTest extends TestCase
             ->expects($this->once())
             ->method('findAcl')
             ->with($this->equalTo($oid), $this->equalTo($sids))
-            ->willReturn($acl = $this->createMock(AclInterface::class))
+            ->willReturn($acl = $this->createMock(SerializableAclInterface::class))
         ;
 
         $acl
@@ -355,7 +355,7 @@ class AclVoterTest extends TestCase
             ->expects($this->once())
             ->method('findAcl')
             ->with($this->equalTo($oid), $this->equalTo($sids))
-            ->willReturn($acl = $this->createMock(AclInterface::class))
+            ->willReturn($acl = $this->createMock(SerializableAclInterface::class))
         ;
 
         $acl
@@ -396,7 +396,7 @@ class AclVoterTest extends TestCase
             ->expects($this->once())
             ->method('findAcl')
             ->with($this->equalTo($oid), $this->equalTo($sids))
-            ->willReturn($acl = $this->createMock(AclInterface::class))
+            ->willReturn($acl = $this->createMock(SerializableAclInterface::class))
         ;
 
         $acl

@@ -11,10 +11,12 @@
 
 namespace Symfony\Component\Security\Acl\Tests\Domain;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Acl\Domain\FieldEntry;
 use Symfony\Component\Security\Acl\Model\SecurityIdentityInterface;
+use Symfony\Component\Security\Acl\Tests\Fixtures\SerializableAclInterface;
 
-class FieldEntryTest extends \PHPUnit\Framework\TestCase
+class FieldEntryTest extends TestCase
 {
     public function testConstructor()
     {
@@ -31,7 +33,7 @@ class FieldEntryTest extends \PHPUnit\Framework\TestCase
         $uAce = unserialize($serialized);
 
         $this->assertNull($uAce->getAcl());
-        $this->assertInstanceOf('Symfony\Component\Security\Acl\Model\SecurityIdentityInterface', $uAce->getSecurityIdentity());
+        $this->assertInstanceOf(SecurityIdentityInterface::class, $uAce->getSecurityIdentity());
         $this->assertEquals($ace->getId(), $uAce->getId());
         $this->assertEquals($ace->getField(), $uAce->getField());
         $this->assertEquals($ace->getMask(), $uAce->getMask());
@@ -86,11 +88,11 @@ class FieldEntryTest extends \PHPUnit\Framework\TestCase
 
     protected function getAcl()
     {
-        return $this->createMock('Symfony\Component\Security\Acl\Model\AclInterface');
+        return $this->createMock(SerializableAclInterface::class);
     }
 
     protected function getSid()
     {
-        return $this->createMock('Symfony\Component\Security\Acl\Model\SecurityIdentityInterface');
+        return $this->createMock(SecurityIdentityInterface::class);
     }
 }
