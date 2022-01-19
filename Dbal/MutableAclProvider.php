@@ -588,15 +588,15 @@ QUERY;
     protected function getSelectAccessControlEntryIdSql($classId, $oid, $field, $order)
     {
         return sprintf(
-            'SELECT id FROM %s WHERE class_id = %d AND %s AND %s AND ace_order = %d',
+            'SELECT id FROM %s WHERE class_id = %d AND object_identity_id %s AND field_name %s AND ace_order = %d',
             $this->options['entry_table_name'],
             $classId,
-            null === $oid ?
-                $this->connection->getDatabasePlatform()->getIsNullExpression('object_identity_id')
-                : 'object_identity_id = '.(int) $oid,
-            null === $field ?
-                $this->connection->getDatabasePlatform()->getIsNullExpression('field_name')
-                : 'field_name = '.$this->connection->quote($field),
+            null === $oid
+                ? 'IS NULL'
+                : '= '.(int) $oid,
+            null === $field
+                ? 'IS NULL'
+                : '= '.$this->connection->quote($field),
             $order
         );
     }

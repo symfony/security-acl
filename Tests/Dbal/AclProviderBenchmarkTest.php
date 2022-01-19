@@ -78,7 +78,8 @@ class AclProviderBenchmarkTest extends TestCase
     protected function generateTestData()
     {
         $sm = $this->connection->createSchemaManager();
-        $sm->dropAndCreateDatabase('testdb');
+        $sm->dropDatabase('testdb');
+        $sm->createDatabase('testdb');
         $this->connection->executeStatement('USE testdb');
 
         // import the schema
