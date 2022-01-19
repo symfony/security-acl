@@ -4,6 +4,7 @@ CHANGELOG
 3.2.0
 -----
 
+ * Change minimum PHP version to 7.2.5
  * Add PSR-6 support for ACL caching
  * Add support for `doctrine/cache` v2
  * Drop support for Symfony 3
