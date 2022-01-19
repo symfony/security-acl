@@ -1,0 +1,5 @@
+---------------------------------------------------------------------------
+
+by derrabus at 2021-11-29T22:32:24Z
+
+The tests fail because of Symfony 5.4 deprecations that we need to take care of.
