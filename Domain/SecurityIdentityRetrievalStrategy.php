@@ -14,6 +14,7 @@ namespace Symfony\Component\Security\Acl\Domain;
 use Symfony\Component\Security\Acl\Model\SecurityIdentityRetrievalStrategyInterface;
 use Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolverInterface;
 use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
+use Symfony\Component\Security\Core\Authentication\Token\NullToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter;
 use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
@@ -39,13 +40,15 @@ class SecurityIdentityRetrievalStrategy implements SecurityIdentityRetrievalStra
 
     /**
      * {@inheritdoc}
+     *
+     * @return RoleSecurityIdentity[]
      */
     public function getSecurityIdentities(TokenInterface $token)
     {
         $sids = [];
 
         // add user security identity
-        if (!$token instanceof AnonymousToken) {
+        if (!$token instanceof AnonymousToken && !$token instanceof NullToken) {
             try {
                 $sids[] = UserSecurityIdentity::fromToken($token);
             } catch (\InvalidArgumentException $e) {
@@ -62,14 +65,31 @@ class SecurityIdentityRetrievalStrategy implements SecurityIdentityRetrievalStra
         if ($this->authenticationTrustResolver->isFullFledged($token)) {
             $sids[] = new RoleSecurityIdentity(AuthenticatedVoter::IS_AUTHENTICATED_FULLY);
             $sids[] = new RoleSecurityIdentity(AuthenticatedVoter::IS_AUTHENTICATED_REMEMBERED);
-            $sids[] = new RoleSecurityIdentity(AuthenticatedVoter::IS_AUTHENTICATED_ANONYMOUSLY);
+            $this->addAnonymousRoles($sids);
         } elseif ($this->authenticationTrustResolver->isRememberMe($token)) {
             $sids[] = new RoleSecurityIdentity(AuthenticatedVoter::IS_AUTHENTICATED_REMEMBERED);
-            $sids[] = new RoleSecurityIdentity(AuthenticatedVoter::IS_AUTHENTICATED_ANONYMOUSLY);
-        } elseif ($this->authenticationTrustResolver->isAnonymous($token)) {
-            $sids[] = new RoleSecurityIdentity(AuthenticatedVoter::IS_AUTHENTICATED_ANONYMOUSLY);
+            $this->addAnonymousRoles($sids);
+        } elseif ($this->isNotAuthenticated($token)) {
+            $this->addAnonymousRoles($sids);
         }
 
         return $sids;
+    }
+
+    private function isNotAuthenticated(TokenInterface $token): bool
+    {
+        if (\defined('\Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter::PUBLIC_ACCESS')) {
+            return !$this->authenticationTrustResolver->isAuthenticated($token);
+        }
+
+        return $this->authenticationTrustResolver->isAnonymous($token);
+    }
+
+    private function addAnonymousRoles(array &$sids)
+    {
+        $sids[] = new RoleSecurityIdentity('IS_AUTHENTICATED_ANONYMOUSLY');
+        if (\defined('\Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter::PUBLIC_ACCESS')) {
+            $sids[] = new RoleSecurityIdentity(AuthenticatedVoter::PUBLIC_ACCESS);
+        }
     }
 }
