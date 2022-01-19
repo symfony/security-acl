@@ -35,7 +35,7 @@ class PsrAclCache implements AclCacheInterface
      */
     public function __construct(CacheItemPoolInterface $cache, PermissionGrantingStrategyInterface $permissionGrantingStrategy, string $prefix = self::PREFIX)
     {
-        if (0 === \strlen($prefix)) {
+        if ('' === $prefix) {
             throw new \InvalidArgumentException('$prefix cannot be empty.');
         }
 
