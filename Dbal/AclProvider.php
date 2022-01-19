@@ -434,8 +434,6 @@ QUERY;
     /**
      * Does either overwrite the passed ACE, or saves it in the global identity
      * map to ensure every ACE only gets instantiated once.
-     *
-     * @param array &$aces
      */
     private function doUpdateAceIdentityMap(array &$aces)
     {
