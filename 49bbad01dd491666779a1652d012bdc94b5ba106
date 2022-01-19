@@ -1,0 +1,158 @@
+---------------------------------------------------------------------------
+
+by jordisala1991 at 2021-12-03T08:24:58Z
+
+You will need to check for `method_exists` (on the tests too).
+
+---------------------------------------------------------------------------
+
+by acrobat at 2021-12-03T12:51:47Z
+
+Yes indeed, this was a quick test to fix it and to open the draft PR. But I will make some time in the next few days to finish this!
+
+---------------------------------------------------------------------------
+
+by acrobat at 2021-12-04T13:41:53Z
+
+PR is ready for review. I'm not sure how I can solve that latest psalm error, if any can help me with this?
+
+---------------------------------------------------------------------------
+
+by jordisala1991 at 2021-12-04T14:03:28Z
+
+You need to use the following annotation `@psalm-suppress UndefinedInterfaceMethod` just before the line where it is complaining. This kind of error is due to psalm checking on a version where this method does not exist.
+
+---------------------------------------------------------------------------
+
+by acrobat at 2021-12-04T14:43:45Z
+
+Thanks @jordisala1991, I wasn't sure if that was the "correct" fix. Php-cs-fixer is not happy with the psalm docblock but it is correct so can be ignored
+
+---------------------------------------------------------------------------
+
+by jordisala1991 at 2021-12-09T13:51:38Z
+
+It would be nice to have a release with this PR included, this is the last package that prevents sonata to be updated to sf 6.
+
+---------------------------------------------------------------------------
+
+by jordisala1991 at 2021-12-16T02:31:56Z
+
+> A `psalm-suppress UndefinedInterfaceMethod` should be added for the psalm error
+
+Not really, on Symfony they do not use it, @wouterj requested to remove it on a previous comment.
+
+---------------------------------------------------------------------------
+
+by VincentLanglet at 2021-12-16T07:32:45Z
+
+> > A `psalm-suppress UndefinedInterfaceMethod` should be added for the psalm error
+>
+> Not really, on Symfony they do not use it, @wouterj requested to remove it on a previous comment.
+
+So this is ready to be merged then ^^
+
+---------------------------------------------------------------------------
+
+by acrobat at 2021-12-16T08:05:53Z
+
+There is one left todo and that is find a way to trigger a deprecation when the old anonymous role string is used instead of the new public role
+
+---------------------------------------------------------------------------
+
+by VincentLanglet at 2021-12-19T10:52:53Z
+
+> There is one left todo and that is find a way to trigger a deprecation when the old anonymous role string is used instead of the new public role
+
+@wouterj Couldn't the deprecation being added later (with maybe an issue about it) ? Symfony 6 support shouldn't be blocked by a missing deprecation.
+
+---------------------------------------------------------------------------
+
+by VincentLanglet at 2022-01-05T14:00:14Z
+
+> @wouterj Couldn't the deprecation being added later (with maybe an issue about it) ? Symfony 6 support shouldn't be blocked by a missing deprecation.
+
+Friendly ping @derrabus @wouterj
+
+---------------------------------------------------------------------------
+
+by wouterj at 2022-01-05T14:56:37Z
+
+We not only need a deprecation, but the BC layer is missing as well (keeping the `IS_AUTHENTICATED_ANONYMOUSLY`). This means the current state of the PR is a hard backwards compatibility break, which *is* worse than not supporting Symfony 6.
+
+---------------------------------------------------------------------------
+
+by jordisala1991 at 2022-01-05T17:49:04Z
+
+@acrobat do you have time for finishing the PR? If not I will try to finish it
+
+---------------------------------------------------------------------------
+
+by acrobat at 2022-01-06T11:20:20Z
+
+@jordisala1991 I have some time to do fixes, but extra help is welcome! Maybe you can send a pr to my fork to include the remaining fixes.
+
+I've pushed a some changes that I had locally to avoid the hard BC break with the anonymous role, so I just needs some help with the deprecation wouter asked for!
+
+EDIT: seems that my last "fixes" broke some tests, I will take a look later today to make them pass again!
+
+---------------------------------------------------------------------------
+
+by wouterj at 2022-01-06T11:24:05Z
+
+Thank you @acrobat. Changes are looking good to me (once you've fixed the failures).
+
+---------------------------------------------------------------------------
+
+by acrobat at 2022-01-06T12:51:58Z
+
+Tests are passing again 🎉
+
+---------------------------------------------------------------------------
+
+by wouterj at 2022-01-06T16:23:56Z
+
+Question to all the ACL users in this PR: Is `getSecurityIdentities()` used in a normal application? Or is it's usage limited to voters (e.g. the `AclVoter` provided by this package)?
+
+I'm asking because making an argument nullable is I'm afraid a BC break. But if it's only used in a voter, that isn't that bad as these will get a `NullToken` instance instead of `null`, so we can pass this token to the `getSecurityIdentities()`. However this fix no longer holds true if the method is called outside a voter.
+
+---------------------------------------------------------------------------
+
+by derrabus at 2022-01-06T16:28:49Z
+
+> making an argument nullable is I'm afraid a BC break.
+
+We can document that and bump the major version.
+
+---------------------------------------------------------------------------
+
+by acrobat at 2022-01-06T18:57:35Z
+
+I've added a breakpoint in `Symfony\Component\Security\Acl\Domain\SecurityIdentityRetrievalStrategy::getSecurityIdentities` and this method is only called from the `AclVoter` class in our case. This is an app with "default" usage of the acl component/bundle
+
+---------------------------------------------------------------------------
+
+by acrobat at 2022-01-07T15:03:37Z
+
+@wouterj now that I'm thinking about your comment of the nullable argument. I've did this change because of the deprecation in `AnonymousToken` -> `@deprecated since 5.4, anonymous is now represented by the absence of a token`, but if I understand your comment correctly this will now be a `NullToken` instead of an anonymous token?
+
+If that's the case we don't even need to make it nullable.
+
+EDIT: I've tested this in a new application with the new authentication setup and a `NullToken` is indeed passed, in my last commit I've removed the nullable argument change and adapted the code to the `NullToken`. This is can reviewed again
+
+---------------------------------------------------------------------------
+
+by wouterj at 2022-01-07T15:44:21Z
+
+> if I understand your comment correctly this will now be a NullToken instead of an anonymous token?
+
+Yes and no :) "anonymous is now represented by the absence of a token" is true for all parts of the application, except from the voter. This allows voters to vote on "anonymous" access (e.g. if some blog posts are premium only, but others can be read by anyone).
+Given your comment, I think it's safe to assume no `null` be used for this method. And if it does, we'll surely get a bug report about it. :)
+
+---------------------------------------------------------------------------
+
+by jordisala1991 at 2022-01-19T08:24:50Z
+
+> Question to all the ACL users in this PR: Is getSecurityIdentities() used in a normal application? Or is it's usage limited to voters (e.g. the AclVoter provided by this package)?
+
+I tried a search on the whole sonata codebase through github and we have no usage of that method.
