@@ -1,0 +1,85 @@
+name: Integration tests
+
+on:
+    pull_request:
+    push:
+        branches: [main]
+
+jobs:
+    mysql_postgres:
+        name: 'Test on SQLite, MySQL and PostgreSQL'
+        runs-on: ubuntu-latest
+
+        services:
+            mysql:
+                image: mysql:8
+                env:
+                    MYSQL_ROOT_PASSWORD: root
+                    MYSQL_DATABASE: acl_test
+                ports:
+                  - '3306:3306'
+
+            postgres:
+                image: postgres:14
+                env:
+                    POSTGRES_PASSWORD: postgres
+                ports:
+                    - '5432:5432'
+                options: >-
+                    --health-cmd healthcheck.sh
+                    --health-interval 20s
+                    --health-timeout 10s
+                    --health-retries 10
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '8.0'
+                  coverage: none
+
+            - name: Composer install
+              uses: ramsey/composer-install@v1
+
+            - name: Install PHPUnit
+              run: vendor/bin/simple-phpunit install
+
+            - name: Run tests
+              run: vendor/bin/simple-phpunit --group mysql,pgsql,sqlite
+
+    oracle:
+        name: 'Test on Oracle'
+        runs-on: ubuntu-latest
+
+        services:
+            oracle:
+                image: gvenzl/oracle-xe:21-slim
+                env:
+                    ORACLE_RANDOM_PASSWORD: true
+                    APP_USER: oracle
+                    APP_USER_PASSWORD: oracle
+                ports:
+                    - '1521:1521'
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '8.0'
+                  coverage: none
+                  extensions: oci8
+
+            - name: Composer install
+              uses: ramsey/composer-install@v1
+
+            - name: Install PHPUnit
+              run: vendor/bin/simple-phpunit install
+
+            - name: Run tests
+              run: vendor/bin/simple-phpunit --group oracle

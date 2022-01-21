@@ -11,7 +11,8 @@
 
 namespace Symfony\Component\Security\Acl\Tests\Dbal;
 
-use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Schema\Identifier;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Acl\Dbal\AclProvider;
 use Symfony\Component\Security\Acl\Dbal\Schema;
@@ -23,12 +24,12 @@ use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Acl\Exception\AclNotFoundException;
 use Symfony\Component\Security\Acl\Exception\NotAllAclsFoundException;
 
-/**
- * @requires extension pdo_sqlite
- */
-class AclProviderTest extends TestCase
+abstract class AclProviderTest extends TestCase
 {
-    private $connection;
+    protected $connection;
+
+    /** @return Connection */
+    abstract protected function createConnection();
 
     /**
      * @expectedMessage There is no ACL for the given object identity.
@@ -146,15 +147,21 @@ class AclProviderTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->connection = DriverManager::getConnection([
-            'driver' => 'pdo_sqlite',
-            'memory' => true,
-        ]);
+        $this->connection = $this->createConnection();
 
         // import the schema
-        $schema = new Schema($this->getOptions());
-        foreach ($schema->toSql($this->connection->getDatabasePlatform()) as $sql) {
-            $this->connection->executeStatement($sql);
+        $schema = new Schema($options = $this->getOptions());
+        $platform = $this->connection->getDatabasePlatform();
+        foreach ($schema->toSql($platform) as $sql) {
+            try {
+                $this->connection->executeStatement($sql);
+            } catch (\Exception $e) {
+            }
+        }
+
+        // purge database
+        foreach ($options as $tableName) {
+            $this->connection->executeStatement('DELETE FROM '.(new Identifier($tableName))->getQuotedName($platform));
         }
 
         // populate the schema with some test data
@@ -261,12 +268,13 @@ class AclProviderTest extends TestCase
 
     protected function getOptions()
     {
+        // ! this list is ordered for usage in the purge process, order must be preserved
         return [
-            'oid_table_name' => 'acl_object_identities',
-            'oid_ancestors_table_name' => 'acl_object_identity_ancestors',
-            'class_table_name' => 'acl_classes',
-            'sid_table_name' => 'acl_security_identities',
             'entry_table_name' => 'acl_entries',
+            'oid_ancestors_table_name' => 'acl_object_identity_ancestors',
+            'oid_table_name' => 'acl_object_identities',
+            'sid_table_name' => 'acl_security_identities',
+            'class_table_name' => 'acl_classes',
         ];
     }
 

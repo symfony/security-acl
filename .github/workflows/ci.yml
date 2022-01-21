@@ -43,8 +43,8 @@ jobs:
             - name: Install PHPUnit
               run: vendor/bin/simple-phpunit install
 
-            - name: Run tests
-              run: vendor/bin/simple-phpunit
+            - name: Run unit tests
+              run: vendor/bin/simple-phpunit --exclude-group integration
               env:
                   SYMFONY_DEPRECATIONS_HELPER: '${{ matrix.deprecations }}'
 
