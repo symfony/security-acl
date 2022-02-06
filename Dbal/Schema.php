@@ -12,6 +12,7 @@
 namespace Symfony\Component\Security\Acl\Dbal;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use Doctrine\DBAL\Schema\Schema as BaseSchema;
 use Doctrine\DBAL\Schema\SchemaConfig;
 
@@ -23,6 +24,7 @@ use Doctrine\DBAL\Schema\SchemaConfig;
 final class Schema extends BaseSchema
 {
     protected $options;
+    protected $platform;
 
     /**
      * @param array $options the names for tables
@@ -34,6 +36,7 @@ final class Schema extends BaseSchema
         parent::__construct([], [], $schemaConfig);
 
         $this->options = $options;
+        $this->platform = $connection ? $connection->getDatabasePlatform() : null;
 
         $this->addClassTable();
         $this->addSecurityIdentitiesTable();
@@ -129,8 +132,13 @@ final class Schema extends BaseSchema
         $table->setPrimaryKey(['object_identity_id', 'ancestor_id']);
 
         $oidTable = $this->getTable($this->options['oid_table_name']);
-        $table->addForeignKeyConstraint($oidTable, ['object_identity_id'], ['id'], ['onDelete' => 'CASCADE', 'onUpdate' => 'CASCADE']);
-        $table->addForeignKeyConstraint($oidTable, ['ancestor_id'], ['id'], ['onDelete' => 'CASCADE', 'onUpdate' => 'CASCADE']);
+        $action = 'CASCADE';
+        if ($this->platform instanceof SQLServerPlatform) {
+            // MS SQL Server does not support recursive cascading
+            $action = 'NO ACTION';
+        }
+        $table->addForeignKeyConstraint($oidTable, ['object_identity_id'], ['id'], ['onDelete' => $action, 'onUpdate' => $action]);
+        $table->addForeignKeyConstraint($oidTable, ['ancestor_id'], ['id'], ['onDelete' => $action, 'onUpdate' => $action]);
     }
 
     /**
