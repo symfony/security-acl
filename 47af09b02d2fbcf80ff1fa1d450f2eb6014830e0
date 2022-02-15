@@ -1,0 +1,23 @@
+---------------------------------------------------------------------------
+
+by derrabus at 2022-02-13T13:39:59Z
+
+Do you really need this fix? That's an incredibly complex test setup for an EOL Symfony branch. 😕
+
+---------------------------------------------------------------------------
+
+by acrobat at 2022-02-13T14:11:15Z
+
+Hmm yes, I thought 5.3 was still supported but you are right as this was also my feeling that the workflow got more complex. Maybe revert the workflow change but keep the test changes and code fix so the library is compatible? Or bump the version constraint for 3.3.x to `symfony/security-core: "^4.4|^5.4|^6.0"?
+
+---------------------------------------------------------------------------
+
+by derrabus at 2022-02-14T09:10:08Z
+
+I'd be in favor of only merging the second commit and tag a release, if @wouterj agrees. For 3.4 we should make the bump you've suggested.
+
+---------------------------------------------------------------------------
+
+by acrobat at 2022-02-14T11:02:33Z
+
+@derrabus That works for me! I've updated the PR to only include the last commit with the fix. The other can still be viewed here -> https://github.com/acrobat/security-acl/commit/50f1abe64b848680d41ba048e136d0c1a06a53df
