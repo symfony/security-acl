@@ -78,7 +78,7 @@ class SecurityIdentityRetrievalStrategy implements SecurityIdentityRetrievalStra
 
     private function isNotAuthenticated(TokenInterface $token): bool
     {
-        if (\defined('\Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter::PUBLIC_ACCESS')) {
+        if (method_exists($this->authenticationTrustResolver, 'isAuthenticated')) {
             return !$this->authenticationTrustResolver->isAuthenticated($token);
         }
 
