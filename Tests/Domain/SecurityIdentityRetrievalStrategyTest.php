@@ -71,6 +71,7 @@ class SecurityIdentityRetrievalStrategyTest extends TestCase
 
     /**
      * @group legacy
+     *
      * @dataProvider getDeprecatedSecurityIdentityRetrievalTests
      */
     public function testDeprecatedGetSecurityIdentities($user, array $roles, string $authenticationStatus, array $sids)

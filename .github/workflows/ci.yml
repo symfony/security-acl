@@ -13,7 +13,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php: ['7.2.5', '7.3', '7.4', '8.0', '8.1']
+                php: ['7.2.5', '7.3', '7.4', '8.0', '8.1', '8.2']
                 include:
                     - php: '7.4'
                       deps: lowest
@@ -56,6 +56,6 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v2
             - name: PHP-CS-Fixer
-              uses: docker://oskarstark/php-cs-fixer-ga:3.5.0
+              uses: docker://oskarstark/php-cs-fixer-ga:3.11.0
               with:
                   args: --diff --dry-run
