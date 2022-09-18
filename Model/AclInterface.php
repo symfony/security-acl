@@ -87,9 +87,9 @@ interface AclInterface extends \Serializable
     /**
      * Determines whether access is granted.
      *
-     * @throws NoAceFoundException when no ACE was applicable for this request
-     *
      * @return bool
+     *
+     * @throws NoAceFoundException when no ACE was applicable for this request
      */
     public function isGranted(array $masks, array $securityIdentities, bool $administrativeMode = false);
 

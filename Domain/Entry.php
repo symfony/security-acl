@@ -175,17 +175,18 @@ class Entry implements AuditableEntryInterface
     public function __unserialize(array $data): void
     {
         [$this->mask,
-             $this->id,
-             $this->securityIdentity,
-             $this->strategy,
-             $this->auditFailure,
-             $this->auditSuccess,
-             $this->granting
+            $this->id,
+            $this->securityIdentity,
+            $this->strategy,
+            $this->auditFailure,
+            $this->auditSuccess,
+            $this->granting
         ] = $data;
     }
 
     /**
      * @internal
+     *
      * @final
      *
      * @return string
@@ -197,6 +198,7 @@ class Entry implements AuditableEntryInterface
 
     /**
      * @internal
+     *
      * @final
      *
      * @param string $serialized

@@ -264,14 +264,14 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
     public function __unserialize(array $data): void
     {
         [$this->parentAcl,
-             $this->objectIdentity,
-             $this->classAces,
-             $this->classFieldAces,
-             $this->objectAces,
-             $this->objectFieldAces,
-             $this->id,
-             $this->loadedSids,
-             $this->entriesInheriting
+            $this->objectIdentity,
+            $this->classAces,
+            $this->classFieldAces,
+            $this->objectAces,
+            $this->objectFieldAces,
+            $this->id,
+            $this->loadedSids,
+            $this->entriesInheriting
         ] = $data;
 
         $this->listeners = [];
@@ -279,6 +279,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
 
     /**
      * @internal
+     *
      * @final
      *
      * @return string
@@ -290,6 +291,7 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
 
     /**
      * @internal
+     *
      * @final
      *
      * @param string $serialized

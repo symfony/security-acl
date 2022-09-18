@@ -504,21 +504,21 @@ QUERY;
         // but it is faster
         foreach ($stmt->fetchAllNumeric() as $data) {
             [$aclId,
-                 $objectIdentifier,
-                 $parentObjectIdentityId,
-                 $entriesInheriting,
-                 $classType,
-                 $aceId,
-                 $objectIdentityId,
-                 $fieldName,
-                 $aceOrder,
-                 $mask,
-                 $granting,
-                 $grantingStrategy,
-                 $auditSuccess,
-                 $auditFailure,
-                 $username,
-                 $securityIdentifier] = array_values($data);
+                $objectIdentifier,
+                $parentObjectIdentityId,
+                $entriesInheriting,
+                $classType,
+                $aceId,
+                $objectIdentityId,
+                $fieldName,
+                $aceOrder,
+                $mask,
+                $granting,
+                $grantingStrategy,
+                $auditSuccess,
+                $auditFailure,
+                $username,
+                $securityIdentifier] = array_values($data);
 
             // FIX: remove duplicate slashes
             $classType = str_replace('\\\\', '\\', $classType);
