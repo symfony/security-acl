@@ -46,12 +46,12 @@ class AclVoter implements VoterInterface
         $this->allowIfObjectIdentityUnavailable = $allowIfObjectIdentityUnavailable;
     }
 
-    public function supportsAttribute($attribute)
+    public function supportsAttribute($attribute): bool
     {
         return \is_string($attribute) && $this->permissionMap->contains($attribute);
     }
 
-    public function vote(TokenInterface $token, $subject, array $attributes)
+    public function vote(TokenInterface $token, $subject, array $attributes): int
     {
         foreach ($attributes as $attribute) {
             if (!$this->supportsAttribute($attribute)) {
@@ -137,10 +137,8 @@ class AclVoter implements VoterInterface
      * class.
      *
      * @param string $class The class name
-     *
-     * @return bool
      */
-    public function supportsClass($class)
+    public function supportsClass(string $class): bool
     {
         return true;
     }

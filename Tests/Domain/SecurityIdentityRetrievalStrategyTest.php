@@ -274,7 +274,7 @@ class CustomUserImpl implements UserInterface
         $this->name = $name;
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return $this->name;
     }
@@ -284,7 +284,7 @@ class CustomUserImpl implements UserInterface
         return [];
     }
 
-    public function eraseCredentials()
+    public function eraseCredentials(): void
     {
     }
 
@@ -293,12 +293,12 @@ class CustomUserImpl implements UserInterface
         return $this->name;
     }
 
-    public function getPassword()
+    public function getPassword(): ?string
     {
         return null;
     }
 
-    public function getSalt()
+    public function getSalt(): ?string
     {
         return null;
     }
