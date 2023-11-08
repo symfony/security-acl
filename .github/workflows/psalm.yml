@@ -16,22 +16,22 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.0'
+          php-version: '8.2'
           ini-values: "memory_limit=-1"
           coverage: none
 
       - name: Checkout target branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.base_ref }}
 
       - name: Checkout PR
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
           composer remove --dev --no-update --no-interaction symfony/phpunit-bridge
-          composer require --no-update vimeo/psalm phpunit/phpunit:^9.5 psalm/plugin-phpunit
+          composer require --no-update vimeo/psalm phpunit/phpunit:^9.6 psalm/plugin-phpunit
           composer update --no-progress --ansi
           git checkout -- composer.json
 
