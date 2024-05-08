@@ -11,8 +11,10 @@
 
 namespace Symfony\Component\Security\Acl\Tests\Dbal;
 
+use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Schema\DefaultSchemaManagerFactory;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Acl\Dbal\AclProvider;
 use Symfony\Component\Security\Acl\Dbal\MutableAclProvider;
@@ -23,6 +25,7 @@ use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Acl\Domain\PermissionGrantingStrategy;
 use Symfony\Component\Security\Acl\Domain\RoleSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
+use Symfony\Component\Security\Acl\Exception\AclAlreadyExistsException;
 use Symfony\Component\Security\Acl\Exception\AclNotFoundException;
 use Symfony\Component\Security\Acl\Exception\ConcurrentModificationException;
 use Symfony\Component\Security\Acl\Model\AuditableEntryInterface;
@@ -59,7 +62,7 @@ class MutableAclProviderTest extends TestCase
 
     public function testCreateAclThrowsExceptionWhenAclAlreadyExists()
     {
-        $this->expectException(\Symfony\Component\Security\Acl\Exception\AclAlreadyExistsException::class);
+        $this->expectException(AclAlreadyExistsException::class);
 
         $provider = $this->getProvider();
         $oid = new ObjectIdentity('123456', 'FOO');
@@ -518,10 +521,17 @@ class MutableAclProviderTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->connection = DriverManager::getConnection([
-            'driver' => 'pdo_sqlite',
-            'memory' => true,
-        ]);
+        $configuration = new Configuration();
+        $configuration->setSchemaManagerFactory(new DefaultSchemaManagerFactory());
+
+        $this->connection = DriverManager::getConnection(
+            [
+                'driver' => 'pdo_sqlite',
+                'memory' => true
+            ],
+            $configuration
+        );
+        $this->connection->setNestTransactionsWithSavepoints(true);
 
         // import the schema
         $schema = new Schema($this->getOptions());

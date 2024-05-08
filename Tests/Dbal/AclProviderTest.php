@@ -11,7 +11,9 @@
 
 namespace Symfony\Component\Security\Acl\Tests\Dbal;
 
+use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Schema\DefaultSchemaManagerFactory;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Acl\Dbal\AclProvider;
 use Symfony\Component\Security\Acl\Dbal\Schema;
@@ -146,10 +148,16 @@ class AclProviderTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->connection = DriverManager::getConnection([
+        $configuration = new Configuration();
+        $configuration->setSchemaManagerFactory(new DefaultSchemaManagerFactory());
+
+        $this->connection = DriverManager::getConnection(
+            [
             'driver' => 'pdo_sqlite',
-            'memory' => true,
-        ]);
+            'memory' => true
+            ],
+            $configuration
+        );
 
         // import the schema
         $schema = new Schema($this->getOptions());
@@ -157,30 +165,84 @@ class AclProviderTest extends TestCase
             $this->connection->executeStatement($sql);
         }
 
-        // populate the schema with some test data
-        $insertClassStmt = $this->connection->prepare('INSERT INTO acl_classes (id, class_type) VALUES (?, ?)');
+        $qb = $this->connection->createQueryBuilder();
+
         foreach ($this->getClassData() as $data) {
-            $insertClassStmt->executeStatement($data);
+            $qb
+                ->insert('acl_classes')
+                ->values(
+                    [
+                        'id' => '?',
+                        'class_type' => '?',
+                    ]
+                )
+                ->setParameters($data)
+                ->executeQuery();
         }
 
-        $insertSidStmt = $this->connection->prepare('INSERT INTO acl_security_identities (id, identifier, username) VALUES (?, ?, ?)');
         foreach ($this->getSidData() as $data) {
-            $insertSidStmt->executeStatement($data);
+            $qb
+                ->insert('acl_security_identities')
+                ->values(
+                    [
+                        'id' => '?',
+                        'identifier' => '?',
+                        'username' => '?',
+                    ]
+                )
+                ->setParameters($data)
+                ->executeQuery();
         }
 
-        $insertOidStmt = $this->connection->prepare('INSERT INTO acl_object_identities (id, class_id, object_identifier, parent_object_identity_id, entries_inheriting) VALUES (?, ?, ?, ?, ?)');
         foreach ($this->getOidData() as $data) {
-            $insertOidStmt->executeStatement($data);
+            $qb
+                ->insert('acl_object_identities')
+                ->values(
+                    [
+                        'id' => '?',
+                        'class_id' => '?',
+                        'object_identifier' => '?',
+                        'parent_object_identity_id' => '?',
+                        'entries_inheriting' => '?',
+                    ]
+                )
+                ->setParameters($data)
+                ->executeQuery();
         }
 
-        $insertEntryStmt = $this->connection->prepare('INSERT INTO acl_entries (id, class_id, object_identity_id, field_name, ace_order, security_identity_id, mask, granting, granting_strategy, audit_success, audit_failure) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
         foreach ($this->getEntryData() as $data) {
-            $insertEntryStmt->executeStatement($data);
+            $qb
+                ->insert('acl_entries')
+                ->values(
+                    [
+                        'id' => '?',
+                        'class_id' => '?',
+                        'object_identity_id' => '?',
+                        'field_name' => '?',
+                        'ace_order' => '?',
+                        'security_identity_id' => '?',
+                        'mask' => '?',
+                        'granting' => '?',
+                        'granting_strategy' => '?',
+                        'audit_success' => '?',
+                        'audit_failure' => '?',
+                    ]
+                )
+                ->setParameters($data)
+                ->executeQuery();
         }
 
-        $insertOidAncestorStmt = $this->connection->prepare('INSERT INTO acl_object_identity_ancestors (object_identity_id, ancestor_id) VALUES (?, ?)');
         foreach ($this->getOidAncestorData() as $data) {
-            $insertOidAncestorStmt->executeStatement($data);
+            $qb
+                ->insert('acl_object_identity_ancestors')
+                ->values(
+                    [
+                        'object_identity_id' => '?',
+                        'ancestor_id' => '?',
+                    ]
+                )
+                ->setParameters($data)
+                ->executeQuery();
         }
     }
 
