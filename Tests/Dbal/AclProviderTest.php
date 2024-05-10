@@ -149,12 +149,14 @@ class AclProviderTest extends TestCase
     protected function setUp(): void
     {
         $configuration = new Configuration();
-        $configuration->setSchemaManagerFactory(new DefaultSchemaManagerFactory());
+        if (function_exists('setSchemaManagerFactory')) {
+            $configuration->setSchemaManagerFactory(new DefaultSchemaManagerFactory());
+        }
 
         $this->connection = DriverManager::getConnection(
             [
             'driver' => 'pdo_sqlite',
-            'memory' => true
+            'memory' => true,
             ],
             $configuration
         );
