@@ -149,7 +149,7 @@ class AclProviderTest extends TestCase
     protected function setUp(): void
     {
         $configuration = new Configuration();
-        if (function_exists('setSchemaManagerFactory')) {
+        if (\method_exists($configuration, 'setSchemaManagerFactory')) {
             $configuration->setSchemaManagerFactory(new DefaultSchemaManagerFactory());
         }
 

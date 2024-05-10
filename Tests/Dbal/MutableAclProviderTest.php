@@ -522,8 +522,8 @@ class MutableAclProviderTest extends TestCase
     protected function setUp(): void
     {
         $configuration = new Configuration();
-        if (function_exists('setSchemaManagerFactory')) {
-            $configuration->setSchemaManagerFactory(new DefaultSchemaManagerFactory());    
+        if (\method_exists($configuration, 'setSchemaManagerFactory')) {
+            $configuration->setSchemaManagerFactory(new DefaultSchemaManagerFactory());
         }
 
         $this->connection = DriverManager::getConnection(
