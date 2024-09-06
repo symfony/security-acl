@@ -525,7 +525,7 @@ class MutableAclProviderTest extends TestCase
         /**
          * @psalm-suppress RedundantCondition Since we are compatibles with DBAL 2 and 3, we need to check if the method exists
          */
-        if (\method_exists($configuration, 'setSchemaManagerFactory')) {
+        if (method_exists($configuration, 'setSchemaManagerFactory')) {
             $configuration->setSchemaManagerFactory(new DefaultSchemaManagerFactory());
         }
 

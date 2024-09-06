@@ -7,6 +7,7 @@ return (new PhpCsFixer\Config())
         '@Symfony' => true,
         '@Symfony:risky' => true,
         'protected_to_private' => false,
+        'phpdoc_to_comment' => ['ignored_tags' => ['psalm-suppress']],
     ])
     ->setRiskyAllowed(true)
     ->setFinder(
