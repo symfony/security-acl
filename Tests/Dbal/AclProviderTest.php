@@ -11,7 +11,9 @@
 
 namespace Symfony\Component\Security\Acl\Tests\Dbal;
 
+use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Schema\DefaultSchemaManagerFactory;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Acl\Dbal\AclProvider;
 use Symfony\Component\Security\Acl\Dbal\Schema;
@@ -146,10 +148,22 @@ class AclProviderTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->connection = DriverManager::getConnection([
-            'driver' => 'pdo_sqlite',
-            'memory' => true,
-        ]);
+        $configuration = new Configuration();
+
+        /**
+         * @psalm-suppress RedundantCondition Since we are compatibles with DBAL 2 and 3, we need to check if the method exists
+         */
+        if (method_exists($configuration, 'setSchemaManagerFactory')) {
+            $configuration->setSchemaManagerFactory(new DefaultSchemaManagerFactory());
+        }
+
+        $this->connection = DriverManager::getConnection(
+            [
+                'driver' => 'pdo_sqlite',
+                'memory' => true,
+            ],
+            $configuration
+        );
 
         // import the schema
         $schema = new Schema($this->getOptions());
@@ -160,27 +174,50 @@ class AclProviderTest extends TestCase
         // populate the schema with some test data
         $insertClassStmt = $this->connection->prepare('INSERT INTO acl_classes (id, class_type) VALUES (?, ?)');
         foreach ($this->getClassData() as $data) {
-            $insertClassStmt->executeStatement($data);
+            $insertClassStmt->bindValue(1, $data[0]);
+            $insertClassStmt->bindValue(2, $data[1]);
+            $insertClassStmt->executeStatement();
         }
 
         $insertSidStmt = $this->connection->prepare('INSERT INTO acl_security_identities (id, identifier, username) VALUES (?, ?, ?)');
         foreach ($this->getSidData() as $data) {
-            $insertSidStmt->executeStatement($data);
+            $insertSidStmt->bindValue(1, $data[0]);
+            $insertSidStmt->bindValue(2, $data[1]);
+            $insertSidStmt->bindValue(3, $data[2]);
+            $insertSidStmt->executeStatement();
         }
 
         $insertOidStmt = $this->connection->prepare('INSERT INTO acl_object_identities (id, class_id, object_identifier, parent_object_identity_id, entries_inheriting) VALUES (?, ?, ?, ?, ?)');
         foreach ($this->getOidData() as $data) {
-            $insertOidStmt->executeStatement($data);
+            $insertOidStmt->bindValue(1, $data[0]);
+            $insertOidStmt->bindValue(2, $data[1]);
+            $insertOidStmt->bindValue(3, $data[2]);
+            $insertOidStmt->bindValue(4, $data[3]);
+            $insertOidStmt->bindValue(5, $data[4]);
+            $insertOidStmt->executeStatement();
         }
 
         $insertEntryStmt = $this->connection->prepare('INSERT INTO acl_entries (id, class_id, object_identity_id, field_name, ace_order, security_identity_id, mask, granting, granting_strategy, audit_success, audit_failure) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
         foreach ($this->getEntryData() as $data) {
-            $insertEntryStmt->executeStatement($data);
+            $insertEntryStmt->bindValue(1, $data[0]);
+            $insertEntryStmt->bindValue(2, $data[1]);
+            $insertEntryStmt->bindValue(3, $data[2]);
+            $insertEntryStmt->bindValue(4, $data[3]);
+            $insertEntryStmt->bindValue(5, $data[4]);
+            $insertEntryStmt->bindValue(6, $data[5]);
+            $insertEntryStmt->bindValue(7, $data[6]);
+            $insertEntryStmt->bindValue(8, $data[7]);
+            $insertEntryStmt->bindValue(9, $data[8]);
+            $insertEntryStmt->bindValue(10, $data[9]);
+            $insertEntryStmt->bindValue(11, $data[10]);
+            $insertEntryStmt->executeStatement();
         }
 
         $insertOidAncestorStmt = $this->connection->prepare('INSERT INTO acl_object_identity_ancestors (object_identity_id, ancestor_id) VALUES (?, ?)');
         foreach ($this->getOidAncestorData() as $data) {
-            $insertOidAncestorStmt->executeStatement($data);
+            $insertOidAncestorStmt->bindValue(1, $data[0]);
+            $insertOidAncestorStmt->bindValue(2, $data[1]);
+            $insertOidAncestorStmt->executeStatement();
         }
     }
 

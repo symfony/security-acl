@@ -11,8 +11,10 @@
 
 namespace Symfony\Component\Security\Acl\Tests\Dbal;
 
+use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Schema\DefaultSchemaManagerFactory;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Acl\Dbal\AclProvider;
 use Symfony\Component\Security\Acl\Dbal\MutableAclProvider;
@@ -518,10 +520,23 @@ class MutableAclProviderTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->connection = DriverManager::getConnection([
-            'driver' => 'pdo_sqlite',
-            'memory' => true,
-        ]);
+        $configuration = new Configuration();
+
+        /**
+         * @psalm-suppress RedundantCondition Since we are compatibles with DBAL 2 and 3, we need to check if the method exists
+         */
+        if (method_exists($configuration, 'setSchemaManagerFactory')) {
+            $configuration->setSchemaManagerFactory(new DefaultSchemaManagerFactory());
+        }
+
+        $this->connection = DriverManager::getConnection(
+            [
+                'driver' => 'pdo_sqlite',
+                'memory' => true,
+            ],
+            $configuration
+        );
+        $this->connection->setNestTransactionsWithSavepoints(true);
 
         // import the schema
         $schema = new Schema($this->getOptions());

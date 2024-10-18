@@ -22,6 +22,30 @@ use Symfony\Component\Security\Acl\Permission\PermissionMapInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 
+if (class_exists(\Symfony\Component\Security\Core\Security::class)) {
+    /**
+     * @internal
+     */
+    trait AclVoterTrait
+    {
+        public function vote(TokenInterface $token, $subject, array $attributes)
+        {
+            return $this->doVote($token, $subject, $attributes);
+        }
+    }
+} else {
+    /**
+     * @internal
+     */
+    trait AclVoterTrait
+    {
+        public function vote(TokenInterface $token, mixed $subject, array $attributes): int
+        {
+            return $this->doVote($token, $subject, $attributes);
+        }
+    }
+}
+
 /**
  * This voter can be used as a base class for implementing your own permissions.
  *
@@ -29,6 +53,8 @@ use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
  */
 class AclVoter implements VoterInterface
 {
+    use AclVoterTrait;
+
     private $aclProvider;
     private $permissionMap;
     private $objectIdentityRetrievalStrategy;
@@ -51,7 +77,7 @@ class AclVoter implements VoterInterface
         return \is_string($attribute) && $this->permissionMap->contains($attribute);
     }
 
-    public function vote(TokenInterface $token, $subject, array $attributes)
+    private function doVote(TokenInterface $token, $subject, array $attributes): int
     {
         foreach ($attributes as $attribute) {
             if (!$this->supportsAttribute($attribute)) {
