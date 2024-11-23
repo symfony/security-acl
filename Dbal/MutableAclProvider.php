@@ -36,6 +36,7 @@ use Symfony\Component\Security\Acl\Model\SecurityIdentityInterface;
 class MutableAclProvider extends AclProvider implements MutableAclProviderInterface, PropertyChangedListener
 {
     private $propertyChanges;
+    private $transactionStarted = false;
 
     /**
      * {@inheritdoc}
@@ -80,7 +81,12 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
      */
     public function deleteAcl(ObjectIdentityInterface $oid)
     {
-        $this->connection->beginTransaction();
+        // DBAL 4.0 does not support nested transactions, so we need to keep track of the transaction state
+        // @see https://github.com/doctrine/dbal/pull/5383 and https://github.com/doctrine/dbal/pull/5401
+        if (!$this->transactionStarted) {
+            $this->connection->beginTransaction();
+            $this->transactionStarted = true;
+        }
         try {
             foreach ($this->findChildren($oid, true) as $childOid) {
                 $this->deleteAcl($childOid);
@@ -92,9 +98,15 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
             $this->deleteObjectIdentityRelations($oidPK);
             $this->deleteObjectIdentity($oidPK);
 
-            $this->connection->commit();
+            if ($this->transactionStarted) {
+                $this->connection->commit();
+                $this->transactionStarted = false;
+            }
         } catch (\Exception $e) {
-            $this->connection->rollBack();
+            if ($this->transactionStarted) {
+                $this->connection->rollBack();
+                $this->transactionStarted = false;
+            }
 
             throw $e;
         }
