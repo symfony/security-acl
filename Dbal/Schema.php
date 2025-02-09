@@ -29,7 +29,7 @@ final class Schema extends BaseSchema
     /**
      * @param array $options the names for tables
      */
-    public function __construct(array $options, Connection $connection = null)
+    public function __construct(array $options, ?Connection $connection = null)
     {
         $schemaConfig = $this->createSchemaConfig($connection);
 
