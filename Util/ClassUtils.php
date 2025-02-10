@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -47,14 +49,10 @@ final class ClassUtils
 
     /**
      * Gets the real class name of a class name that could be a proxy.
-     *
-     * @param string|object $object
-     *
-     * @return string
      */
-    public static function getRealClass($object)
+    public static function getRealClass(object|string $object): string
     {
-        $class = \is_object($object) ? \get_class($object) : $object;
+        $class = \is_object($object) ? $object::class : $object;
 
         if (class_exists(DoctrineClassUtils::class)) {
             return DoctrineClassUtils::getRealClass($class);

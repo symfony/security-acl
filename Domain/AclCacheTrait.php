@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -13,6 +15,7 @@ namespace Symfony\Component\Security\Acl\Domain;
 
 use Symfony\Component\Security\Acl\Model\AclInterface;
 use Symfony\Component\Security\Acl\Model\ObjectIdentityInterface;
+use Symfony\Component\Security\Acl\Model\PermissionGrantingStrategyInterface;
 
 /**
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
@@ -21,8 +24,8 @@ use Symfony\Component\Security\Acl\Model\ObjectIdentityInterface;
  */
 trait AclCacheTrait
 {
-    private $prefix;
-    private $permissionGrantingStrategy;
+    private string $prefix;
+    private PermissionGrantingStrategyInterface $permissionGrantingStrategy;
 
     /**
      * Unserializes the ACL.

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -26,10 +28,8 @@ interface ObjectIdentityInterface
      *
      * Referential Equality: $object1 === $object2
      * Example for Object Equality: $object1->getId() === $object2->getId()
-     *
-     * @return bool
      */
-    public function equals(self $identity);
+    public function equals(self $identity): bool;
 
     /**
      * Obtains a unique identifier for this object. The identifier must not be
@@ -37,12 +37,12 @@ interface ObjectIdentityInterface
      *
      * @return string cannot return null
      */
-    public function getIdentifier();
+    public function getIdentifier(): string;
 
     /**
      * Returns a type for the domain object. Typically, this is the PHP class name.
      *
      * @return string cannot return null
      */
-    public function getType();
+    public function getType(): string;
 }

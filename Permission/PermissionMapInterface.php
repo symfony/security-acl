@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -24,19 +26,12 @@ interface PermissionMapInterface
      * The security identity must have been granted access to at least one of
      * these bitmasks.
      *
-     * @param string $permission
-     * @param object $object
-     *
-     * @return array|null may return null if permission/object combination is not supported
+     * @return int[]|null may return null if permission/object combination is not supported
      */
-    public function getMasks($permission, $object);
+    public function getMasks(string $permission, $object): ?array;
 
     /**
      * Whether this map contains the given permission.
-     *
-     * @param string $permission
-     *
-     * @return bool
      */
-    public function contains($permission);
+    public function contains(string $permission): bool;
 }

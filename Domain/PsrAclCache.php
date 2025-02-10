@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -28,13 +30,16 @@ class PsrAclCache implements AclCacheInterface
 
     public const PREFIX = 'sf_acl_';
 
-    private $cache;
+    private CacheItemPoolInterface $cache;
 
     /**
      * @throws \InvalidArgumentException When $prefix is empty
      */
-    public function __construct(CacheItemPoolInterface $cache, PermissionGrantingStrategyInterface $permissionGrantingStrategy, string $prefix = self::PREFIX)
-    {
+    public function __construct(
+        CacheItemPoolInterface $cache,
+        PermissionGrantingStrategyInterface $permissionGrantingStrategy,
+        string $prefix = self::PREFIX,
+    ) {
         if ('' === $prefix) {
             throw new \InvalidArgumentException('$prefix cannot be empty.');
         }
@@ -77,9 +82,9 @@ class PsrAclCache implements AclCacheInterface
     /**
      * {@inheritdoc}
      */
-    public function getFromCacheById($aclId): ?AclInterface
+    public function getFromCacheById(int $aclId): ?AclInterface
     {
-        $lookupKey = $this->getAliasKeyForIdentity($aclId);
+        $lookupKey = $this->getAliasKeyForIdentity((string)$aclId);
         $lookupKeyItem = $this->cache->getItem($lookupKey);
         if (!$lookupKeyItem->isHit()) {
             return null;
@@ -129,7 +134,7 @@ class PsrAclCache implements AclCacheInterface
 
         $this->cache->saveDeferred($objectIdentityItem);
 
-        $aliasKey = $this->getAliasKeyForIdentity($acl->getId());
+        $aliasKey = $this->getAliasKeyForIdentity((string)$acl->getId());
         $aliasItem = $this->cache->getItem($aliasKey);
         $aliasItem->set($key);
 

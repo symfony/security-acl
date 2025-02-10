@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -29,23 +31,18 @@ class DoctrineAclCache implements AclCacheInterface
 
     public const PREFIX = 'sf2_acl_';
 
-    private $cache;
-
     /**
-     * Constructor.
-     *
-     * @param string $prefix
-     *
      * @throws \InvalidArgumentException
      */
-    public function __construct(Cache $cache, PermissionGrantingStrategyInterface $permissionGrantingStrategy, $prefix = self::PREFIX)
-    {
-        $prefix = (string) $prefix;
+    public function __construct(
+        private Cache $cache,
+        PermissionGrantingStrategyInterface $permissionGrantingStrategy,
+        string $prefix = self::PREFIX,
+    ) {
         if ('' === $prefix) {
             throw new \InvalidArgumentException('$prefix cannot be empty.');
         }
 
-        $this->cache = $cache;
         $this->permissionGrantingStrategy = $permissionGrantingStrategy;
         $this->prefix = $prefix;
     }
@@ -53,7 +50,7 @@ class DoctrineAclCache implements AclCacheInterface
     /**
      * {@inheritdoc}
      */
-    public function clearCache()
+    public function clearCache(): void
     {
         if ($this->cache instanceof CacheProvider) {
             $this->cache->deleteAll();
@@ -63,7 +60,7 @@ class DoctrineAclCache implements AclCacheInterface
     /**
      * {@inheritdoc}
      */
-    public function evictFromCacheById($aclId)
+    public function evictFromCacheById(string $aclId): void
     {
         $lookupKey = $this->getAliasKeyForIdentity($aclId);
         if (!$this->cache->contains($lookupKey)) {
@@ -81,7 +78,7 @@ class DoctrineAclCache implements AclCacheInterface
     /**
      * {@inheritdoc}
      */
-    public function evictFromCacheByIdentity(ObjectIdentityInterface $oid)
+    public function evictFromCacheByIdentity(ObjectIdentityInterface $oid): void
     {
         $key = $this->getDataKeyByIdentity($oid);
         if (!$this->cache->contains($key)) {
@@ -94,18 +91,18 @@ class DoctrineAclCache implements AclCacheInterface
     /**
      * {@inheritdoc}
      */
-    public function getFromCacheById($aclId)
+    public function getFromCacheById(int $aclId): ?AclInterface
     {
-        $lookupKey = $this->getAliasKeyForIdentity($aclId);
+        $lookupKey = $this->getAliasKeyForIdentity((string)$aclId);
         if (!$this->cache->contains($lookupKey)) {
-            return;
+            return null;
         }
 
         $key = $this->cache->fetch($lookupKey);
         if (!$this->cache->contains($key)) {
             $this->cache->delete($lookupKey);
 
-            return;
+            return null;
         }
 
         return $this->unserializeAcl($this->cache->fetch($key));
@@ -114,11 +111,11 @@ class DoctrineAclCache implements AclCacheInterface
     /**
      * {@inheritdoc}
      */
-    public function getFromCacheByIdentity(ObjectIdentityInterface $oid)
+    public function getFromCacheByIdentity(ObjectIdentityInterface $oid): ?AclInterface
     {
         $key = $this->getDataKeyByIdentity($oid);
         if (!$this->cache->contains($key)) {
-            return;
+            return null;
         }
 
         return $this->unserializeAcl($this->cache->fetch($key));
@@ -127,7 +124,7 @@ class DoctrineAclCache implements AclCacheInterface
     /**
      * {@inheritdoc}
      */
-    public function putInCache(AclInterface $acl)
+    public function putInCache(AclInterface $acl): void
     {
         if (null === $acl->getId()) {
             throw new \InvalidArgumentException('Transient ACLs cannot be cached.');
@@ -139,6 +136,6 @@ class DoctrineAclCache implements AclCacheInterface
 
         $key = $this->getDataKeyByIdentity($acl->getObjectIdentity());
         $this->cache->save($key, serialize($acl));
-        $this->cache->save($this->getAliasKeyForIdentity($acl->getId()), $key);
+        $this->cache->save($this->getAliasKeyForIdentity((string)$acl->getId()), $key);
     }
 }

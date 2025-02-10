@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -25,12 +27,15 @@ use Symfony\Component\Security\Acl\Model\ObjectIdentityInterface;
  */
 class NotAllAclsFoundException extends AclNotFoundException
 {
-    private $partialResult;
+    /**
+     * @var \SplObjectStorage<ObjectIdentityInterface,AclInterface>
+     */
+    private \SplObjectStorage $partialResult;
 
     /**
      * @param \SplObjectStorage<ObjectIdentityInterface,AclInterface> $result
      */
-    public function setPartialResult(\SplObjectStorage $result)
+    public function setPartialResult(\SplObjectStorage $result): void
     {
         $this->partialResult = $result;
     }
@@ -40,7 +45,7 @@ class NotAllAclsFoundException extends AclNotFoundException
      *
      * @return \SplObjectStorage<ObjectIdentityInterface,AclInterface>
      */
-    public function getPartialResult()
+    public function getPartialResult(): \SplObjectStorage
     {
         return $this->partialResult;
     }

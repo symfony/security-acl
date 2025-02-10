@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -12,6 +14,7 @@
 namespace Symfony\Component\Security\Acl\Domain;
 
 use Symfony\Component\Security\Acl\Exception\InvalidDomainObjectException;
+use Symfony\Component\Security\Acl\Model\ObjectIdentityInterface;
 use Symfony\Component\Security\Acl\Model\ObjectIdentityRetrievalStrategyInterface;
 
 /**
@@ -24,12 +27,12 @@ class ObjectIdentityRetrievalStrategy implements ObjectIdentityRetrievalStrategy
     /**
      * {@inheritdoc}
      */
-    public function getObjectIdentity($domainObject)
+    public function getObjectIdentity(object $domainObject): ?ObjectIdentityInterface
     {
         try {
             return ObjectIdentity::fromDomainObject($domainObject);
         } catch (InvalidDomainObjectException $e) {
-            return;
+            return null;
         }
     }
 }

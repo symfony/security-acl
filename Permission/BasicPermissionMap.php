@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -28,7 +30,10 @@ class BasicPermissionMap implements PermissionMapInterface, MaskBuilderRetrieval
     public const PERMISSION_MASTER = 'MASTER';
     public const PERMISSION_OWNER = 'OWNER';
 
-    protected $map;
+    /**
+     * @var array<string,array<int,int>>
+     */
+    protected array $map;
 
     public function __construct()
     {
@@ -89,10 +94,10 @@ class BasicPermissionMap implements PermissionMapInterface, MaskBuilderRetrieval
     /**
      * {@inheritdoc}
      */
-    public function getMasks($permission, $object)
+    public function getMasks(string $permission, $object): ?array
     {
         if (!isset($this->map[$permission])) {
-            return;
+            return null;
         }
 
         return $this->map[$permission];
@@ -101,7 +106,7 @@ class BasicPermissionMap implements PermissionMapInterface, MaskBuilderRetrieval
     /**
      * {@inheritdoc}
      */
-    public function contains($permission)
+    public function contains(string $permission): bool
     {
         return isset($this->map[$permission]);
     }
@@ -109,7 +114,7 @@ class BasicPermissionMap implements PermissionMapInterface, MaskBuilderRetrieval
     /**
      * {@inheritdoc}
      */
-    public function getMaskBuilder()
+    public function getMaskBuilder(): MaskBuilder
     {
         return new MaskBuilder();
     }

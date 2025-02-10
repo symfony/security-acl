@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -24,10 +26,8 @@ abstract class AuditLogger implements AuditLoggerInterface
 {
     /**
      * Performs some checks if logging was requested.
-     *
-     * @param bool $granted
      */
-    public function logIfNeeded($granted, EntryInterface $ace)
+    public function logIfNeeded(bool $granted, EntryInterface $ace): void
     {
         if (!$ace instanceof AuditableEntryInterface) {
             return;
@@ -42,8 +42,6 @@ abstract class AuditLogger implements AuditLoggerInterface
 
     /**
      * This method is only called when logging is needed.
-     *
-     * @param bool $granted
      */
-    abstract protected function doLog($granted, EntryInterface $ace);
+    abstract protected function doLog(bool $granted, EntryInterface $ace): void;
 }

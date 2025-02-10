@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -21,8 +23,6 @@ interface AuditLoggerInterface
     /**
      * This method is called whenever access is granted, or denied, and
      * administrative mode is turned off.
-     *
-     * @param bool $granted
      */
-    public function logIfNeeded($granted, EntryInterface $ace);
+    public function logIfNeeded(bool $granted, EntryInterface $ace): void;
 }

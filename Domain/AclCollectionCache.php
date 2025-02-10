@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -23,28 +25,21 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
  */
 class AclCollectionCache
 {
-    private $aclProvider;
-    private $objectIdentityRetrievalStrategy;
-    private $securityIdentityRetrievalStrategy;
-
-    /**
-     * Constructor.
-     */
-    public function __construct(AclProviderInterface $aclProvider, ObjectIdentityRetrievalStrategyInterface $oidRetrievalStrategy, SecurityIdentityRetrievalStrategyInterface $sidRetrievalStrategy)
-    {
-        $this->aclProvider = $aclProvider;
-        $this->objectIdentityRetrievalStrategy = $oidRetrievalStrategy;
-        $this->securityIdentityRetrievalStrategy = $sidRetrievalStrategy;
+    public function __construct(
+        private AclProviderInterface $aclProvider,
+        private ObjectIdentityRetrievalStrategyInterface $objectIdentityRetrievalStrategy,
+        private SecurityIdentityRetrievalStrategyInterface $securityIdentityRetrievalStrategy,
+    ) {
     }
 
     /**
      * Batch loads ACLs for an entire collection; thus, it reduces the number
      * of required queries considerably.
      *
-     * @param mixed            $collection anything that can be passed to foreach()
+     * @param object[]         $collection anything that can be passed to foreach()
      * @param TokenInterface[] $tokens     an array of TokenInterface implementations
      */
-    public function cache($collection, array $tokens = [])
+    public function cache(iterable $collection, array $tokens = []): void
     {
         $sids = [];
         foreach ($tokens as $token) {

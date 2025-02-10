@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -29,5 +31,5 @@ interface SecurityIdentityRetrievalStrategyInterface
      *
      * @return SecurityIdentityInterface[] An array of SecurityIdentityInterface implementations
      */
-    public function getSecurityIdentities(TokenInterface $token);
+    public function getSecurityIdentities(TokenInterface $token): array;
 }

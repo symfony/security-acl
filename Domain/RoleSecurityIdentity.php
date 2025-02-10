@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -20,19 +22,14 @@ use Symfony\Component\Security\Acl\Model\SecurityIdentityInterface;
  */
 final class RoleSecurityIdentity implements SecurityIdentityInterface
 {
-    private $role;
-
-    public function __construct(string $role)
+    public function __construct(private readonly string $role)
     {
-        $this->role = $role;
     }
 
     /**
      * Returns the role name.
-     *
-     * @return string
      */
-    public function getRole()
+    public function getRole(): string
     {
         return $this->role;
     }
@@ -40,7 +37,7 @@ final class RoleSecurityIdentity implements SecurityIdentityInterface
     /**
      * {@inheritdoc}
      */
-    public function equals(SecurityIdentityInterface $sid)
+    public function equals(SecurityIdentityInterface $sid): bool
     {
         if (!$sid instanceof self) {
             return false;
@@ -53,10 +50,8 @@ final class RoleSecurityIdentity implements SecurityIdentityInterface
      * Returns a textual representation of this security identity.
      *
      * This is solely used for debugging purposes, not to make an equality decision.
-     *
-     * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return sprintf('RoleSecurityIdentity(%s)', $this->role);
     }

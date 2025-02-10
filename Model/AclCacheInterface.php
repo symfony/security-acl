@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -23,38 +25,32 @@ interface AclCacheInterface
      *
      * @param string $aclId a serialized primary key
      */
-    public function evictFromCacheById($aclId);
+    public function evictFromCacheById(string $aclId): void;
 
     /**
      * Removes an ACL from the cache.
      *
      * The ACL which is returned, must reference the passed object identity.
      */
-    public function evictFromCacheByIdentity(ObjectIdentityInterface $oid);
+    public function evictFromCacheByIdentity(ObjectIdentityInterface $oid): void;
 
     /**
      * Retrieves an ACL for the given object identity primary key from the cache.
-     *
-     * @param int $aclId
-     *
-     * @return AclInterface|null
      */
-    public function getFromCacheById($aclId);
+    public function getFromCacheById(int $aclId): ?AclInterface;
 
     /**
      * Retrieves an ACL for the given object identity from the cache.
-     *
-     * @return AclInterface|null
      */
-    public function getFromCacheByIdentity(ObjectIdentityInterface $oid);
+    public function getFromCacheByIdentity(ObjectIdentityInterface $oid): ?AclInterface;
 
     /**
      * Stores a new ACL in the cache.
      */
-    public function putInCache(AclInterface $acl);
+    public function putInCache(AclInterface $acl): void;
 
     /**
      * Removes all ACLs from the cache.
      */
-    public function clearCache();
+    public function clearCache(): void;
 }

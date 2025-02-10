@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -18,8 +20,6 @@ interface MaskBuilderRetrievalInterface
 {
     /**
      * Returns a new instance of the MaskBuilder used in the permissionMap.
-     *
-     * @return MaskBuilderInterface
      */
-    public function getMaskBuilder();
+    public function getMaskBuilder(): MaskBuilderInterface;
 }

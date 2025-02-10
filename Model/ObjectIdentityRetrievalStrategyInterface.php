@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -20,10 +22,6 @@ interface ObjectIdentityRetrievalStrategyInterface
 {
     /**
      * Retrieves the object identity from a domain object.
-     *
-     * @param object $domainObject
-     *
-     * @return ObjectIdentityInterface
      */
-    public function getObjectIdentity($domainObject);
+    public function getObjectIdentity(object $domainObject): ?ObjectIdentityInterface;
 }

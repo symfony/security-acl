@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -21,20 +23,20 @@ interface AuditableAclInterface extends MutableAclInterface
     /**
      * Updates auditing for class-based ACE.
      */
-    public function updateClassAuditing(int $index, bool $auditSuccess, bool $auditFailure);
+    public function updateClassAuditing(int $index, bool $auditSuccess, bool $auditFailure): void;
 
     /**
      * Updates auditing for class-field-based ACE.
      */
-    public function updateClassFieldAuditing(int $index, string $field, bool $auditSuccess, bool $auditFailure);
+    public function updateClassFieldAuditing(int $index, string $field, bool $auditSuccess, bool $auditFailure): void;
 
     /**
      * Updates auditing for object-based ACE.
      */
-    public function updateObjectAuditing(int $index, bool $auditSuccess, bool $auditFailure);
+    public function updateObjectAuditing(int $index, bool $auditSuccess, bool $auditFailure): void;
 
     /**
      * Updates auditing for object-field-based ACE.
      */
-    public function updateObjectFieldAuditing(int $index, string $field, bool $auditSuccess, bool $auditFailure);
+    public function updateObjectFieldAuditing(int $index, string $field, bool $auditSuccess, bool $auditFailure): void;
 }

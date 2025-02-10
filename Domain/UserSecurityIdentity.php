@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -23,46 +25,36 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 final class UserSecurityIdentity implements SecurityIdentityInterface
 {
-    private $username;
-    private $class;
-
     /**
-     * Constructor.
-     *
      * @param string $username the username representation
      * @param string $class    the user's fully qualified class name
      *
      * @throws \InvalidArgumentException
      */
-    public function __construct($username, $class)
-    {
-        if ('' === $username || null === $username) {
+    public function __construct(
+        private readonly string $username,
+        private readonly string $class,
+    ) {
+        if ('' === $username) {
             throw new \InvalidArgumentException('$username must not be empty.');
         }
         if (empty($class)) {
             throw new \InvalidArgumentException('$class must not be empty.');
         }
-
-        $this->username = (string) $username;
-        $this->class = $class;
     }
 
     /**
      * Creates a user security identity from a UserInterface.
-     *
-     * @return UserSecurityIdentity
      */
-    public static function fromAccount(UserInterface $user)
+    public static function fromAccount(UserInterface $user): self
     {
-        return new self(method_exists($user, 'getUserIdentifier') ? $user->getUserIdentifier() : $user->getUsername(), ClassUtils::getRealClass($user));
+        return new self($user->getUserIdentifier(), ClassUtils::getRealClass($user));
     }
 
     /**
      * Creates a user security identity from a TokenInterface.
-     *
-     * @return UserSecurityIdentity
      */
-    public static function fromToken(TokenInterface $token)
+    public static function fromToken(TokenInterface $token): self
     {
         $user = $token->getUser();
 
@@ -70,25 +62,21 @@ final class UserSecurityIdentity implements SecurityIdentityInterface
             return self::fromAccount($user);
         }
 
-        return new self((string) $user, \is_object($user) ? ClassUtils::getRealClass($user) : ClassUtils::getRealClass($token));
+        return new self((string) $user, ClassUtils::getRealClass($token));
     }
 
     /**
      * Returns the username.
-     *
-     * @return string
      */
-    public function getUsername()
+    public function getUsername(): string
     {
         return $this->username;
     }
 
     /**
      * Returns the user's class name.
-     *
-     * @return string
      */
-    public function getClass()
+    public function getClass(): string
     {
         return $this->class;
     }
@@ -96,7 +84,7 @@ final class UserSecurityIdentity implements SecurityIdentityInterface
     /**
      * {@inheritdoc}
      */
-    public function equals(SecurityIdentityInterface $sid)
+    public function equals(SecurityIdentityInterface $sid): bool
     {
         if (!$sid instanceof self) {
             return false;
@@ -110,10 +98,8 @@ final class UserSecurityIdentity implements SecurityIdentityInterface
      * A textual representation of this security identity.
      *
      * This is not used for equality comparison, but only for debugging.
-     *
-     * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return sprintf('UserSecurityIdentity(%s, %s)', $this->username, $this->class);
     }

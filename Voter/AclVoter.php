@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -28,6 +30,11 @@ if (class_exists(\Symfony\Component\Security\Core\Security::class)) {
      */
     trait AclVoterTrait
     {
+        /**
+         * @param mixed[] $attributes
+         *
+         * @return int<-1,1>
+         */
         public function vote(TokenInterface $token, $subject, array $attributes)
         {
             return $this->doVote($token, $subject, $attributes);
@@ -39,6 +46,11 @@ if (class_exists(\Symfony\Component\Security\Core\Security::class)) {
      */
     trait AclVoterTrait
     {
+        /**
+         * @param mixed[] $attributes
+         *
+         * @return int<-1,1>
+         */
         public function vote(TokenInterface $token, mixed $subject, array $attributes): int
         {
             return $this->doVote($token, $subject, $attributes);
@@ -55,29 +67,25 @@ class AclVoter implements VoterInterface
 {
     use AclVoterTrait;
 
-    private $aclProvider;
-    private $permissionMap;
-    private $objectIdentityRetrievalStrategy;
-    private $securityIdentityRetrievalStrategy;
-    private $allowIfObjectIdentityUnavailable;
-    private $logger;
-
-    public function __construct(AclProviderInterface $aclProvider, ObjectIdentityRetrievalStrategyInterface $oidRetrievalStrategy, SecurityIdentityRetrievalStrategyInterface $sidRetrievalStrategy, PermissionMapInterface $permissionMap, LoggerInterface $logger = null, $allowIfObjectIdentityUnavailable = true)
-    {
-        $this->aclProvider = $aclProvider;
-        $this->permissionMap = $permissionMap;
-        $this->objectIdentityRetrievalStrategy = $oidRetrievalStrategy;
-        $this->securityIdentityRetrievalStrategy = $sidRetrievalStrategy;
-        $this->logger = $logger;
-        $this->allowIfObjectIdentityUnavailable = $allowIfObjectIdentityUnavailable;
+    public function __construct(
+        private readonly AclProviderInterface $aclProvider,
+        private readonly ObjectIdentityRetrievalStrategyInterface $objectIdentityRetrievalStrategy,
+        private readonly SecurityIdentityRetrievalStrategyInterface $securityIdentityRetrievalStrategy,
+        private readonly PermissionMapInterface $permissionMap,
+        private readonly ?LoggerInterface $logger = null,
+        private readonly bool $allowIfObjectIdentityUnavailable = true,
+    ) {
     }
 
-    public function supportsAttribute($attribute)
+    public function supportsAttribute(mixed $attribute): bool
     {
         return \is_string($attribute) && $this->permissionMap->contains($attribute);
     }
 
-    private function doVote(TokenInterface $token, $subject, array $attributes): int
+    /**
+     * @param mixed[] $attributes
+     */
+    private function doVote(TokenInterface $token, mixed $subject, array $attributes): int
     {
         foreach ($attributes as $attribute) {
             if (!$this->supportsAttribute($attribute)) {
@@ -161,12 +169,8 @@ class AclVoter implements VoterInterface
     /**
      * You can override this method when writing a voter for a specific domain
      * class.
-     *
-     * @param string $class The class name
-     *
-     * @return bool
      */
-    public function supportsClass($class)
+    public function supportsClass(string $class): bool
     {
         return true;
     }

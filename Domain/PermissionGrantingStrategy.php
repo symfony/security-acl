@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -29,12 +31,12 @@ class PermissionGrantingStrategy implements PermissionGrantingStrategyInterface
     public const ALL = 'all';
     public const ANY = 'any';
 
-    private $auditLogger;
+    private ?AuditLoggerInterface $auditLogger = null;
 
     /**
      * Sets the audit logger.
      */
-    public function setAuditLogger(AuditLoggerInterface $auditLogger)
+    public function setAuditLogger(AuditLoggerInterface $auditLogger): void
     {
         $this->auditLogger = $auditLogger;
     }
@@ -42,7 +44,7 @@ class PermissionGrantingStrategy implements PermissionGrantingStrategyInterface
     /**
      * {@inheritdoc}
      */
-    public function isGranted(AclInterface $acl, array $masks, array $sids, $administrativeMode = false)
+    public function isGranted(AclInterface $acl, array $masks, array $sids, bool $administrativeMode = false): bool
     {
         try {
             try {
@@ -74,7 +76,7 @@ class PermissionGrantingStrategy implements PermissionGrantingStrategyInterface
     /**
      * {@inheritdoc}
      */
-    public function isFieldGranted(AclInterface $acl, $field, array $masks, array $sids, $administrativeMode = false)
+    public function isFieldGranted(AclInterface $acl, string $field, array $masks, array $sids, bool $administrativeMode = false): bool
     {
         try {
             try {
@@ -123,7 +125,7 @@ class PermissionGrantingStrategy implements PermissionGrantingStrategyInterface
      * an NoAceFoundException, or deny access.
      *
      * @param EntryInterface[]            $aces               An array of ACE to check against
-     * @param array                       $masks              An array of permission masks
+     * @param int[]                       $masks              An array of permission masks
      * @param SecurityIdentityInterface[] $sids               An array of SecurityIdentityInterface implementations
      * @param bool                        $administrativeMode True turns off audit logging
      *
@@ -131,7 +133,7 @@ class PermissionGrantingStrategy implements PermissionGrantingStrategyInterface
      *
      * @throws NoAceFoundException
      */
-    private function hasSufficientPermissions(AclInterface $acl, array $aces, array $masks, array $sids, $administrativeMode)
+    private function hasSufficientPermissions(AclInterface $acl, array $aces, array $masks, array $sids, bool $administrativeMode): bool
     {
         $firstRejectedAce = null;
 
@@ -185,13 +187,9 @@ class PermissionGrantingStrategy implements PermissionGrantingStrategyInterface
      * Strategy EQUAL:
      * The ACE will be considered applicable when the bitmasks are equal.
      *
-     * @param int $requiredMask
-     *
-     * @return bool
-     *
      * @throws \RuntimeException if the ACE strategy is not supported
      */
-    private function isAceApplicable($requiredMask, EntryInterface $ace)
+    private function isAceApplicable(int $requiredMask, EntryInterface $ace): bool
     {
         $strategy = $ace->getStrategy();
         if (self::ALL === $strategy) {

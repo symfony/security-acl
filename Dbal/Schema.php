@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -12,6 +14,7 @@
 namespace Symfony\Component\Security\Acl\Dbal;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use Doctrine\DBAL\Schema\Schema as BaseSchema;
 use Doctrine\DBAL\Schema\SchemaConfig;
@@ -23,20 +26,18 @@ use Doctrine\DBAL\Schema\SchemaConfig;
  */
 final class Schema extends BaseSchema
 {
-    protected $options;
-    protected $platform;
+    protected ?AbstractPlatform $platform;
 
     /**
-     * @param array $options the names for tables
+     * @param array<string,string> $options the names for tables
      */
-    public function __construct(array $options, Connection $connection = null)
+    public function __construct(protected array $options, ?Connection $connection = null)
     {
         $schemaConfig = $this->createSchemaConfig($connection);
 
         parent::__construct([], [], $schemaConfig);
 
-        $this->options = $options;
-        $this->platform = $connection ? $connection->getDatabasePlatform() : null;
+        $this->platform = $connection?->getDatabasePlatform();
 
         $this->addClassTable();
         $this->addSecurityIdentitiesTable();
@@ -48,7 +49,7 @@ final class Schema extends BaseSchema
     /**
      * Merges ACL schema with the given schema.
      */
-    public function addToSchema(BaseSchema $schema)
+    public function addToSchema(BaseSchema $schema): void
     {
         foreach ($this->getTables() as $table) {
             $schema->_addTable($table);
@@ -62,7 +63,7 @@ final class Schema extends BaseSchema
     /**
      * Adds the class table to the schema.
      */
-    protected function addClassTable()
+    protected function addClassTable(): void
     {
         $table = $this->createTable($this->options['class_table_name']);
         $table->addColumn('id', 'integer', ['unsigned' => true, 'autoincrement' => true]);
@@ -74,7 +75,7 @@ final class Schema extends BaseSchema
     /**
      * Adds the entry table to the schema.
      */
-    protected function addEntryTable()
+    protected function addEntryTable(): void
     {
         $table = $this->createTable($this->options['entry_table_name']);
 
@@ -102,7 +103,7 @@ final class Schema extends BaseSchema
     /**
      * Adds the object identity table to the schema.
      */
-    protected function addObjectIdentitiesTable()
+    protected function addObjectIdentitiesTable(): void
     {
         $table = $this->createTable($this->options['oid_table_name']);
 
@@ -122,7 +123,7 @@ final class Schema extends BaseSchema
     /**
      * Adds the object identity relation table to the schema.
      */
-    protected function addObjectIdentityAncestorsTable()
+    protected function addObjectIdentityAncestorsTable(): void
     {
         $table = $this->createTable($this->options['oid_ancestors_table_name']);
 
@@ -144,7 +145,7 @@ final class Schema extends BaseSchema
     /**
      * Adds the security identity table to the schema.
      */
-    protected function addSecurityIdentitiesTable()
+    protected function addSecurityIdentitiesTable(): void
     {
         $table = $this->createTable($this->options['sid_table_name']);
 
@@ -162,11 +163,6 @@ final class Schema extends BaseSchema
             return null;
         }
 
-        $schemaManager = method_exists($connection, 'createSchemaManager')
-            ? $connection->createSchemaManager()
-            : $connection->getSchemaManager()
-        ;
-
-        return $schemaManager->createSchemaConfig();
+        return $connection->createSchemaManager()->createSchemaConfig();
     }
 }

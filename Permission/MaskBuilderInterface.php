@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -19,58 +21,38 @@ interface MaskBuilderInterface
     /**
      * Set the mask of this permission.
      *
-     * @param int $mask
-     *
-     * @return MaskBuilderInterface
-     *
      * @throws \InvalidArgumentException if $mask is not an integer
      */
-    public function set($mask);
+    public function set(int $mask): self;
 
     /**
      * Returns the mask of this permission.
-     *
-     * @return int
      */
-    public function get();
+    public function get(): int;
 
     /**
      * Adds a mask to the permission.
      *
-     * @param mixed $mask
-     *
-     * @return MaskBuilderInterface
-     *
      * @throws \InvalidArgumentException
      */
-    public function add($mask);
+    public function add(int $mask): self;
 
     /**
      * Removes a mask from the permission.
      *
-     * @param mixed $mask
-     *
-     * @return MaskBuilderInterface
-     *
      * @throws \InvalidArgumentException
      */
-    public function remove($mask);
+    public function remove(int $mask): self;
 
     /**
      * Resets the PermissionBuilder.
-     *
-     * @return MaskBuilderInterface
      */
-    public function reset();
+    public function reset(): self;
 
     /**
      * Returns the mask for the passed code.
      *
-     * @param mixed $code
-     *
-     * @return int
-     *
      * @throws \InvalidArgumentException
      */
-    public function resolveMask($code);
+    public function resolveMask(string|int $code): int;
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -22,19 +24,24 @@ use Symfony\Component\Security\Acl\Model\SecurityIdentityInterface;
  */
 class FieldEntry extends Entry implements FieldEntryInterface
 {
-    private $field;
-
-    public function __construct(?int $id, AclInterface $acl, string $field, SecurityIdentityInterface $sid, string $strategy, int $mask, bool $granting, bool $auditFailure, $auditSuccess)
-    {
+    public function __construct(
+        ?int $id,
+        AclInterface $acl,
+        private readonly string $field,
+        SecurityIdentityInterface $sid,
+        string $strategy,
+        int $mask,
+        bool $granting,
+        bool $auditFailure,
+        bool $auditSuccess,
+    ) {
         parent::__construct($id, $acl, $sid, $strategy, $mask, $granting, $auditFailure, $auditSuccess);
-
-        $this->field = $field;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getField()
+    public function getField(): string
     {
         return $this->field;
     }

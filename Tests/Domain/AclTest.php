@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -288,17 +290,17 @@ class AclTest extends TestCase
 
         $this->assertTrue($acl->isSidLoaded(new UserSecurityIdentity('foo', 'Foo')));
         $this->assertTrue($acl->isSidLoaded(new UserSecurityIdentity('johannes', 'Bar')));
-        $this->assertTrue($acl->isSidLoaded([
+        $this->assertTrue($acl->isSidLoaded(
             new UserSecurityIdentity('foo', 'Foo'),
             new UserSecurityIdentity('johannes', 'Bar'),
-        ]));
+        ));
         $this->assertFalse($acl->isSidLoaded(new RoleSecurityIdentity('ROLE_FOO')));
         $this->assertFalse($acl->isSidLoaded(new UserSecurityIdentity('schmittjoh@gmail.com', 'Moo')));
-        $this->assertFalse($acl->isSidLoaded([
+        $this->assertFalse($acl->isSidLoaded(
             new UserSecurityIdentity('foo', 'Foo'),
             new UserSecurityIdentity('johannes', 'Bar'),
             new RoleSecurityIdentity('ROLE_FOO'),
-        ]));
+        ));
     }
 
     /**

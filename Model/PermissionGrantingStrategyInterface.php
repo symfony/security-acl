@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -21,19 +23,16 @@ interface PermissionGrantingStrategyInterface
     /**
      * Determines whether access to a domain object is to be granted.
      *
-     * @param bool $administrativeMode
-     *
-     * @return bool
+     * @param int[]                       $masks
+     * @param SecurityIdentityInterface[] $sids
      */
-    public function isGranted(AclInterface $acl, array $masks, array $sids, $administrativeMode = false);
+    public function isGranted(AclInterface $acl, array $masks, array $sids, bool $administrativeMode = false): bool;
 
     /**
      * Determines whether access to a domain object's field is to be granted.
      *
-     * @param string $field
-     * @param bool   $administrativeMode
-     *
-     * @return bool
+     * @param int[]                       $masks
+     * @param SecurityIdentityInterface[] $sids
      */
-    public function isFieldGranted(AclInterface $acl, $field, array $masks, array $sids, $administrativeMode = false);
+    public function isFieldGranted(AclInterface $acl, string $field, array $masks, array $sids, bool $administrativeMode = false): bool;
 }

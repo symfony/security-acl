@@ -26,43 +26,31 @@ interface EntryInterface extends \Serializable
 {
     /**
      * The ACL this ACE is associated with.
-     *
-     * @return AclInterface
      */
-    public function getAcl();
+    public function getAcl(): ?AclInterface;
 
     /**
      * The primary key of this ACE.
-     *
-     * @return int|null
      */
-    public function getId();
+    public function getId(): ?int;
 
     /**
      * The permission mask of this ACE.
-     *
-     * @return int
      */
-    public function getMask();
+    public function getMask(): int;
 
     /**
      * The security identity associated with this ACE.
-     *
-     * @return SecurityIdentityInterface
      */
-    public function getSecurityIdentity();
+    public function getSecurityIdentity(): SecurityIdentityInterface;
 
     /**
      * The strategy for comparing masks.
-     *
-     * @return string
      */
-    public function getStrategy();
+    public function getStrategy(): string;
 
     /**
      * Returns whether this ACE is granting, or denying.
-     *
-     * @return bool
      */
-    public function isGranting();
+    public function isGranting(): bool;
 }

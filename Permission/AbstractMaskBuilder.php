@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -16,17 +18,9 @@ namespace Symfony\Component\Security\Acl\Permission;
  */
 abstract class AbstractMaskBuilder implements MaskBuilderInterface
 {
-    /**
-     * @var int
-     */
-    protected $mask;
+    protected int $mask;
 
-    /**
-     * Constructor.
-     *
-     * @param int $mask optional; defaults to 0
-     */
-    public function __construct($mask = 0)
+    public function __construct(int $mask = 0)
     {
         $this->set($mask);
     }
@@ -34,12 +28,8 @@ abstract class AbstractMaskBuilder implements MaskBuilderInterface
     /**
      * {@inheritdoc}
      */
-    public function set($mask)
+    public function set(int $mask): static
     {
-        if (!\is_int($mask)) {
-            throw new \InvalidArgumentException('$mask must be an integer.');
-        }
-
         $this->mask = $mask;
 
         return $this;
@@ -48,7 +38,7 @@ abstract class AbstractMaskBuilder implements MaskBuilderInterface
     /**
      * {@inheritdoc}
      */
-    public function get()
+    public function get(): int
     {
         return $this->mask;
     }
@@ -56,7 +46,7 @@ abstract class AbstractMaskBuilder implements MaskBuilderInterface
     /**
      * {@inheritdoc}
      */
-    public function add($mask)
+    public function add(string|int $mask): static
     {
         $this->mask |= $this->resolveMask($mask);
 
@@ -66,7 +56,7 @@ abstract class AbstractMaskBuilder implements MaskBuilderInterface
     /**
      * {@inheritdoc}
      */
-    public function remove($mask)
+    public function remove(string|int $mask): static
     {
         $this->mask &= ~$this->resolveMask($mask);
 
@@ -76,7 +66,7 @@ abstract class AbstractMaskBuilder implements MaskBuilderInterface
     /**
      * {@inheritdoc}
      */
-    public function reset()
+    public function reset(): static
     {
         $this->mask = 0;
 

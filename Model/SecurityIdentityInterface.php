@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -24,5 +26,5 @@ interface SecurityIdentityInterface
      * This method is used to compare two security identities in order to
      * not rely on referential equality.
      */
-    public function equals(self $sid);
+    public function equals(self $sid): bool;
 }

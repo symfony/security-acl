@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -11,9 +13,9 @@
 
 namespace Symfony\Component\Security\Acl\Domain;
 
+use Symfony\Component\Security\Acl\Model\SecurityIdentityInterface;
 use Symfony\Component\Security\Acl\Model\SecurityIdentityRetrievalStrategyInterface;
 use Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolverInterface;
-use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 use Symfony\Component\Security\Core\Authentication\Token\NullToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter;
@@ -26,29 +28,23 @@ use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
  */
 class SecurityIdentityRetrievalStrategy implements SecurityIdentityRetrievalStrategyInterface
 {
-    private $roleHierarchy;
-    private $authenticationTrustResolver;
-
-    /**
-     * Constructor.
-     */
-    public function __construct(RoleHierarchyInterface $roleHierarchy, AuthenticationTrustResolverInterface $authenticationTrustResolver)
-    {
-        $this->roleHierarchy = $roleHierarchy;
-        $this->authenticationTrustResolver = $authenticationTrustResolver;
+    public function __construct(
+        private readonly RoleHierarchyInterface $roleHierarchy,
+        private readonly AuthenticationTrustResolverInterface $authenticationTrustResolver,
+    ) {
     }
 
     /**
      * {@inheritdoc}
      *
-     * @return RoleSecurityIdentity[]
+     * @return SecurityIdentityInterface[]
      */
-    public function getSecurityIdentities(TokenInterface $token)
+    public function getSecurityIdentities(TokenInterface $token): array
     {
         $sids = [];
 
         // add user security identity
-        if (!$token instanceof AnonymousToken && !$token instanceof NullToken) {
+        if (!$token instanceof NullToken) {
             try {
                 $sids[] = UserSecurityIdentity::fromToken($token);
             } catch (\InvalidArgumentException $e) {
@@ -78,14 +74,13 @@ class SecurityIdentityRetrievalStrategy implements SecurityIdentityRetrievalStra
 
     private function isNotAuthenticated(TokenInterface $token): bool
     {
-        if (method_exists($this->authenticationTrustResolver, 'isAuthenticated')) {
-            return !$this->authenticationTrustResolver->isAuthenticated($token);
-        }
-
-        return $this->authenticationTrustResolver->isAnonymous($token);
+        return !$this->authenticationTrustResolver->isAuthenticated($token);
     }
 
-    private function addAnonymousRoles(array &$sids)
+    /**
+     * @param SecurityIdentityInterface[] &$sids
+     */
+    private function addAnonymousRoles(array &$sids): void
     {
         $sids[] = new RoleSecurityIdentity('IS_AUTHENTICATED_ANONYMOUSLY');
         if (\defined('\Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter::PUBLIC_ACCESS')) {

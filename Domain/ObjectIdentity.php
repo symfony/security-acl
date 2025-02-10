@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -23,45 +25,32 @@ use Symfony\Component\Security\Acl\Util\ClassUtils;
  */
 final class ObjectIdentity implements ObjectIdentityInterface
 {
-    private $identifier;
-    private $type;
+    private readonly string $identifier;
 
     /**
-     * Constructor.
-     *
-     * @param string $identifier
-     * @param string $type
-     *
      * @throws \InvalidArgumentException
      */
-    public function __construct($identifier, $type)
-    {
-        if ('' === $identifier) {
+    public function __construct(
+        string|int $identifier,
+        private readonly string $type,
+    ) {
+        $this->identifier = (string) $identifier;
+
+        if ('' === $this->identifier) {
             throw new \InvalidArgumentException('$identifier cannot be empty.');
         }
         if (empty($type)) {
             throw new \InvalidArgumentException('$type cannot be empty.');
         }
-
-        $this->identifier = $identifier;
-        $this->type = $type;
     }
 
     /**
      * Constructs an ObjectIdentity for the given domain object.
      *
-     * @param object $domainObject
-     *
-     * @return ObjectIdentity
-     *
      * @throws InvalidDomainObjectException
      */
-    public static function fromDomainObject($domainObject)
+    public static function fromDomainObject(object $domainObject): self
     {
-        if (!\is_object($domainObject)) {
-            throw new InvalidDomainObjectException('$domainObject must be an object.');
-        }
-
         try {
             if ($domainObject instanceof DomainObjectInterface) {
                 return new self($domainObject->getObjectIdentifier(), ClassUtils::getRealClass($domainObject));
@@ -78,7 +67,7 @@ final class ObjectIdentity implements ObjectIdentityInterface
     /**
      * {@inheritdoc}
      */
-    public function getIdentifier()
+    public function getIdentifier(): string
     {
         return $this->identifier;
     }
@@ -86,7 +75,7 @@ final class ObjectIdentity implements ObjectIdentityInterface
     /**
      * {@inheritdoc}
      */
-    public function getType()
+    public function getType(): string
     {
         return $this->type;
     }
@@ -94,7 +83,7 @@ final class ObjectIdentity implements ObjectIdentityInterface
     /**
      * {@inheritdoc}
      */
-    public function equals(ObjectIdentityInterface $identity)
+    public function equals(ObjectIdentityInterface $identity): bool
     {
         // comparing the identifier with === might lead to problems, so we
         // waive this restriction

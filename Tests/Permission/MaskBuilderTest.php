@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -20,7 +22,7 @@ class MaskBuilderTest extends \PHPUnit\Framework\TestCase
      */
     public function testConstructorWithNonInteger($invalidMask)
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(\TypeError::class);
 
         new MaskBuilder($invalidMask);
     }

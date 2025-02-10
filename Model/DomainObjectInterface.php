@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -22,8 +24,6 @@ interface DomainObjectInterface
 {
     /**
      * Returns a unique identifier for this domain object.
-     *
-     * @return string
      */
-    public function getObjectIdentifier();
+    public function getObjectIdentifier(): string;
 }

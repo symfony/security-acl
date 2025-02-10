@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -69,10 +71,8 @@ class MaskBuilder extends AbstractMaskBuilder
 
     /**
      * Returns a human-readable representation of the permission.
-     *
-     * @return string
      */
-    public function getPattern()
+    public function getPattern(): string
     {
         $pattern = self::ALL_OFF;
         $length = \strlen($pattern);
@@ -94,22 +94,14 @@ class MaskBuilder extends AbstractMaskBuilder
     /**
      * Returns the code for the passed mask.
      *
-     * @param int $mask
-     *
-     * @return string
-     *
      * @throws \InvalidArgumentException
      * @throws \RuntimeException
      */
-    public static function getCode($mask)
+    public static function getCode(int $mask): string
     {
-        if (!\is_int($mask)) {
-            throw new \InvalidArgumentException('$mask must be an integer.');
-        }
-
         $reflection = new \ReflectionClass(static::class);
         foreach ($reflection->getConstants() as $name => $cMask) {
-            if (0 !== strpos($name, 'MASK_') || $mask !== $cMask) {
+            if (!str_starts_with($name, 'MASK_') || $mask !== $cMask) {
                 continue;
             }
 
@@ -126,13 +118,9 @@ class MaskBuilder extends AbstractMaskBuilder
     /**
      * Returns the mask for the passed code.
      *
-     * @param mixed $code
-     *
-     * @return int
-     *
      * @throws \InvalidArgumentException
      */
-    public function resolveMask($code)
+    public function resolveMask(string|int $code): int
     {
         if (\is_string($code)) {
             if (!\defined($name = sprintf('static::MASK_%s', strtoupper($code)))) {
@@ -140,10 +128,6 @@ class MaskBuilder extends AbstractMaskBuilder
             }
 
             return \constant($name);
-        }
-
-        if (!\is_int($code)) {
-            throw new \InvalidArgumentException('$code must be an integer.');
         }
 
         return $code;

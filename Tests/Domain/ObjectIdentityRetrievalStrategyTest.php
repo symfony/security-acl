@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -18,7 +20,7 @@ class ObjectIdentityRetrievalStrategyTest extends \PHPUnit\Framework\TestCase
     public function testGetObjectIdentityReturnsNullForInvalidDomainObject()
     {
         $strategy = new ObjectIdentityRetrievalStrategy();
-        $this->assertNull($strategy->getObjectIdentity('foo'));
+        $this->assertNull($strategy->getObjectIdentity(new \stdClass()));
     }
 
     public function testGetObjectIdentity()
@@ -28,7 +30,7 @@ class ObjectIdentityRetrievalStrategyTest extends \PHPUnit\Framework\TestCase
         $objectIdentity = $strategy->getObjectIdentity($domainObject);
 
         $this->assertEquals($domainObject->getId(), $objectIdentity->getIdentifier());
-        $this->assertEquals(\get_class($domainObject), $objectIdentity->getType());
+        $this->assertEquals($domainObject::class, $objectIdentity->getType());
     }
 }
 

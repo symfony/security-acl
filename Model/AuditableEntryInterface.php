@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -20,15 +22,11 @@ interface AuditableEntryInterface extends EntryInterface
 {
     /**
      * Whether auditing for successful grants is turned on.
-     *
-     * @return bool
      */
-    public function isAuditFailure();
+    public function isAuditFailure(): bool;
 
     /**
      * Whether auditing for successful denies is turned on.
-     *
-     * @return bool
      */
-    public function isAuditSuccess();
+    public function isAuditSuccess(): bool;
 }

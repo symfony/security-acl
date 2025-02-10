@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -24,8 +26,10 @@ use Symfony\Component\Security\Acl\Exception\NotAllAclsFoundException;
 use Symfony\Component\Security\Acl\Model\AclCacheInterface;
 use Symfony\Component\Security\Acl\Model\AclInterface;
 use Symfony\Component\Security\Acl\Model\AclProviderInterface;
+use Symfony\Component\Security\Acl\Model\EntryInterface;
 use Symfony\Component\Security\Acl\Model\ObjectIdentityInterface;
 use Symfony\Component\Security\Acl\Model\PermissionGrantingStrategyInterface;
+use Symfony\Component\Security\Acl\Model\SecurityIdentityInterface;
 
 /**
  * An ACL provider implementation.
@@ -39,35 +43,32 @@ class AclProvider implements AclProviderInterface
     public const MAX_BATCH_SIZE = 30;
 
     /**
-     * @var AclCacheInterface|null
+     * @var EntryInterface[]
      */
-    protected $cache;
+    protected array $loadedAces = [];
 
     /**
-     * @var Connection
+     * @var array<string,array<string,AclInterface>>
      */
-    protected $connection;
-    protected $loadedAces = [];
-    protected $loadedAcls = [];
-    protected $options;
+    protected array $loadedAcls = [];
 
     /**
-     * @var PermissionGrantingStrategyInterface
+     * @param array<string,string> $options
      */
-    private $permissionGrantingStrategy;
-
-    public function __construct(Connection $connection, PermissionGrantingStrategyInterface $permissionGrantingStrategy, array $options, AclCacheInterface $cache = null)
-    {
-        $this->cache = $cache;
-        $this->connection = $connection;
-        $this->options = $options;
-        $this->permissionGrantingStrategy = $permissionGrantingStrategy;
+    public function __construct(
+        protected readonly Connection $connection,
+        private readonly PermissionGrantingStrategyInterface $permissionGrantingStrategy,
+        protected readonly array $options,
+        protected readonly ?AclCacheInterface $cache = null,
+    ) {
     }
 
     /**
-     * {@inheritdoc}
+     * Retrieves all child object identities from the database.
+     *
+     * @return ObjectIdentityInterface[] returns an array of child 'ObjectIdentity's
      */
-    public function findChildren(ObjectIdentityInterface $parentOid, $directChildrenOnly = false)
+    public function findChildren(ObjectIdentityInterface $parentOid, bool $directChildrenOnly = false): array
     {
         $sql = $this->getFindChildrenSql($parentOid, $directChildrenOnly);
 
@@ -80,17 +81,28 @@ class AclProvider implements AclProviderInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Returns the ACL that belongs to the given object identity.
+     *
+     * @param SecurityIdentityInterface[] $sids
+     *
+     * @throws AclNotFoundException when there is no ACL
      */
-    public function findAcl(ObjectIdentityInterface $oid, array $sids = [])
+    public function findAcl(ObjectIdentityInterface $oid, array $sids = []): AclInterface
     {
         return $this->findAcls([$oid], $sids)->offsetGet($oid);
     }
 
     /**
-     * {@inheritdoc}
+     * Returns the ACLs that belong to the given object identities.
+     *
+     * @param ObjectIdentityInterface[]   $oids an array of ObjectIdentityInterface implementations
+     * @param SecurityIdentityInterface[] $sids an array of SecurityIdentityInterface implementations
+     *
+     * @return \SplObjectStorage<ObjectIdentityInterface, AclInterface> mapping the passed object identities to ACLs
+     *
+     * @throws AclNotFoundException when we cannot find an ACL for all identities
      */
-    public function findAcls(array $oids, array $sids = [])
+    public function findAcls(array $oids, array $sids = []): \SplObjectStorage
     {
         /** @var \SplObjectStorage<ObjectIdentityInterface,AclInterface> */
         $result = new \SplObjectStorage();
@@ -112,7 +124,7 @@ class AclProvider implements AclProviderInterface
             if (!$aclFound && isset($this->loadedAcls[$oid->getType()][$oid->getIdentifier()])) {
                 $acl = $this->loadedAcls[$oid->getType()][$oid->getIdentifier()];
 
-                if (!$acl->isSidLoaded($sids)) {
+                if (!$acl->isSidLoaded(...$sids)) {
                     // FIXME: we need to load ACEs for the missing SIDs. This is never
                     //        reached by the default implementation, since we do not
                     //        filter by SID
@@ -128,7 +140,7 @@ class AclProvider implements AclProviderInterface
                 $acl = $this->cache->getFromCacheByIdentity($oid);
 
                 if (null !== $acl) {
-                    if ($acl->isSidLoaded($sids)) {
+                    if ($acl->isSidLoaded(...$sids)) {
                         // check if any of the parents has been loaded since we need to
                         // ensure that there is only ever one ACL per object identity
                         $parentAcl = $acl->getParentAcl();
@@ -217,9 +229,9 @@ class AclProvider implements AclProviderInterface
      * Constructs the query used for looking up object identities and associated
      * ACEs, and security identities.
      *
-     * @return string
+     * @param int[] $ancestorIds
      */
-    protected function getLookupSql(array $ancestorIds)
+    protected function getLookupSql(array $ancestorIds): string
     {
         // FIXME: add support for filtering by sids (right now we select all sids)
 
@@ -259,7 +271,10 @@ SELECTCLAUSE;
         return $sql;
     }
 
-    protected function getAncestorLookupSql(array $batch)
+    /**
+     * @param ObjectIdentityInterface[] $batch
+     */
+    protected function getAncestorLookupSql(array $batch): string
     {
         $sql = <<<SELECTCLAUSE
             SELECT a.ancestor_id
@@ -320,12 +335,8 @@ SELECTCLAUSE;
     /**
      * Constructs the SQL for retrieving child object identities for the given
      * object identities.
-     *
-     * @param bool $directChildrenOnly
-     *
-     * @return string
      */
-    protected function getFindChildrenSql(ObjectIdentityInterface $oid, $directChildrenOnly)
+    protected function getFindChildrenSql(ObjectIdentityInterface $oid, bool $directChildrenOnly): string
     {
         if (false === $directChildrenOnly) {
             $query = <<<FINDCHILDREN
@@ -352,10 +363,8 @@ FINDCHILDREN;
     /**
      * Constructs the SQL for retrieving the primary key of the given object
      * identity.
-     *
-     * @return string
      */
-    protected function getSelectObjectIdentityIdSql(ObjectIdentityInterface $oid)
+    protected function getSelectObjectIdentityIdSql(ObjectIdentityInterface $oid): string
     {
         $query = <<<QUERY
             SELECT o.id
@@ -375,10 +384,8 @@ QUERY;
 
     /**
      * Returns the primary key of the passed object identity.
-     *
-     * @return int
      */
-    final protected function retrieveObjectIdentityPrimaryKey(ObjectIdentityInterface $oid)
+    final protected function retrieveObjectIdentityPrimaryKey(ObjectIdentityInterface $oid): int|false
     {
         return $this->connection->executeQuery($this->getSelectObjectIdentityIdSql($oid))->fetchOne();
     }
@@ -386,7 +393,7 @@ QUERY;
     /**
      * This method is called when an ACL instance is retrieved from the cache.
      */
-    private function updateAceIdentityMap(AclInterface $acl)
+    private function updateAceIdentityMap(AclInterface $acl): void
     {
         foreach (['classAces', 'classFieldAces', 'objectAces', 'objectFieldAces'] as $property) {
             $reflection = new \ReflectionProperty($acl, $property);
@@ -410,9 +417,11 @@ QUERY;
      * Retrieves all the ids which need to be queried from the database
      * including the ids of parent ACLs.
      *
-     * @return array
+     * @param ObjectIdentityInterface[] $batch
+     *
+     * @return int[]
      */
-    private function getAncestorIds(array $batch)
+    private function getAncestorIds(array $batch): array
     {
         $sql = $this->getAncestorLookupSql($batch);
 
@@ -429,8 +438,10 @@ QUERY;
     /**
      * Does either overwrite the passed ACE, or saves it in the global identity
      * map to ensure every ACE only gets instantiated once.
+     *
+     * @param EntryInterface[] $aces
      */
-    private function doUpdateAceIdentityMap(array &$aces)
+    private function doUpdateAceIdentityMap(array &$aces): void
     {
         foreach ($aces as $index => $ace) {
             if (isset($this->loadedAces[$ace->getId()])) {
@@ -445,11 +456,15 @@ QUERY;
      * This method is called for object identities which could not be retrieved
      * from the cache, and for which thus a database query is required.
      *
+     * @param ObjectIdentityInterface[]             $batch
+     * @param array<int,SecurityIdentityInterface>  $sids
+     * @param array<string,ObjectIdentityInterface> $oidLookup
+     *
      * @return \SplObjectStorage<ObjectIdentityInterface,AclInterface> mapping object identities to ACL instances
      *
      * @throws AclNotFoundException
      */
-    private function lookupObjectIdentities(array $batch, array $sids, array $oidLookup)
+    private function lookupObjectIdentities(array $batch, array $sids, array $oidLookup): \SplObjectStorage
     {
         $ancestorIds = $this->getAncestorIds($batch);
         if (!$ancestorIds) {
@@ -471,11 +486,14 @@ QUERY;
      * Keep in mind that changes to this method might severely reduce the
      * performance of the entire ACL system.
      *
+     * @param array<string,ObjectIdentityInterface> $oidLookup
+     * @param array<int,SecurityIdentityInterface>  $sids
+     *
      * @return \SplObjectStorage<ObjectIdentityInterface,AclInterface>
      *
      * @throws \RuntimeException
      */
-    private function hydrateObjectIdentities(Result $stmt, array $oidLookup, array $sids)
+    private function hydrateObjectIdentities(Result $stmt, array $oidLookup, array $sids): \SplObjectStorage
     {
         /** @var \SplObjectStorage<Acl,string> */
         $parentIdToFill = new \SplObjectStorage();

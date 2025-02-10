@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -33,72 +35,64 @@ interface AclInterface extends \Serializable
      *
      * @return array<int, EntryInterface>
      */
-    public function getClassAces();
+    public function getClassAces(): array;
 
     /**
      * Returns all class-field-based ACEs associated with this ACL.
      *
      * @return array<int, EntryInterface>
      */
-    public function getClassFieldAces(string $field);
+    public function getClassFieldAces(string $field): array;
 
     /**
      * Returns all object-based ACEs associated with this ACL.
      *
      * @return array<int, EntryInterface>
      */
-    public function getObjectAces();
+    public function getObjectAces(): array;
 
     /**
      * Returns all object-field-based ACEs associated with this ACL.
      *
      * @return array<int, EntryInterface>
      */
-    public function getObjectFieldAces(string $field);
+    public function getObjectFieldAces(string $field): array;
 
     /**
      * Returns the object identity associated with this ACL.
-     *
-     * @return ObjectIdentityInterface
      */
-    public function getObjectIdentity();
+    public function getObjectIdentity(): ObjectIdentityInterface;
 
     /**
      * Returns the parent ACL, or null if there is none.
-     *
-     * @return AclInterface|null
      */
-    public function getParentAcl();
+    public function getParentAcl(): self|int|null;
 
     /**
      * Whether this ACL is inheriting ACEs from a parent ACL.
-     *
-     * @return bool
      */
-    public function isEntriesInheriting();
+    public function isEntriesInheriting(): bool;
 
     /**
      * Determines whether field access is granted.
      *
-     * @return bool
+     * @param int[]                       $masks
+     * @param SecurityIdentityInterface[] $securityIdentities
      */
-    public function isFieldGranted(string $field, array $masks, array $securityIdentities, bool $administrativeMode = false);
+    public function isFieldGranted(string $field, array $masks, array $securityIdentities, bool $administrativeMode = false): bool;
 
     /**
      * Determines whether access is granted.
      *
-     * @return bool
+     * @param int[]                       $masks
+     * @param SecurityIdentityInterface[] $securityIdentities
      *
      * @throws NoAceFoundException when no ACE was applicable for this request
      */
-    public function isGranted(array $masks, array $securityIdentities, bool $administrativeMode = false);
+    public function isGranted(array $masks, array $securityIdentities, bool $administrativeMode = false): bool;
 
     /**
      * Whether the ACL has loaded ACEs for all of the passed security identities.
-     *
-     * @param SecurityIdentityInterface|SecurityIdentityInterface[] $securityIdentities
-     *
-     * @return bool
      */
-    public function isSidLoaded($securityIdentities);
+    public function isSidLoaded(SecurityIdentityInterface ...$securityIdentities): bool;
 }

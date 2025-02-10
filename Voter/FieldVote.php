@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -19,21 +21,18 @@ namespace Symfony\Component\Security\Acl\Voter;
  */
 class FieldVote
 {
-    private $domainObject;
-    private $field;
-
-    public function __construct($domainObject, $field)
-    {
-        $this->domainObject = $domainObject;
-        $this->field = $field;
+    public function __construct(
+        private readonly object $domainObject,
+        private readonly string $field,
+    ) {
     }
 
-    public function getDomainObject()
+    public function getDomainObject(): object
     {
         return $this->domainObject;
     }
 
-    public function getField()
+    public function getField(): string
     {
         return $this->field;
     }

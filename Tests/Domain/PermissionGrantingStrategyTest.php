@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -166,7 +168,7 @@ class PermissionGrantingStrategyTest extends TestCase
             ['all', 1 << 0 | 1 << 1, 1 << 0, true],
             ['all', 1 << 0 | 1 << 1, 1 << 2, false],
             ['all', 1 << 0 | 1 << 10, 1 << 0 | 1 << 10, true],
-            ['all', 1 << 0 | 1 << 1, 1 << 0 | 1 << 1 || 1 << 2, false],
+            ['all', 1 << 0 | 1 << 1, 1 << 0 | 1 << 1 | 1 << 2, false],
             ['any', 1 << 0 | 1 << 1, 1 << 0, true],
             ['any', 1 << 0 | 1 << 1, 1 << 0 | 1 << 2, true],
             ['any', 1 << 0 | 1 << 1, 1 << 2, false],

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -22,39 +24,30 @@ use Symfony\Component\Security\Acl\Model\SecurityIdentityInterface;
  */
 class Entry implements AuditableEntryInterface
 {
-    private $acl;
-    private $mask;
-    private $id;
-    private $securityIdentity;
-    private $strategy;
-    private $auditFailure;
-    private $auditSuccess;
-    private $granting;
-
-    public function __construct(?int $id, AclInterface $acl, SecurityIdentityInterface $sid, string $strategy, int $mask, bool $granting, bool $auditFailure, bool $auditSuccess)
-    {
-        $this->id = $id;
-        $this->acl = $acl;
-        $this->securityIdentity = $sid;
-        $this->strategy = $strategy;
-        $this->mask = $mask;
-        $this->granting = $granting;
-        $this->auditFailure = $auditFailure;
-        $this->auditSuccess = $auditSuccess;
+    public function __construct(
+        private ?int $id,
+        private readonly AclInterface $acl,
+        private readonly SecurityIdentityInterface $securityIdentity,
+        private string $strategy,
+        private int $mask,
+        private bool $granting,
+        private bool $auditFailure,
+        private bool $auditSuccess,
+    ) {
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getAcl()
+    public function getAcl(): ?AclInterface
     {
-        return $this->acl;
+        return $this->acl ?? null;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getMask()
+    public function getMask(): int
     {
         return $this->mask;
     }
@@ -62,7 +55,7 @@ class Entry implements AuditableEntryInterface
     /**
      * {@inheritdoc}
      */
-    public function getId()
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -70,7 +63,7 @@ class Entry implements AuditableEntryInterface
     /**
      * {@inheritdoc}
      */
-    public function getSecurityIdentity()
+    public function getSecurityIdentity(): SecurityIdentityInterface
     {
         return $this->securityIdentity;
     }
@@ -78,7 +71,7 @@ class Entry implements AuditableEntryInterface
     /**
      * {@inheritdoc}
      */
-    public function getStrategy()
+    public function getStrategy(): string
     {
         return $this->strategy;
     }
@@ -86,7 +79,7 @@ class Entry implements AuditableEntryInterface
     /**
      * {@inheritdoc}
      */
-    public function isAuditFailure()
+    public function isAuditFailure(): bool
     {
         return $this->auditFailure;
     }
@@ -94,7 +87,7 @@ class Entry implements AuditableEntryInterface
     /**
      * {@inheritdoc}
      */
-    public function isAuditSuccess()
+    public function isAuditSuccess(): bool
     {
         return $this->auditSuccess;
     }
@@ -102,7 +95,7 @@ class Entry implements AuditableEntryInterface
     /**
      * {@inheritdoc}
      */
-    public function isGranting()
+    public function isGranting(): bool
     {
         return $this->granting;
     }
@@ -112,10 +105,8 @@ class Entry implements AuditableEntryInterface
      *
      * Do never call this method directly. Use the respective methods on the
      * AclInterface instead.
-     *
-     * @param bool $boolean
      */
-    public function setAuditFailure($boolean)
+    public function setAuditFailure(bool $boolean): void
     {
         $this->auditFailure = $boolean;
     }
@@ -125,10 +116,8 @@ class Entry implements AuditableEntryInterface
      *
      * Do never call this method directly. Use the respective methods on the
      * AclInterface instead.
-     *
-     * @param bool $boolean
      */
-    public function setAuditSuccess($boolean)
+    public function setAuditSuccess(bool $boolean): void
     {
         $this->auditSuccess = $boolean;
     }
@@ -138,10 +127,8 @@ class Entry implements AuditableEntryInterface
      *
      * Do never call this method directly. Use the respective methods on the
      * AclInterface instead.
-     *
-     * @param int $mask
      */
-    public function setMask($mask)
+    public function setMask(int $mask): void
     {
         $this->mask = $mask;
     }
@@ -151,10 +138,8 @@ class Entry implements AuditableEntryInterface
      *
      * Do never call this method directly. Use the respective methods on the
      * AclInterface instead.
-     *
-     * @param string $strategy
      */
-    public function setStrategy($strategy)
+    public function setStrategy(string $strategy): void
     {
         $this->strategy = $strategy;
     }
@@ -180,7 +165,7 @@ class Entry implements AuditableEntryInterface
             $this->strategy,
             $this->auditFailure,
             $this->auditSuccess,
-            $this->granting
+            $this->granting,
         ] = $data;
     }
 
@@ -201,10 +186,10 @@ class Entry implements AuditableEntryInterface
      *
      * @final
      *
-     * @param string $serialized
+     * @param string $data
      */
-    public function unserialize($serialized)
+    public function unserialize($data)
     {
-        $this->__unserialize(\is_array($serialized) ? $serialized : unserialize($serialized));
+        $this->__unserialize(unserialize($data));
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -20,8 +22,6 @@ interface FieldEntryInterface extends EntryInterface
 {
     /**
      * Returns the field used for this entry.
-     *
-     * @return string
      */
-    public function getField();
+    public function getField(): string;
 }

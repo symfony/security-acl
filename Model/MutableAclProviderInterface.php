@@ -22,27 +22,23 @@ interface MutableAclProviderInterface extends AclProviderInterface
 {
     /**
      * {@inheritdoc}
-     *
-     * @return MutableAclInterface
      */
-    public function findAcl(ObjectIdentityInterface $oid, array $sids = []);
+    public function findAcl(ObjectIdentityInterface $oid, array $sids = []): AclInterface;
 
     /**
      * {@inheritdoc}
      *
      * @return \SplObjectStorage<ObjectIdentityInterface, MutableAclInterface> mapping the passed object identities to ACLs
      */
-    public function findAcls(array $oids, array $sids = []);
+    public function findAcls(array $oids, array $sids = []): \SplObjectStorage;
 
     /**
      * Creates a new ACL for the given object identity.
      *
-     * @return MutableAclInterface
-     *
      * @throws AclAlreadyExistsException when there already is an ACL for the given
      *                                   object identity
      */
-    public function createAcl(ObjectIdentityInterface $oid);
+    public function createAcl(ObjectIdentityInterface $oid): MutableAclInterface;
 
     /**
      * Deletes the ACL for a given object identity.
@@ -50,7 +46,7 @@ interface MutableAclProviderInterface extends AclProviderInterface
      * This will automatically trigger a delete for any child ACLs. If you don't
      * want child ACLs to be deleted, you will have to set their parent ACL to null.
      */
-    public function deleteAcl(ObjectIdentityInterface $oid);
+    public function deleteAcl(ObjectIdentityInterface $oid): void;
 
     /**
      * Persists any changes which were made to the ACL, or any associated
@@ -58,5 +54,5 @@ interface MutableAclProviderInterface extends AclProviderInterface
      *
      * Changes to parent ACLs are not persisted.
      */
-    public function updateAcl(MutableAclInterface $acl);
+    public function updateAcl(MutableAclInterface $acl): void;
 }

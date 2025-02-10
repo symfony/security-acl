@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -40,7 +42,7 @@ class MutableAclProviderTest extends TestCase
 
     public static function assertAceEquals(EntryInterface $a, EntryInterface $b)
     {
-        self::assertInstanceOf(\get_class($a), $b);
+        self::assertInstanceOf($a::class, $b);
 
         foreach (['getId', 'getMask', 'getStrategy', 'isGranting'] as $getter) {
             self::assertSame($a->$getter(), $b->$getter());
