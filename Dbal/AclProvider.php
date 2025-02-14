@@ -56,7 +56,7 @@ class AclProvider implements AclProviderInterface
      */
     private $permissionGrantingStrategy;
 
-    public function __construct(Connection $connection, PermissionGrantingStrategyInterface $permissionGrantingStrategy, array $options, AclCacheInterface $cache = null)
+    public function __construct(Connection $connection, PermissionGrantingStrategyInterface $permissionGrantingStrategy, array $options, ?AclCacheInterface $cache = null)
     {
         $this->cache = $cache;
         $this->connection = $connection;

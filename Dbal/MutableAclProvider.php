@@ -40,7 +40,7 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
     /**
      * {@inheritdoc}
      */
-    public function __construct(Connection $connection, PermissionGrantingStrategyInterface $permissionGrantingStrategy, array $options, AclCacheInterface $cache = null)
+    public function __construct(Connection $connection, PermissionGrantingStrategyInterface $permissionGrantingStrategy, array $options, ?AclCacheInterface $cache = null)
     {
         parent::__construct($connection, $permissionGrantingStrategy, $options, $cache);
 
