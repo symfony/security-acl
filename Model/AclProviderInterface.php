@@ -12,6 +12,7 @@
 namespace Symfony\Component\Security\Acl\Model;
 
 use Symfony\Component\Security\Acl\Exception\AclNotFoundException;
+use Symfony\Component\Security\Acl\Exception\NotAllAclsFoundException;
 
 /**
  * Provides a common interface for retrieving ACLs.
@@ -48,7 +49,8 @@ interface AclProviderInterface
      *
      * @return \SplObjectStorage<ObjectIdentityInterface, AclInterface> mapping the passed object identities to ACLs
      *
-     * @throws AclNotFoundException when we cannot find an ACL for all identities
+     * @throws NotAllAclsFoundException<AclInterface> when we cannot find an ACL for every identity but still have a partial result
+     * @throws AclNotFoundException                   when we cannot find an ACL for all identities
      */
     public function findAcls(array $oids, array $sids = []);
 }

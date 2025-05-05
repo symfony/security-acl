@@ -22,13 +22,15 @@ use Symfony\Component\Security\Acl\Model\ObjectIdentityInterface;
  * This exception contains the partial result.
  *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
+ *
+ * @template T of AclInterface
  */
 class NotAllAclsFoundException extends AclNotFoundException
 {
     private $partialResult;
 
     /**
-     * @param \SplObjectStorage<ObjectIdentityInterface,AclInterface> $result
+     * @param \SplObjectStorage<ObjectIdentityInterface, T> $result
      */
     public function setPartialResult(\SplObjectStorage $result)
     {
@@ -38,7 +40,7 @@ class NotAllAclsFoundException extends AclNotFoundException
     /**
      * Returns the partial result.
      *
-     * @return \SplObjectStorage<ObjectIdentityInterface,AclInterface>
+     * @return \SplObjectStorage<ObjectIdentityInterface, T>
      */
     public function getPartialResult()
     {
