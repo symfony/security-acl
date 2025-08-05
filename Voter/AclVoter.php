@@ -20,6 +20,7 @@ use Symfony\Component\Security\Acl\Model\ObjectIdentityRetrievalStrategyInterfac
 use Symfony\Component\Security\Acl\Model\SecurityIdentityRetrievalStrategyInterface;
 use Symfony\Component\Security\Acl\Permission\PermissionMapInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 
 if (class_exists(\Symfony\Component\Security\Core\Security::class)) {
@@ -33,7 +34,7 @@ if (class_exists(\Symfony\Component\Security\Core\Security::class)) {
             return $this->doVote($token, $subject, $attributes);
         }
     }
-} else {
+} elseif (method_exists(TokenInterface::class, 'eraseCredentials')) {
     /**
      * @internal
      */
@@ -42,6 +43,17 @@ if (class_exists(\Symfony\Component\Security\Core\Security::class)) {
         public function vote(TokenInterface $token, mixed $subject, array $attributes): int
         {
             return $this->doVote($token, $subject, $attributes);
+        }
+    }
+} else {
+    /**
+     * @internal
+     */
+    trait AclVoterTrait
+    {
+        public function vote(TokenInterface $token, mixed $subject, array $attributes, ?Vote $vote = null): int
+        {
+            return $this->doVote($token, $subject, $attributes, $vote);
         }
     }
 }
@@ -77,7 +89,7 @@ class AclVoter implements VoterInterface
         return \is_string($attribute) && $this->permissionMap->contains($attribute);
     }
 
-    private function doVote(TokenInterface $token, $subject, array $attributes): int
+    private function doVote(TokenInterface $token, $subject, array $attributes, ?Vote $vote = null): int
     {
         foreach ($attributes as $attribute) {
             if (!$this->supportsAttribute($attribute)) {
