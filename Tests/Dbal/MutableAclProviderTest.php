@@ -263,7 +263,7 @@ class MutableAclProviderTest extends TestCase
         ;
         $con
             ->expects($this->never())
-            ->method('executeUpdate')
+            ->method('executeStatement')
         ;
 
         $provider = new MutableAclProvider($con, new PermissionGrantingStrategy(), []);
@@ -536,7 +536,6 @@ class MutableAclProviderTest extends TestCase
             ],
             $configuration
         );
-        $this->connection->setNestTransactionsWithSavepoints(true);
 
         // import the schema
         $schema = new Schema($this->getOptions());
@@ -547,6 +546,7 @@ class MutableAclProviderTest extends TestCase
 
     protected function tearDown(): void
     {
+        $this->connection->close();
         $this->connection = null;
     }
 
