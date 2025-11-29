@@ -162,11 +162,9 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
      * @param mixed  $oldValue
      * @param mixed  $newValue
      *
-     * @return void
-     *
      * @throws \InvalidArgumentException
      */
-    public function propertyChanged($sender, $propertyName, $oldValue, $newValue)
+    public function propertyChanged($sender, $propertyName, $oldValue, $newValue): void
     {
         if (!$sender instanceof MutableAclInterface && !$sender instanceof EntryInterface) {
             throw new \InvalidArgumentException('$sender must be an instance of MutableAclInterface, or EntryInterface.');
