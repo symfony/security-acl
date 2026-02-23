@@ -104,7 +104,7 @@ class AclProvider implements AclProviderInterface
             $aclFound = false;
 
             // check if result already contains an ACL
-            if ($result->contains($oid)) {
+            if ($result->offsetExists($oid)) {
                 $aclFound = true;
             }
 
@@ -118,7 +118,7 @@ class AclProvider implements AclProviderInterface
                     //        filter by SID
                     throw new \RuntimeException('This is not supported by the default implementation.');
                 } else {
-                    $result->attach($oid, $acl);
+                    $result->offsetSet($oid, $acl);
                     $aclFound = true;
                 }
             }
@@ -148,7 +148,7 @@ class AclProvider implements AclProviderInterface
 
                         $this->loadedAcls[$oid->getType()][$oid->getIdentifier()] = $acl;
                         $this->updateAceIdentityMap($acl);
-                        $result->attach($oid, $acl);
+                        $result->offsetSet($oid, $acl);
                         $aclFound = true;
                     } else {
                         $this->cache->evictFromCacheByIdentity($oid);
@@ -187,7 +187,7 @@ class AclProvider implements AclProviderInterface
                     }
 
                     if (isset($oidLookup[$loadedOid->getIdentifier().$loadedOid->getType()])) {
-                        $result->attach($loadedOid, $loadedAcl);
+                        $result->offsetSet($loadedOid, $loadedAcl);
                     }
                 }
 
@@ -197,7 +197,7 @@ class AclProvider implements AclProviderInterface
 
         // check that we got ACLs for all the identities
         foreach ($oids as $oid) {
-            if (!$result->contains($oid)) {
+            if (!$result->offsetExists($oid)) {
                 if (1 === \count($oids)) {
                     $objectName = method_exists($oid, '__toString') ? $oid : \get_class($oid);
                     throw new AclNotFoundException(sprintf('No ACL found for %s.', $objectName));
@@ -390,7 +390,6 @@ QUERY;
     {
         foreach (['classAces', 'classFieldAces', 'objectAces', 'objectFieldAces'] as $property) {
             $reflection = new \ReflectionProperty($acl, $property);
-            $reflection->setAccessible(true);
             $value = $reflection->getValue($acl);
 
             if ('classAces' === $property || 'objectAces' === $property) {
@@ -402,7 +401,6 @@ QUERY;
             }
 
             $reflection->setValue($acl, $value);
-            $reflection->setAccessible(false);
         }
     }
 
@@ -490,15 +488,10 @@ QUERY;
         // we need these to set protected properties on hydrated objects
         $aclReflection = new \ReflectionClass(Acl::class);
         $aclClassAcesProperty = $aclReflection->getProperty('classAces');
-        $aclClassAcesProperty->setAccessible(true);
         $aclClassFieldAcesProperty = $aclReflection->getProperty('classFieldAces');
-        $aclClassFieldAcesProperty->setAccessible(true);
         $aclObjectAcesProperty = $aclReflection->getProperty('objectAces');
-        $aclObjectAcesProperty->setAccessible(true);
         $aclObjectFieldAcesProperty = $aclReflection->getProperty('objectFieldAces');
-        $aclObjectFieldAcesProperty->setAccessible(true);
         $aclParentAclProperty = $aclReflection->getProperty('parentAcl');
-        $aclParentAclProperty->setAccessible(true);
 
         // fetchAll() consumes more memory than consecutive calls to fetch(),
         // but it is faster
@@ -541,7 +534,7 @@ QUERY;
                 if (!isset($oidCache[$oidCacheKey])) {
                     $oidCache[$oidCacheKey] = $acl->getObjectIdentity();
                 }
-                $result->attach($oidCache[$oidCacheKey], $acl);
+                $result->offsetSet($oidCache[$oidCacheKey], $acl);
             // so, this hasn't been hydrated yet
             } else {
                 // create object identity if we haven't done so yet
@@ -561,11 +554,11 @@ QUERY;
                     if (isset($acls[$parentObjectIdentityId])) {
                         $aclParentAclProperty->setValue($acl, $acls[$parentObjectIdentityId]);
                     } else {
-                        $parentIdToFill->attach($acl, $parentObjectIdentityId);
+                        $parentIdToFill->offsetSet($acl, $parentObjectIdentityId);
                     }
                 }
 
-                $result->attach($oidCache[$oidLookupKey], $acl);
+                $result->offsetSet($oidCache[$oidLookupKey], $acl);
             }
 
             // check if this row contains an ACE record
@@ -655,12 +648,6 @@ QUERY;
             }
         }
 
-        // reset reflection changes
-        $aclClassAcesProperty->setAccessible(false);
-        $aclClassFieldAcesProperty->setAccessible(false);
-        $aclObjectAcesProperty->setAccessible(false);
-        $aclObjectFieldAcesProperty->setAccessible(false);
-        $aclParentAclProperty->setAccessible(false);
 
         // this should never be true if the database integrity hasn't been compromised
         if ($processed < \count($parentIdToFill)) {

@@ -132,16 +132,16 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
         foreach ($result as $oid) {
             $acl = $result->offsetGet($oid);
 
-            if (false === $this->propertyChanges->contains($acl) && $acl instanceof MutableAclInterface) {
+            if (false === $this->propertyChanges->offsetExists($acl) && $acl instanceof MutableAclInterface) {
                 $acl->addPropertyChangedListener($this);
-                $this->propertyChanges->attach($acl, []);
+                $this->propertyChanges->offsetSet($acl, []);
             }
 
             $parentAcl = $acl->getParentAcl();
             while (null !== $parentAcl) {
-                if (false === $this->propertyChanges->contains($parentAcl) && $acl instanceof MutableAclInterface) {
+                if (false === $this->propertyChanges->offsetExists($parentAcl) && $acl instanceof MutableAclInterface) {
                     $parentAcl->addPropertyChangedListener($this);
-                    $this->propertyChanges->attach($parentAcl, []);
+                    $this->propertyChanges->offsetSet($parentAcl, []);
                 }
 
                 $parentAcl = $parentAcl->getParentAcl();
@@ -183,7 +183,7 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
             $ace = null;
         }
 
-        if (false === $this->propertyChanges->contains($sender)) {
+        if (false === $this->propertyChanges->offsetExists($sender)) {
             throw new \InvalidArgumentException('$sender is not being tracked by this provider.');
         }
 
@@ -204,7 +204,7 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
                 $propertyChanges['aces'] = new \SplObjectStorage();
             }
 
-            $acePropertyChanges = $propertyChanges['aces']->contains($ace) ? $propertyChanges['aces']->offsetGet($ace) : [];
+            $acePropertyChanges = $propertyChanges['aces']->offsetExists($ace) ? $propertyChanges['aces']->offsetGet($ace) : [];
 
             if (isset($acePropertyChanges[$propertyName])) {
                 $oldValue = $acePropertyChanges[$propertyName][0];
@@ -236,7 +236,7 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
      */
     public function updateAcl(MutableAclInterface $acl)
     {
-        if (!$this->propertyChanges->contains($acl)) {
+        if (!$this->propertyChanges->offsetExists($acl)) {
             throw new \InvalidArgumentException('$acl is not tracked by this provider.');
         }
 
@@ -311,9 +311,7 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
             // ACL instances for object identities of the same type that are already in-memory
             if (\count($sharedPropertyChanges) > 0) {
                 $classAcesProperty = new \ReflectionProperty(Acl::class, 'classAces');
-                $classAcesProperty->setAccessible(true);
                 $classFieldAcesProperty = new \ReflectionProperty(Acl::class, 'classFieldAces');
-                $classFieldAcesProperty->setAccessible(true);
 
                 foreach ($this->loadedAcls[$acl->getObjectIdentity()->getType()] as $sameTypeAcl) {
                     if (isset($sharedPropertyChanges['classAces'])) {
@@ -843,14 +841,14 @@ QUERY;
                 $ace = $new[$i];
 
                 if (null === $ace->getId()) {
-                    if ($sids->contains($ace->getSecurityIdentity())) {
+                    if ($sids->offsetExists($ace->getSecurityIdentity())) {
                         $sid = $sids->offsetGet($ace->getSecurityIdentity());
                     } else {
                         $sid = $this->createOrRetrieveSecurityIdentityId($ace->getSecurityIdentity());
                     }
 
                     $oid = $ace->getAcl()->getObjectIdentity();
-                    if ($classIds->contains($oid)) {
+                    if ($classIds->offsetExists($oid)) {
                         $classId = $classIds->offsetGet($oid);
                     } else {
                         $classId = $this->createOrRetrieveClassId($oid->getType());
@@ -863,7 +861,6 @@ QUERY;
                     $this->loadedAces[$aceId] = $ace;
 
                     $aceIdProperty = new \ReflectionProperty(Entry::class, 'id');
-                    $aceIdProperty->setAccessible(true);
                     $aceIdProperty->setValue($ace, (int) $aceId);
                 }
             }
@@ -915,14 +912,14 @@ QUERY;
             $ace = $new[$i];
 
             if (null === $ace->getId()) {
-                if ($sids->contains($ace->getSecurityIdentity())) {
+                if ($sids->offsetExists($ace->getSecurityIdentity())) {
                     $sid = $sids->offsetGet($ace->getSecurityIdentity());
                 } else {
                     $sid = $this->createOrRetrieveSecurityIdentityId($ace->getSecurityIdentity());
                 }
 
                 $oid = $ace->getAcl()->getObjectIdentity();
-                if ($classIds->contains($oid)) {
+                if ($classIds->offsetExists($oid)) {
                     $classId = $classIds->offsetGet($oid);
                 } else {
                     $classId = $this->createOrRetrieveClassId($oid->getType());
@@ -935,7 +932,6 @@ QUERY;
                 $this->loadedAces[$aceId] = $ace;
 
                 $aceIdProperty = new \ReflectionProperty($ace, 'id');
-                $aceIdProperty->setAccessible(true);
                 $aceIdProperty->setValue($ace, (int) $aceId);
             }
         }
