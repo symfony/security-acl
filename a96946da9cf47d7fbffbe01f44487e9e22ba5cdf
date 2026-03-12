@@ -1,0 +1,13 @@
+---------------------------------------------------------------------------
+
+by derrabus at 2026-03-11T16:22:38Z
+
+Thank you for your PR.
+
+While I'm generally in favor of raising the required PHP version, we don't have to do that just to support PHP 8.5. Please focus on the PHP deprecations without changing our composer.json or the CI configuration. Adding PHP 8.5 to the CI matrix is fine though.
+
+---------------------------------------------------------------------------
+
+by ireneperezddc1 at 2026-03-11T19:53:30Z
+
+Ok, I added a check on PHP version, so if lower than 8.1 I use setAccessible, so it won't return any warning message, and keep working with old version
