@@ -263,7 +263,7 @@ class MutableAclProviderTest extends TestCase
         ;
         $con
             ->expects($this->never())
-            ->method('executeUpdate')
+            ->method('executeStatement')
         ;
 
         $provider = new MutableAclProvider($con, new PermissionGrantingStrategy(), []);
@@ -538,7 +538,12 @@ class MutableAclProviderTest extends TestCase
             ],
             $configuration
         );
-        $this->connection->setNestTransactionsWithSavepoints(true);
+
+        // DBAL 3 supports nested transactions with savepoints, removed in DBAL 4
+        // In DBAL 4, Connection implements ServerVersionProvider
+        if (!$this->connection instanceof \Doctrine\DBAL\ServerVersionProvider) {
+            $this->connection->setNestTransactionsWithSavepoints(true);
+        }
 
         // import the schema
         $schema = new Schema($this->getOptions());
