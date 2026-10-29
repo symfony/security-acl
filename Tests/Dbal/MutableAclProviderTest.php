@@ -15,6 +15,7 @@ use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Schema\DefaultSchemaManagerFactory;
+use Doctrine\DBAL\ServerVersionProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Acl\Dbal\AclProvider;
 use Symfony\Component\Security\Acl\Dbal\MutableAclProvider;
@@ -263,7 +264,7 @@ class MutableAclProviderTest extends TestCase
         ;
         $con
             ->expects($this->never())
-            ->method('executeUpdate')
+            ->method('executeStatement')
         ;
 
         $provider = new MutableAclProvider($con, new PermissionGrantingStrategy(), []);
@@ -538,7 +539,11 @@ class MutableAclProviderTest extends TestCase
             ],
             $configuration
         );
-        $this->connection->setNestTransactionsWithSavepoints(true);
+
+        if (!interface_exists(ServerVersionProvider::class)) {
+            // DBAL 4+ always uses savepoints
+            $this->connection->setNestTransactionsWithSavepoints(true);
+        }
 
         // import the schema
         $schema = new Schema($this->getOptions());

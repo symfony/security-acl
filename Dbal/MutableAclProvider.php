@@ -35,6 +35,8 @@ use Symfony\Component\Security\Acl\Model\SecurityIdentityInterface;
  */
 class MutableAclProvider extends AclProvider implements MutableAclProviderInterface, PropertyChangedListener
 {
+    use PropertyChangedListenerImplementation;
+
     private $propertyChanges;
 
     /**
@@ -151,22 +153,7 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
         return $result;
     }
 
-    /**
-     * Implementation of PropertyChangedListener.
-     *
-     * This allows us to keep track of which values have been changed, so we don't
-     * have to do a full introspection when ->updateAcl() is called.
-     *
-     * @param mixed  $sender
-     * @param string $propertyName
-     * @param mixed  $oldValue
-     * @param mixed  $newValue
-     *
-     * @return void
-     *
-     * @throws \InvalidArgumentException
-     */
-    public function propertyChanged($sender, $propertyName, $oldValue, $newValue)
+    private function doPropertyChanged($sender, $propertyName, $oldValue, $newValue): void
     {
         if (!$sender instanceof MutableAclInterface && !$sender instanceof EntryInterface) {
             throw new \InvalidArgumentException('$sender must be an instance of MutableAclInterface, or EntryInterface.');

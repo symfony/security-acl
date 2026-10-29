@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+3.5.0
+-----
+
+ * Add support for `doctrine/dbal` 4 and `doctrine/persistence` 4
+
 3.2.0
 -----
 
