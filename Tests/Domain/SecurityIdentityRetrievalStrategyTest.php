@@ -31,7 +31,7 @@ class SecurityIdentityRetrievalStrategyTest extends TestCase
      */
     public function testGetSecurityIdentities($user, array $roles, string $authenticationStatus, array $sids)
     {
-        $token = class_exists(NullToken::class) ? new NullToken() : new AnonymousToken('', '');
+        $token = new NullToken();
         if ('anonymous' !== $authenticationStatus) {
             $class = '';
             if (\is_string($user)) {
