@@ -335,6 +335,20 @@ class MutableAclProviderTest extends TestCase
         }
     }
 
+    public function testUpdateAclUpdatesTheStrategyOfAces()
+    {
+        $provider = $this->getProvider();
+        $acl = $provider->createAcl(new ObjectIdentity(1, 'Foo'));
+        $acl->insertObjectAce(new UserSecurityIdentity('johannes', 'FooClass'), 1);
+        $provider->updateAcl($acl);
+
+        $acl->updateObjectAce(0, 1, PermissionGrantingStrategy::ANY);
+        $provider->updateAcl($acl);
+
+        $reloadedAcl = $this->getProvider()->findAcl(new ObjectIdentity(1, 'Foo'));
+        $this->assertSame(PermissionGrantingStrategy::ANY, $reloadedAcl->getObjectAces()[0]->getStrategy());
+    }
+
     public function testUpdateAclWorksForChangingTheParentAcl()
     {
         $provider = $this->getProvider();

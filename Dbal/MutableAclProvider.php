@@ -1058,7 +1058,7 @@ QUERY;
             $sets[] = sprintf('mask = %d', $propertyChanges['mask'][1]);
         }
         if (isset($propertyChanges['strategy'])) {
-            $sets[] = sprintf('granting_strategy = %s', $this->connection->quote($propertyChanges['strategy']));
+            $sets[] = sprintf('granting_strategy = %s', $this->connection->quote($propertyChanges['strategy'][1]));
         }
         if (isset($propertyChanges['auditSuccess'])) {
             $sets[] = sprintf('audit_success = %s', $this->connection->getDatabasePlatform()->convertBooleans($propertyChanges['auditSuccess'][1]));
