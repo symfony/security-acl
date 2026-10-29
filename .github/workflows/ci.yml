@@ -31,9 +31,9 @@ jobs:
                   php-version: '${{ matrix.php }}'
                   coverage: none
 
-            - name: Configure composer
-              if: "${{ matrix.deps == 'highest' }}"
-              run: composer config minimum-stability dev
+            - name: Configure Composer
+              # Test the versions we support even when they are affected by security advisories
+              run: composer config audit.block-insecure false
 
             - name: Composer install
               uses: ramsey/composer-install@v3
