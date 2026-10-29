@@ -97,18 +97,17 @@ class DoctrineAclCache implements AclCacheInterface
     public function getFromCacheById($aclId)
     {
         $lookupKey = $this->getAliasKeyForIdentity($aclId);
-        if (!$this->cache->contains($lookupKey)) {
+        if (false === $key = $this->cache->fetch($lookupKey)) {
             return;
         }
 
-        $key = $this->cache->fetch($lookupKey);
-        if (!$this->cache->contains($key)) {
+        if (false === $serializedAcl = $this->cache->fetch($key)) {
             $this->cache->delete($lookupKey);
 
             return;
         }
 
-        return $this->unserializeAcl($this->cache->fetch($key));
+        return $this->unserializeAcl($serializedAcl);
     }
 
     /**
@@ -116,12 +115,11 @@ class DoctrineAclCache implements AclCacheInterface
      */
     public function getFromCacheByIdentity(ObjectIdentityInterface $oid)
     {
-        $key = $this->getDataKeyByIdentity($oid);
-        if (!$this->cache->contains($key)) {
+        if (false === $serializedAcl = $this->cache->fetch($this->getDataKeyByIdentity($oid))) {
             return;
         }
 
-        return $this->unserializeAcl($this->cache->fetch($key));
+        return $this->unserializeAcl($serializedAcl);
     }
 
     /**

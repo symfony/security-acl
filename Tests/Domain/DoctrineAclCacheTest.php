@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\Security\Acl\Tests\Domain;
 
+use Doctrine\Common\Cache\Cache;
 use Doctrine\Common\Cache\Psr6\DoctrineProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
@@ -61,6 +62,18 @@ class DoctrineAclCacheTest extends TestCase
         $this->assertEquals($aclWithParent->getId(), $cachedAclWithParent->getId());
         $this->assertNotNull($cachedParentAcl = $cachedAclWithParent->getParentAcl());
         $this->assertEquals($aclWithParent->getParentAcl()->getId(), $cachedParentAcl->getId());
+    }
+
+    public function testGetFromCacheWhenEntriesAreEvictedConcurrently()
+    {
+        $cacheDriver = $this->createMock(Cache::class);
+        $cacheDriver->method('contains')->willReturn(true);
+        $cacheDriver->method('fetch')->willReturn(false);
+
+        $cache = $this->getCache($cacheDriver);
+
+        $this->assertNull($cache->getFromCacheById(1));
+        $this->assertNull($cache->getFromCacheByIdentity(new ObjectIdentity(1, 'foo')));
     }
 
     protected function getAcl($depth = 0)
