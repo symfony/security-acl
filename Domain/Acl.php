@@ -12,7 +12,6 @@
 namespace Symfony\Component\Security\Acl\Domain;
 
 use Doctrine\Persistence\NotifyPropertyChanged;
-use Doctrine\Persistence\PropertyChangedListener;
 use Symfony\Component\Security\Acl\Model\AclInterface;
 use Symfony\Component\Security\Acl\Model\AuditableAclInterface;
 use Symfony\Component\Security\Acl\Model\EntryInterface;
@@ -35,6 +34,8 @@ use Symfony\Component\Security\Acl\Model\SecurityIdentityInterface;
  */
 class Acl implements AuditableAclInterface, NotifyPropertyChanged
 {
+    use NotifyPropertyChangedImplementation;
+
     private $parentAcl;
     private $permissionGrantingStrategy;
     private $objectIdentity;
@@ -60,16 +61,6 @@ class Acl implements AuditableAclInterface, NotifyPropertyChanged
         $this->permissionGrantingStrategy = $permissionGrantingStrategy;
         $this->loadedSids = $loadedSids;
         $this->entriesInheriting = $entriesInheriting;
-    }
-
-    /**
-     * Adds a property changed listener.
-     *
-     * @return void
-     */
-    public function addPropertyChangedListener(PropertyChangedListener $listener)
-    {
-        $this->listeners[] = $listener;
     }
 
     /**
