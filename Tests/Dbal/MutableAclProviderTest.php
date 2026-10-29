@@ -17,6 +17,7 @@ use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Schema\DefaultSchemaManagerFactory;
 use Doctrine\DBAL\ServerVersionProvider;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Security\Acl\Dbal\AclProvider;
 use Symfony\Component\Security\Acl\Dbal\MutableAclProvider;
 use Symfony\Component\Security\Acl\Dbal\Schema;
@@ -24,13 +25,17 @@ use Symfony\Component\Security\Acl\Domain\Acl;
 use Symfony\Component\Security\Acl\Domain\Entry;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Acl\Domain\PermissionGrantingStrategy;
+use Symfony\Component\Security\Acl\Domain\PsrAclCache;
 use Symfony\Component\Security\Acl\Domain\RoleSecurityIdentity;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Acl\Exception\AclNotFoundException;
 use Symfony\Component\Security\Acl\Exception\ConcurrentModificationException;
+use Symfony\Component\Security\Acl\Model\AclInterface;
 use Symfony\Component\Security\Acl\Model\AuditableEntryInterface;
 use Symfony\Component\Security\Acl\Model\EntryInterface;
 use Symfony\Component\Security\Acl\Model\FieldEntryInterface;
+use Symfony\Component\Security\Acl\Model\MutableAclInterface;
+use Symfony\Component\Security\Acl\Model\SecurityIdentityInterface;
 
 /**
  * @requires extension pdo_sqlite
@@ -331,6 +336,20 @@ class MutableAclProviderTest extends TestCase
         }
     }
 
+    public function testUpdateAclUpdatesTheStrategyOfAces()
+    {
+        $provider = $this->getProvider();
+        $acl = $provider->createAcl(new ObjectIdentity(1, 'Foo'));
+        $acl->insertObjectAce(new UserSecurityIdentity('johannes', 'FooClass'), 1);
+        $provider->updateAcl($acl);
+
+        $acl->updateObjectAce(0, 1, PermissionGrantingStrategy::ANY);
+        $provider->updateAcl($acl);
+
+        $reloadedAcl = $this->getProvider()->findAcl(new ObjectIdentity(1, 'Foo'));
+        $this->assertSame(PermissionGrantingStrategy::ANY, $reloadedAcl->getObjectAces()[0]->getStrategy());
+    }
+
     public function testUpdateAclWorksForChangingTheParentAcl()
     {
         $provider = $this->getProvider();
@@ -419,6 +438,99 @@ class MutableAclProviderTest extends TestCase
 
         $acls = $provider->findAcl($oid);
         $this->assertCount(2, $acls->getObjectFieldAces($fieldName));
+    }
+
+    /**
+     * @dataProvider provideAceChangesAfterDeletingASecurityIdentity
+     */
+    public function testUpdateAclAfterDeletingASecurityIdentity(string $type, bool $reloadAcl, \Closure $change, array $expectedMasks)
+    {
+        $provider = $this->getProvider();
+        $oid = new ObjectIdentity('1', 'Foo');
+        $acl = $this->createAclThenDeleteASecurityIdentity($provider, $oid, $type);
+
+        if ($reloadAcl) {
+            $provider = $this->getProvider();
+            $acl = $provider->findAcl($oid);
+        }
+
+        $change($acl, new UserSecurityIdentity('eve', 'FooClass'));
+        $provider->updateAcl($acl);
+
+        $this->assertSame($expectedMasks, $this->getAceMasks($this->getProvider()->findAcl($oid), $type));
+    }
+
+    public static function provideAceChangesAfterDeletingASecurityIdentity(): iterable
+    {
+        yield 'object ACE inserted first' => ['object', true, static function (MutableAclInterface $acl, SecurityIdentityInterface $sid) { $acl->insertObjectAce($sid, 16, 0); }, ['eve' => 16, 'alice' => 1, 'carol' => 4, 'dave' => 8]];
+        yield 'object ACE inserted before the last one' => ['object', true, static function (MutableAclInterface $acl, SecurityIdentityInterface $sid) { $acl->insertObjectAce($sid, 16, 2); }, ['alice' => 1, 'carol' => 4, 'eve' => 16, 'dave' => 8]];
+        yield 'object ACE appended' => ['object', true, static function (MutableAclInterface $acl, SecurityIdentityInterface $sid) { $acl->insertObjectAce($sid, 16, 3); }, ['alice' => 1, 'carol' => 4, 'dave' => 8, 'eve' => 16]];
+        yield 'object ACE updated' => ['object', true, static function (MutableAclInterface $acl) { $acl->updateObjectAce(1, 32); }, ['alice' => 1, 'carol' => 32, 'dave' => 8]];
+        yield 'first object ACE deleted' => ['object', true, static function (MutableAclInterface $acl) { $acl->deleteObjectAce(0); }, ['carol' => 4, 'dave' => 8]];
+        yield 'object ACE deleted then another one appended' => ['object', true, static function (MutableAclInterface $acl, SecurityIdentityInterface $sid) {
+            $acl->deleteObjectAce(1);
+            $acl->insertObjectAce($sid, 16, 2);
+        }, ['alice' => 1, 'dave' => 8, 'eve' => 16]];
+
+        yield 'object field ACE inserted first' => ['objectField', true, static function (MutableAclInterface $acl, SecurityIdentityInterface $sid) { $acl->insertObjectFieldAce('name', $sid, 16, 0); }, ['eve' => 16, 'alice' => 1, 'carol' => 4, 'dave' => 8]];
+        yield 'object field ACE appended' => ['objectField', true, static function (MutableAclInterface $acl, SecurityIdentityInterface $sid) { $acl->insertObjectFieldAce('name', $sid, 16, 3); }, ['alice' => 1, 'carol' => 4, 'dave' => 8, 'eve' => 16]];
+        yield 'object field ACE updated' => ['objectField', true, static function (MutableAclInterface $acl) { $acl->updateObjectFieldAce(1, 'name', 32); }, ['alice' => 1, 'carol' => 32, 'dave' => 8]];
+        yield 'first object field ACE deleted' => ['objectField', true, static function (MutableAclInterface $acl) { $acl->deleteObjectFieldAce(0, 'name'); }, ['carol' => 4, 'dave' => 8]];
+
+        yield 'class ACE appended' => ['class', true, static function (MutableAclInterface $acl, SecurityIdentityInterface $sid) { $acl->insertClassAce($sid, 16, 3); }, ['alice' => 1, 'carol' => 4, 'dave' => 8, 'eve' => 16]];
+        yield 'class ACE deleted then another one appended' => ['class', true, static function (MutableAclInterface $acl, SecurityIdentityInterface $sid) {
+            $acl->deleteClassAce(1);
+            $acl->insertClassAce($sid, 16, 2);
+        }, ['alice' => 1, 'dave' => 8, 'eve' => 16]];
+        yield 'class field ACE appended' => ['classField', true, static function (MutableAclInterface $acl, SecurityIdentityInterface $sid) { $acl->insertClassFieldAce('name', $sid, 16, 3); }, ['alice' => 1, 'carol' => 4, 'dave' => 8, 'eve' => 16]];
+
+        // the ACL loaded before deleting the security identity still holds the deleted entry, at index 1
+        yield 'object ACE inserted first with the same provider' => ['object', false, static function (MutableAclInterface $acl, SecurityIdentityInterface $sid) { $acl->insertObjectAce($sid, 16, 0); }, ['eve' => 16, 'alice' => 1, 'carol' => 4, 'dave' => 8]];
+        yield 'object field ACE appended with the same provider' => ['objectField', false, static function (MutableAclInterface $acl, SecurityIdentityInterface $sid) { $acl->insertObjectFieldAce('name', $sid, 16, 4); }, ['alice' => 1, 'carol' => 4, 'dave' => 8, 'eve' => 16]];
+    }
+
+    public function testUpdateAclLoadedFromACacheWithGapsInAceIndexes()
+    {
+        $oid = new ObjectIdentity('1', 'Foo');
+        $this->createAclThenDeleteASecurityIdentity($this->getProvider(), $oid, 'object');
+
+        // simulate an ACL cached by a previous version, with its ACEs indexed by their order
+        $acl = $this->getProvider()->findAcl($oid);
+        $objectAcesProperty = new \ReflectionProperty(Acl::class, 'objectAces');
+        if (\PHP_VERSION_ID < 80100) {
+            $objectAcesProperty->setAccessible(true);
+        }
+        $objectAcesProperty->setValue($acl, array_combine([0, 2, 3], $acl->getObjectAces()));
+        $cache = new PsrAclCache(new ArrayAdapter(), $this->getStrategy());
+        $cache->putInCache($acl);
+
+        $provider = $this->getProvider($cache);
+        $acl = $provider->findAcl($oid);
+        $acl->insertObjectAce(new UserSecurityIdentity('eve', 'FooClass'), 16, 1);
+        $provider->updateAcl($acl);
+
+        $expectedMasks = ['alice' => 1, 'eve' => 16, 'carol' => 4, 'dave' => 8];
+        $this->assertSame($expectedMasks, $this->getAceMasks($acl, 'object'));
+        $this->assertSame($expectedMasks, $this->getAceMasks($this->getProvider()->findAcl($oid), 'object'));
+    }
+
+    public function testUpdateAclInsertingFieldAcesAtSeveralIndexes()
+    {
+        $provider = $this->getProvider();
+        $oid = new ObjectIdentity('1', 'Foo');
+        $acl = $provider->createAcl($oid);
+        foreach (['alice' => 1, 'bob' => 2, 'carol' => 4, 'dave' => 8] as $username => $mask) {
+            $acl->insertObjectFieldAce('name', new UserSecurityIdentity($username, 'FooClass'), $mask, \count($acl->getObjectFieldAces('name')));
+        }
+        $provider->updateAcl($acl);
+
+        $provider = $this->getProvider();
+        $acl = $provider->findAcl($oid);
+        $acl->insertObjectFieldAce('name', new UserSecurityIdentity('eve', 'FooClass'), 16, 3);
+        $acl->insertObjectFieldAce('name', new UserSecurityIdentity('frank', 'FooClass'), 32, 0);
+        $provider->updateAcl($acl);
+
+        $this->assertSame(['frank' => 32, 'alice' => 1, 'bob' => 2, 'carol' => 4, 'eve' => 16, 'dave' => 8], $this->getAceMasks($this->getProvider()->findAcl($oid), 'objectField'));
     }
 
     public function testUpdateUserSecurityIdentity()
@@ -586,5 +698,63 @@ class MutableAclProviderTest extends TestCase
     protected function getProvider($cache = null)
     {
         return new MutableAclProvider($this->connection, $this->getStrategy(), $this->getOptions(), $cache);
+    }
+
+    private function createAclThenDeleteASecurityIdentity(MutableAclProvider $provider, ObjectIdentity $oid, string $type): MutableAclInterface
+    {
+        // SQLite deletes the entries of a security identity only when foreign keys are enabled
+        $this->connection->executeStatement('PRAGMA foreign_keys = ON');
+
+        $acl = $provider->createAcl($oid);
+        foreach (['alice' => 1, 'bob' => 2, 'carol' => 4, 'dave' => 8] as $username => $mask) {
+            $sid = new UserSecurityIdentity($username, 'FooClass');
+            $index = \count($this->getAces($acl, $type));
+
+            switch ($type) {
+                case 'class':
+                    $acl->insertClassAce($sid, $mask, $index);
+                    break;
+                case 'classField':
+                    $acl->insertClassFieldAce('name', $sid, $mask, $index);
+                    break;
+                case 'object':
+                    $acl->insertObjectAce($sid, $mask, $index);
+                    break;
+                default:
+                    $acl->insertObjectFieldAce('name', $sid, $mask, $index);
+            }
+        }
+        $provider->updateAcl($acl);
+
+        $provider->deleteSecurityIdentity(new UserSecurityIdentity('bob', 'FooClass'));
+
+        return $acl;
+    }
+
+    private function getAces(AclInterface $acl, string $type): array
+    {
+        switch ($type) {
+            case 'class':
+                return $acl->getClassAces();
+            case 'classField':
+                return $acl->getClassFieldAces('name');
+            case 'object':
+                return $acl->getObjectAces();
+            default:
+                return $acl->getObjectFieldAces('name');
+        }
+    }
+
+    private function getAceMasks(AclInterface $acl, string $type): array
+    {
+        $aces = $this->getAces($acl, $type);
+        $this->assertSame(array_values($aces), $aces);
+
+        $masks = [];
+        foreach ($aces as $ace) {
+            $masks[$ace->getSecurityIdentity()->getUsername()] = $ace->getMask();
+        }
+
+        return $masks;
     }
 }

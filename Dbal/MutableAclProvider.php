@@ -271,6 +271,8 @@ class MutableAclProvider extends AclProvider implements MutableAclProviderInterf
                 $this->updateOldFieldAceProperty('objectFieldAces', $propertyChanges['objectFieldAces']);
             }
 
+            $this->updateAceOrders($acl, $propertyChanges);
+
             // this includes only updates of existing ACEs, but neither the creation, nor
             // the deletion of ACEs; these are tracked by changes to the ACL's respective
             // properties (classAces, classFieldAces, objectAces, objectFieldAces)
@@ -594,6 +596,23 @@ QUERY;
     }
 
     /**
+     * Constructs the SQL for selecting the id and the order of the ACEs of an ACL.
+     *
+     * @param int $oidPK
+     *
+     * @return string
+     */
+    private function getSelectAccessControlEntryOrdersSql($oidPK)
+    {
+        return sprintf(
+            'SELECT e.id, e.ace_order FROM %s e INNER JOIN %s o ON o.class_id = e.class_id WHERE o.id = %d AND (e.object_identity_id = o.id OR e.object_identity_id IS NULL)',
+            $this->options['entry_table_name'],
+            $this->options['oid_table_name'],
+            $oidPK
+        );
+    }
+
+    /**
      * Constructs the SQL for selecting the primary key associated with
      * the passed class type.
      *
@@ -829,9 +848,7 @@ QUERY;
         $sids = new \SplObjectStorage();
         $classIds = new \SplObjectStorage();
         foreach ($changes[1] as $field => $new) {
-            for ($i = 0, $c = \count($new); $i < $c; ++$i) {
-                $ace = $new[$i];
-
+            foreach ($new as $i => $ace) {
                 if (null === $ace->getId()) {
                     if ($sids->offsetExists($ace->getSecurityIdentity())) {
                         $sid = $sids->offsetGet($ace->getSecurityIdentity());
@@ -871,9 +888,7 @@ QUERY;
     {
         $currentIds = [];
         foreach ($changes[1] as $field => $new) {
-            for ($i = 0, $c = \count($new); $i < $c; ++$i) {
-                $ace = $new[$i];
-
+            foreach ($new as $ace) {
                 if (null !== $ace->getId()) {
                     $currentIds[$ace->getId()] = true;
                 }
@@ -881,9 +896,7 @@ QUERY;
         }
 
         foreach ($changes[0] as $old) {
-            for ($i = 0, $c = \count($old); $i < $c; ++$i) {
-                $ace = $old[$i];
-
+            foreach ($old as $ace) {
                 if (!isset($currentIds[$ace->getId()])) {
                     $this->connection->executeStatement($this->getDeleteAccessControlEntrySql($ace->getId()));
                     unset($this->loadedAces[$ace->getId()]);
@@ -903,9 +916,7 @@ QUERY;
 
         $sids = new \SplObjectStorage();
         $classIds = new \SplObjectStorage();
-        for ($i = 0, $c = \count($new); $i < $c; ++$i) {
-            $ace = $new[$i];
-
+        foreach ($new as $i => $ace) {
             if (null === $ace->getId()) {
                 if ($sids->offsetExists($ace->getSecurityIdentity())) {
                     $sid = $sids->offsetGet($ace->getSecurityIdentity());
@@ -945,20 +956,72 @@ QUERY;
         [$old, $new] = $changes;
         $currentIds = [];
 
-        for ($i = 0, $c = \count($new); $i < $c; ++$i) {
-            $ace = $new[$i];
-
+        foreach ($new as $ace) {
             if (null !== $ace->getId()) {
                 $currentIds[$ace->getId()] = true;
             }
         }
 
-        for ($i = 0, $c = \count($old); $i < $c; ++$i) {
-            $ace = $old[$i];
-
+        foreach ($old as $ace) {
             if (!isset($currentIds[$ace->getId()])) {
                 $this->connection->executeStatement($this->getDeleteAccessControlEntrySql($ace->getId()));
                 unset($this->loadedAces[$ace->getId()]);
+            }
+        }
+    }
+
+    /**
+     * Sets the order of the persisted ACEs of the changed ACE lists to their index in these lists.
+     *
+     * The current orders are read from the database since they can have gaps. As ACEs keep their
+     * relative order, updating the ones moving down in ascending order, then the ones moving up in
+     * descending order, never gives the same order to two ACEs.
+     */
+    private function updateAceOrders(MutableAclInterface $acl, array $propertyChanges)
+    {
+        $lists = [];
+        foreach (['classAces', 'classFieldAces', 'objectAces', 'objectFieldAces'] as $name) {
+            if (!isset($propertyChanges[$name])) {
+                continue;
+            }
+
+            $new = $propertyChanges[$name][1];
+            foreach ('classAces' === $name || 'objectAces' === $name ? [$new] : $new as $aces) {
+                $aceIds = [];
+                foreach ($aces as $index => $ace) {
+                    if (null !== $aceId = $ace->getId()) {
+                        $aceIds[$index] = $aceId;
+                    }
+                }
+
+                if ($aceIds) {
+                    $lists[] = $aceIds;
+                }
+            }
+        }
+
+        if (!$lists) {
+            return;
+        }
+
+        $orders = array_map('intval', $this->connection->executeQuery($this->getSelectAccessControlEntryOrdersSql($acl->getId()))->fetchAllKeyValue());
+
+        foreach ($lists as $aceIds) {
+            $movingUp = [];
+            foreach ($aceIds as $index => $aceId) {
+                if (!isset($orders[$aceId]) || $index === $orders[$aceId]) {
+                    continue;
+                }
+
+                if ($index < $orders[$aceId]) {
+                    $this->connection->executeStatement($this->getUpdateAccessControlEntrySql($aceId, [sprintf('ace_order = %d', $index)]));
+                } else {
+                    $movingUp[$index] = $aceId;
+                }
+            }
+
+            foreach (array_reverse($movingUp, true) as $index => $aceId) {
+                $this->connection->executeStatement($this->getUpdateAccessControlEntrySql($aceId, [sprintf('ace_order = %d', $index)]));
             }
         }
     }
@@ -978,23 +1041,11 @@ QUERY;
         $propertyChanges = $aces->offsetGet($ace);
         $sets = [];
 
-        if (isset($propertyChanges['aceOrder'])
-            && $propertyChanges['aceOrder'][1] > $propertyChanges['aceOrder'][0]
-            && $propertyChanges == $aces->offsetGet($ace)) {
-            $aces->next();
-            if ($aces->valid()) {
-                $this->updateAce($aces, $aces->current());
-            }
-        }
-
         if (isset($propertyChanges['mask'])) {
             $sets[] = sprintf('mask = %d', $propertyChanges['mask'][1]);
         }
         if (isset($propertyChanges['strategy'])) {
-            $sets[] = sprintf('granting_strategy = %s', $this->connection->quote($propertyChanges['strategy']));
-        }
-        if (isset($propertyChanges['aceOrder'])) {
-            $sets[] = sprintf('ace_order = %d', $propertyChanges['aceOrder'][1]);
+            $sets[] = sprintf('granting_strategy = %s', $this->connection->quote($propertyChanges['strategy'][1]));
         }
         if (isset($propertyChanges['auditSuccess'])) {
             $sets[] = sprintf('audit_success = %s', $this->connection->getDatabasePlatform()->convertBooleans($propertyChanges['auditSuccess'][1]));
@@ -1003,6 +1054,9 @@ QUERY;
             $sets[] = sprintf('audit_failure = %s', $this->connection->getDatabasePlatform()->convertBooleans($propertyChanges['auditFailure'][1]));
         }
 
-        $this->connection->executeStatement($this->getUpdateAccessControlEntrySql($ace->getId(), $sets));
+        // changes of aceOrder are persisted by updateAceOrders()
+        if ($sets) {
+            $this->connection->executeStatement($this->getUpdateAccessControlEntrySql($ace->getId(), $sets));
+        }
     }
 }
