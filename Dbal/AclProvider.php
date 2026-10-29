@@ -440,6 +440,9 @@ QUERY;
                 $this->loadedAces[$ace->getId()] = $ace;
             }
         }
+
+        // ACLs cached by previous versions can have ACEs indexed by their order
+        $aces = array_values($aces);
     }
 
     /**
@@ -624,22 +627,26 @@ QUERY;
         // and we are going to read the entire result set anyway.
         // Sorting on DB level increases query time by an order of magnitude while it is
         // almost negligible when we use PHPs array sort functions.
+        // ACEs are then indexed by their position since their orders can have gaps, e.g. after
+        // deleting a security identity.
         foreach ($aces as $aclId => $aceData) {
             $acl = $acls[$aclId];
 
             ksort($aceData[0]);
-            $aclClassAcesProperty->setValue($acl, $aceData[0]);
+            $aclClassAcesProperty->setValue($acl, array_values($aceData[0]));
 
             foreach (array_keys($aceData[1]) as $fieldName) {
                 ksort($aceData[1][$fieldName]);
+                $aceData[1][$fieldName] = array_values($aceData[1][$fieldName]);
             }
             $aclClassFieldAcesProperty->setValue($acl, $aceData[1]);
 
             ksort($aceData[2]);
-            $aclObjectAcesProperty->setValue($acl, $aceData[2]);
+            $aclObjectAcesProperty->setValue($acl, array_values($aceData[2]));
 
             foreach (array_keys($aceData[3]) as $fieldName) {
                 ksort($aceData[3][$fieldName]);
+                $aceData[3][$fieldName] = array_values($aceData[3][$fieldName]);
             }
             $aclObjectFieldAcesProperty->setValue($acl, $aceData[3]);
         }
