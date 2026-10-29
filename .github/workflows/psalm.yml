@@ -31,7 +31,7 @@ jobs:
       - name: Install dependencies
         run: |
           composer remove --dev --no-update --no-interaction symfony/phpunit-bridge
-          composer require --no-update vimeo/psalm phpunit/phpunit:^9.5 psalm/plugin-phpunit
+          composer require --no-update vimeo/psalm phpunit/phpunit:^9.5 psalm/plugin-phpunit:^0.19
           composer update --no-progress --ansi
           git checkout -- composer.json
 
